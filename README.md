@@ -30,6 +30,8 @@ and this felt like a decent project to dive in on.
    venv/bin/pip install aiohttp
    ```
 
+1. Run! `venv/bin/python bot.py`
+
 [docs-irc]: https://dev.twitch.tv/docs/irc/
 [app-setup]: https://dev.twitch.tv/docs/authentication/#registration
 
