@@ -131,7 +131,11 @@ class UptimeResponse(Response):
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
                 text = await response.text()
-                start_time_s = json.loads(text)['data'][0]['started_at']
+                data = json.loads(text)['data']
+                if not data:
+                    msg = 'not currently streaming!'
+                    return PRIVMSG.format(channel=config.channel, msg=msg)
+                start_time_s = data[0]['started_at']
                 start_time = datetime.datetime.strptime(
                     start_time_s, '%Y-%m-%dT%H:%M:%SZ',
                 )
