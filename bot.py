@@ -26,7 +26,6 @@ class Config(NamedTuple):
     channel: str
     oauth_token: str
     client_id: str
-    client_secret: str
 
     def __repr__(self) -> str:
         return (
@@ -35,7 +34,6 @@ class Config(NamedTuple):
             f'channel={self.channel!r}, '
             f'oauth_token={"***"!r}, '
             f'client_id={"***"!r}, '
-            f'client_secret={"***"!r}, '
             f')'
         )
 
