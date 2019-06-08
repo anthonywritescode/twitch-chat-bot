@@ -74,3 +74,12 @@ anthonywritescodebot: PONG
 anthonywritescode: PING hello
 anthonywritescodebot: PONG hello
 ```
+
+### `!discord'
+
+Show the discord url
+
+```
+anthonywritescode: !uptime
+anthonywritescodebot: We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px
+```

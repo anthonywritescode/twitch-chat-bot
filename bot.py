@@ -124,6 +124,11 @@ def cmd_ohai(match: Match[str]) -> Response:
     return MessageResponse(match, 'ohai, {user}!')
 
 
+@handle_message('!discord')
+def cmd_discord(match: Match[str]) -> Response:
+    return MessageResponse(match, 'We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px')
+
+
 class UptimeResponse(Response):
     async def __call__(self, config: Config) -> Optional[str]:
         url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'  # noqa: E501
