@@ -80,6 +80,6 @@ anthonywritescodebot: PONG hello
 Show the discord url
 
 ```
-anthonywritescode: !uptime
+anthonywritescode: !discord
 anthonywritescodebot: We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px
 ```
