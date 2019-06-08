@@ -126,7 +126,11 @@ def cmd_ohai(match: Match[str]) -> Response:
 
 @handle_message('!discord')
 def cmd_discord(match: Match[str]) -> Response:
-    return MessageResponse(match, 'We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px')
+    return MessageResponse(
+        match,
+        'We do have Discord, you are welcome to join: '
+        'https://discord.gg/HxpQ3px',
+    )
 
 
 class UptimeResponse(Response):
@@ -164,9 +168,14 @@ def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
 
+COMMAND_RE = re.compile(r'!\w+')
+
+
 @handle_message(r'!\w')
 def cmd_help(match: Match[str]) -> Response:
-    msg = 'possible commands: !help, !ohai, !uptime'
+    possible = [COMMAND_RE.search(reg.pattern) for reg, _ in HANDLERS]
+    commands = ['!help'] + sorted(match.group() for match in possible if match)
+    msg = f'possible commands: {", ".join(commands)}'
     if not match['msg'].startswith('!help'):
         msg = f'unknown command ({esc(match["msg"].split()[0])}), {msg}'
     return MessageResponse(match, msg)
