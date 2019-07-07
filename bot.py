@@ -195,7 +195,9 @@ def msg_gnu_please(match: Match[str]) -> Response:
         return MessageResponse(match, f'YES! GNU/{esc(word)}')
     else:
         return MessageResponse(match, f"Um please, it's GNU/{esc(word)}!")
-
+@handle_message(r'.*\b(dick)\b')
+def censor_bad_word(match: Match[str]) -> Response:
+    return MessageResponse(match, f"Those words are spoken by sinful people. Repent of your sins bad person')
 
 # TODO: !tags, only allowed by stream admin / mods????
 
