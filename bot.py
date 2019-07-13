@@ -191,7 +191,7 @@ def msg_ping(match: Match[str]) -> Response:
 @handle_message(r'.*\b(nano|linux|windows)\b')
 def msg_gnu_please(match: Match[str]) -> Response:
     msg, word = match[3], match[4]
-    if f'GNU/{word}' in msg:
+    if f'GNU/{word}' in msg or f'gnu/{word}' in msg:
         return MessageResponse(match, f'YES! GNU/{esc(word)}')
     else:
         return MessageResponse(match, f"Um please, it's GNU/{esc(word)}!")
