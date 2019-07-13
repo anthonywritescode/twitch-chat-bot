@@ -133,6 +133,24 @@ def cmd_discord(match: Match[str]) -> Response:
     )
 
 
+@handle_message('!keyboard2')
+def keyboard2(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        'this is my second mechanical keyboard: '
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+    )
+
+
+@handle_message('!keyboard')
+def keyboard(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        'this is my streaming keyboard (contributed by PhillipWei): '
+        'http://www.wasdkeyboards.com/index.php/products/mechanical-keyboard/wasd-v3-87-key-custom-mechanical-keyboard.html',  # noqa: E501
+    )
+
+
 class UptimeResponse(Response):
     async def __call__(self, config: Config) -> Optional[str]:
         url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'  # noqa: E501
