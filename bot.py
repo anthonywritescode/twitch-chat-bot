@@ -133,6 +133,11 @@ def cmd_discord(match: Match[str]) -> Response:
     )
 
 
+@handle_message('!emoji')
+def cmd_emoji(match: Match[str]) -> Response:
+    return MessageResponse(match, 'anthon63DumpsterFire')
+
+
 @handle_message('!keyboard2')
 def keyboard2(match: Match[str]) -> Response:
     return MessageResponse(
