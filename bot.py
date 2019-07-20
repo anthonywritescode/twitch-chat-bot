@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import datetime
 import json
+import random
 import re
 import sys
 import traceback
@@ -154,6 +155,15 @@ def keyboard(match: Match[str]) -> Response:
         'this is my streaming keyboard (contributed by PhillipWei): '
         'http://www.wasdkeyboards.com/index.php/products/mechanical-keyboard/wasd-v3-87-key-custom-mechanical-keyboard.html',  # noqa: E501
     )
+
+
+@handle_message('!still')
+def cmd_still(match: Match[str]) -> Response:
+    _, _, msg = match.groups()
+    _, _, rest = msg.partition(' ')
+    year = datetime.date.today().year
+    lol = random.choice(['LOL', 'LOLW', 'LMAO', 'NUUU'])
+    return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
 
 
 class UptimeResponse(Response):
