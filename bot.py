@@ -16,6 +16,7 @@ from typing import Pattern
 from typing import Tuple
 
 import aiohttp
+import aiosqlite
 
 # TODO: allow host / port to be configurable
 HOST = 'irc.chat.twitch.tv'
@@ -166,6 +167,70 @@ def cmd_still(match: Match[str]) -> Response:
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
 
 
+async def ensure_table_exists(db: aiosqlite.Connection) -> None:
+    await db.execute(
+        'CREATE TABLE IF NOT EXISTS today ('
+        '   msg TEXT NOT NULL,'
+        '   timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+        ')',
+    )
+    await db.commit()
+
+
+async def set_today(db: aiosqlite.Connection, msg: str) -> None:
+    await ensure_table_exists(db)
+    await db.execute('INSERT INTO today (msg) VALUES (?)', (msg,))
+    await db.commit()
+
+
+async def get_today(db: aiosqlite.Connection) -> str:
+    await ensure_table_exists(db)
+    query = 'SELECT msg FROM today ORDER BY ROWID DESC LIMIT 1'
+    async with db.execute(query) as cursor:
+        row = await cursor.fetchone()
+        if row is None:
+            return 'not working on anything?'
+        else:
+            return esc(row[0])
+
+
+class TodayResponse(MessageResponse):
+    def __init__(self, match: Match[str]) -> None:
+        super().__init__(match, '')
+
+    async def __call__(self, config: Config) -> Optional[str]:
+        async with aiosqlite.connect('db.db') as db:
+            self.msg_fmt = await get_today(db)
+        return await super().__call__(config)
+
+
+@handle_message('!today')
+def cmd_today(match: Match[str]) -> Response:
+    return TodayResponse(match)
+
+
+class SetTodayResponse(MessageResponse):
+    def __init__(self, match: Match[str], msg: str) -> None:
+        super().__init__(match, 'updated!')
+        self.msg = msg
+
+    async def __call__(self, config: Config) -> Optional[str]:
+        async with aiosqlite.connect('db.db') as db:
+            await set_today(db, self.msg)
+        return await super().__call__(config)
+
+
+@handle_message('!settoday')
+def cmd_settoday(match: Match[str]) -> Response:
+    if match['user'] != match['channel']:
+        return MessageResponse(
+            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
+        )
+    _, _, msg = match.groups()
+    _, _, rest = msg.partition(' ')
+    return SetTodayResponse(match, rest)
+
+
 class UptimeResponse(Response):
     async def __call__(self, config: Config) -> Optional[str]:
         url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'  # noqa: E501
@@ -202,12 +267,14 @@ def cmd_uptime(match: Match[str]) -> Response:
 
 
 COMMAND_RE = re.compile(r'!\w+')
+SECRET_CMDS = frozenset(('!settoday',))
 
 
 @handle_message(r'!\w')
 def cmd_help(match: Match[str]) -> Response:
     possible = [COMMAND_RE.search(reg.pattern) for reg, _ in HANDLERS]
-    commands = ['!help'] + sorted(match.group() for match in possible if match)
+    possible_cmds = {match[0] for match in possible if match} - SECRET_CMDS
+    commands = ['!help'] + sorted(possible_cmds)
     msg = f'possible commands: {", ".join(commands)}'
     if not match['msg'].startswith('!help'):
         msg = f'unknown command ({esc(match["msg"].split()[0])}), {msg}'
