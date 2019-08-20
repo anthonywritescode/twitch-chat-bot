@@ -154,7 +154,7 @@ def keyboard(match: Match[str]) -> Response:
     return MessageResponse(
         match,
         'this is my streaming keyboard (contributed by PhillipWei): '
-        'http://www.wasdkeyboards.com/index.php/products/mechanical-keyboard/wasd-v3-87-key-custom-mechanical-keyboard.html',  # noqa: E501
+        'http://www.wasdkeyboards.com/index.php/products/code-keyboard/code-87-key-mechanical-keyboard.html',  # noqa: E501
     )
 
 
