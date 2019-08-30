@@ -101,18 +101,22 @@ HANDLERS: List[Tuple[Pattern[str], Callable[[Match[str]], Response]]]
 HANDLERS = []
 
 
-def handler(prefix: str) -> Callable[[Callback], Callback]:
+def handler(*prefixes: str) -> Callable[[Callback], Callback]:
     def handler_decorator(func: Callback) -> Callback:
-        HANDLERS.append((re.compile(prefix + '\r\n$'), func))
+        for prefix in prefixes:
+            HANDLERS.append((re.compile(prefix + '\r\n$'), func))
         return func
     return handler_decorator
 
 
-def handle_message(message_prefix: str) -> Callable[[Callback], Callback]:
+def handle_message(*message_prefixes: str) -> Callable[[Callback], Callback]:
     return handler(
-        f'^:(?P<user>[^!]+).* '
-        f'PRIVMSG #(?P<channel>[^ ]+) '
-        f':(?P<msg>{message_prefix}.*)',
+        *(
+            f'^:(?P<user>[^!]+).* '
+            f'PRIVMSG #(?P<channel>[^ ]+) '
+            f':(?P<msg>{message_prefix}.*)'
+            for message_prefix in message_prefixes
+        ),
     )
 
 
@@ -209,7 +213,7 @@ class TodayResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@handle_message('!today')
+@handle_message('!today', '!project')
 def cmd_today(match: Match[str]) -> Response:
     return TodayResponse(match)
 
