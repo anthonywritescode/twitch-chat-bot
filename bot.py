@@ -126,6 +126,11 @@ def cmd_ohai(match: Match[str]) -> Response:
     return MessageResponse(match, 'ohai, {user}!')
 
 
+@handle_message('!lurk')
+def cmd_lurk(match: Match[str]) -> Response:
+    return MessageResponse(match, 'thanks for lurking, {user}!')
+
+
 @handle_message('!discord')
 def cmd_discord(match: Match[str]) -> Response:
     return MessageResponse(
