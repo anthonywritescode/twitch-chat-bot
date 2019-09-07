@@ -297,7 +297,7 @@ def msg_ping(match: Match[str]) -> Response:
     return MessageResponse(match, f'PONG {esc(rest)}')
 
 
-@handle_message(r'.*\b(nano|linux|windows)\b')
+@handle_message(r'.*\b(nano|linux|windows)\b', flags=re.IGNORECASE)
 def msg_gnu_please(match: Match[str]) -> Response:
     msg, word = match[3], match[4]
     if f'GNU/{word}' in msg or f'gnu/{word}' in msg:
