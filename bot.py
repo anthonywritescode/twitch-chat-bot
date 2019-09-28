@@ -144,6 +144,11 @@ def cmd_discord(match: Match[str]) -> Response:
     )
 
 
+@handle_message('!homeland')
+def cmd_russians(match: Match[str]) -> Response:
+    return MessageResponse(match, 'WE WILL PROTECT OUR HOMELAND!')
+
+
 @handle_message('!emoji')
 def cmd_emoji(match: Match[str]) -> Response:
     return MessageResponse(match, 'anthon63DumpsterFire anthon63Pythonk')
