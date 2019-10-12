@@ -172,6 +172,15 @@ def keyboard(match: Match[str]) -> Response:
     )
 
 
+@handle_message('!github')
+def github(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        "anthony's github is https://github.com/asottile -- stream github is "
+        "https://github.com/anthonywritescode",
+    )
+
+
 @handle_message('!still')
 def cmd_still(match: Match[str]) -> Response:
     _, _, msg = match.groups()
