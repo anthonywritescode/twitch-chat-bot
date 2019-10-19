@@ -75,7 +75,7 @@ anthonywritescode: PING hello
 anthonywritescodebot: PONG hello
 ```
 
-### `!discord'
+### `!discord`
 
 Show the discord url
 

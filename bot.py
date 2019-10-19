@@ -144,6 +144,11 @@ def cmd_discord(match: Match[str]) -> Response:
     )
 
 
+@handle_message('!homeland')
+def cmd_russians(match: Match[str]) -> Response:
+    return MessageResponse(match, 'WE WILL PROTECT OUR HOMELAND!')
+
+
 @handle_message('!emoji')
 def cmd_emoji(match: Match[str]) -> Response:
     return MessageResponse(match, 'anthon63DumpsterFire anthon63Pythonk')
@@ -164,6 +169,15 @@ def keyboard(match: Match[str]) -> Response:
         match,
         'this is my streaming keyboard (contributed by PhillipWei): '
         'http://www.wasdkeyboards.com/index.php/products/code-keyboard/code-87-key-mechanical-keyboard.html',  # noqa: E501
+    )
+
+
+@handle_message('!github')
+def github(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        "anthony's github is https://github.com/asottile -- stream github is "
+        "https://github.com/anthonywritescode",
     )
 
 
