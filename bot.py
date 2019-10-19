@@ -324,7 +324,7 @@ def msg_gnu_please(match: Match[str]) -> Response:
     if query:
         return MessageResponse(match, f'YES! {query[0]}')
     else:
-        return MessageResponse(match, f"Um please, it's GNU/{esc(word)}!")
+        return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
 
 
 # TODO: !tags, only allowed by stream admin / mods????
