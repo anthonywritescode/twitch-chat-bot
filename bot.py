@@ -320,7 +320,7 @@ def msg_ping(match: Match[str]) -> Response:
 @handle_message(r'.*\b(nano|linux|windows|emacs)\b', flags=re.IGNORECASE)
 def msg_gnu_please(match: Match[str]) -> Response:
     msg, word = match[3], match[4]
-    query = re.match(fr'(?i)gnu(\/|\+){word}', msg)
+    query = re.match(fr'gnu[/+]{word}', msg, flags=re.IGNORECASE)
     if query:
         return MessageResponse(match, f'YES! {query.match(0)}')
     else:
