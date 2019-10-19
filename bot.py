@@ -101,7 +101,10 @@ HANDLERS: List[Tuple[Pattern[str], Callable[[Match[str]], Response]]]
 HANDLERS = []
 
 
-def handler(*prefixes: str, flags: re.RegexFlag = re.U) -> Callable[[Callback], Callback]:
+def handler(
+    *prefixes: str,
+    flags: re.RegexFlag = re.U,
+) -> Callable[[Callback], Callback]:
     def handler_decorator(func: Callback) -> Callback:
         for prefix in prefixes:
             HANDLERS.append((re.compile(prefix + '\r\n$', flags=flags), func))
@@ -109,7 +112,10 @@ def handler(*prefixes: str, flags: re.RegexFlag = re.U) -> Callable[[Callback], 
     return handler_decorator
 
 
-def handle_message(*message_prefixes: str, flags: re.RegexFlag = re.U) -> Callable[[Callback], Callback]:
+def handle_message(
+        *message_prefixes: str,
+        flags: re.RegexFlag = re.U,
+) -> Callable[[Callback], Callback]:
     return handler(
         *(
             f'^:(?P<user>[^!]+).* '
