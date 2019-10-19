@@ -101,22 +101,28 @@ HANDLERS: List[Tuple[Pattern[str], Callable[[Match[str]], Response]]]
 HANDLERS = []
 
 
-def handler(*prefixes: str) -> Callable[[Callback], Callback]:
+def handler(
+    *prefixes: str,
+    flags: re.RegexFlag = re.U,
+) -> Callable[[Callback], Callback]:
     def handler_decorator(func: Callback) -> Callback:
         for prefix in prefixes:
-            HANDLERS.append((re.compile(prefix + '\r\n$'), func))
+            HANDLERS.append((re.compile(prefix + '\r\n$', flags=flags), func))
         return func
     return handler_decorator
 
 
-def handle_message(*message_prefixes: str) -> Callable[[Callback], Callback]:
+def handle_message(
+        *message_prefixes: str,
+        flags: re.RegexFlag = re.U,
+) -> Callable[[Callback], Callback]:
     return handler(
         *(
             f'^:(?P<user>[^!]+).* '
             f'PRIVMSG #(?P<channel>[^ ]+) '
             f':(?P<msg>{message_prefix}.*)'
             for message_prefix in message_prefixes
-        ),
+        ), flags=flags,
     )
 
 
@@ -311,7 +317,7 @@ def msg_ping(match: Match[str]) -> Response:
     return MessageResponse(match, f'PONG {esc(rest)}')
 
 
-@handle_message(r'.*\b(nano|linux|windows)\b')
+@handle_message(r'.*\b(nano|linux|windows)\b', flags=re.IGNORECASE)
 def msg_gnu_please(match: Match[str]) -> Response:
     msg, word = match[3], match[4]
     if f'GNU/{word}' in msg or f'gnu/{word}' in msg:
