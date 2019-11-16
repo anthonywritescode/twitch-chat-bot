@@ -299,13 +299,13 @@ def cmd_uptime(match: Match[str]) -> Response:
 def cmd_pep(match: Match[str]) -> Response:
     *_, msg = match.groups()
     *_, rest = msg.partition(' ')
-    pep = rest.strip()
-
-    if not pep.isdigit() or len(pep) > 4:
+    try:
+        pep = str(int(rest)).zfill(4)
+    except ValueError:
         return MessageResponse(match, 'Please make sure you gave me a number!')
     else:
         return MessageResponse(
-            match, f'https://www.python.org/dev/peps/pep-{pep.zfill(4)}/',
+            match, f'https://www.python.org/dev/peps/pep-{pep}/',
         )
 
 
