@@ -297,11 +297,19 @@ def cmd_uptime(match: Match[str]) -> Response:
 
 @handle_message('!pep')
 def cmd_pep(match: Match[str]) -> Response:
-    _, _, msg = match.groups()
-    _, _, rest = msg.partition(' ')
+    *_, msg = match.groups()
+    *_, rest = msg.partition(' ')
+    pep = esc(rest.zfill(4))
+
+    if not pep.isdigit():
+        return MessageResponse(
+            match,
+            'Please make sure you gave me a number!',
+        )
+
     return MessageResponse(
         match,
-        f'https://www.python.org/dev/peps/pep-{rest.zfill(4)}/',
+        f'https://www.python.org/dev/peps/pep-{pep}/',
     )
 
 
