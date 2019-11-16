@@ -295,6 +295,16 @@ def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
 
+@handle_message('!pep')
+def cmd_pep(match: Match[str]) -> Response:
+    _, _, msg = match.groups()
+    _, _, rest = msg.partition(' ')
+    return MessageResponse(
+        match,
+        f'https://www.python.org/dev/peps/pep-{rest.zfill(4)}/',
+    )
+
+
 COMMAND_RE = re.compile(r'!\w+')
 SECRET_CMDS = frozenset(('!settoday',))
 
