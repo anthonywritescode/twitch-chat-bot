@@ -295,11 +295,11 @@ def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
 
-@handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})')
+@handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})', flags=re.ASCII)
 def cmd_pep(match: Match[str]) -> Response:
     *_, number = match.groups()
     return MessageResponse(
-        match, f'https://www.python.org/dev/peps/pep-{int(number).zfill(4)}/',
+        match, f'https://www.python.org/dev/peps/pep-{number.zfill(4)}/',
     )
 
 
