@@ -295,18 +295,12 @@ def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
 
-@handle_message('!pep')
+@handle_message('!pep[ ]?(?P<pep_num>\d{1,4})')
 def cmd_pep(match: Match[str]) -> Response:
-    *_, msg = match.groups()
-    *_, rest = msg.partition(' ')
-    try:
-        pep = str(int(rest)).zfill(4)
-    except ValueError:
-        return MessageResponse(match, 'Please make sure you gave me a number!')
-    else:
-        return MessageResponse(
-            match, f'https://www.python.org/dev/peps/pep-{pep}/',
-        )
+    *_, number = match.groups()
+    return MessageResponse(
+        match, f'https://www.python.org/dev/peps/pep-{number.zfill(4)}/',
+    )
 
 
 COMMAND_RE = re.compile(r'!\w+')
