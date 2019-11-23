@@ -295,7 +295,7 @@ def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
 
-@handle_message('!pep[ ]?(?P<pep_num>\d{1,4})')
+@handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})')
 def cmd_pep(match: Match[str]) -> Response:
     *_, number = match.groups()
     return MessageResponse(
