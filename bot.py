@@ -299,7 +299,7 @@ def cmd_uptime(match: Match[str]) -> Response:
 def cmd_pep(match: Match[str]) -> Response:
     *_, number = match.groups()
     return MessageResponse(
-        match, f'https://www.python.org/dev/peps/pep-{number.zfill(4)}/',
+        match, f'https://www.python.org/dev/peps/pep-{int(number).zfill(4)}/',
     )
 
 
