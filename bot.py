@@ -22,6 +22,10 @@ import aiosqlite
 HOST = 'irc.chat.twitch.tv'
 PORT = 6697
 
+MSG_RE = re.compile('^:([^!]+).* PRIVMSG #[^ ]+ :([^\r]+)')
+PRIVMSG = 'PRIVMSG #{channel} :{msg}\r\n'
+SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
+
 
 class Config(NamedTuple):
     username: str
@@ -80,9 +84,6 @@ class CmdResponse(Response):
 
     async def __call__(self, config: Config) -> Optional[str]:
         return self.cmd
-
-
-PRIVMSG = 'PRIVMSG #{channel} :{msg}\r\n'
 
 
 class MessageResponse(Response):
@@ -336,23 +337,26 @@ def msg_gnu_please(match: Match[str]) -> Response:
 
 # TODO: !tags, only allowed by stream admin / mods????
 
-
-@handler('.*')
-def unhandled(match: Match[str]) -> Response:
-    print(f'UNHANDLED: {match.group()}', end='')
-    return Response()
+def dt_str() -> str:
+    dt_now = datetime.datetime.now()
+    return f'[{dt_now.hour}:{dt_now.minute}]'
 
 
-async def amain(config: Config) -> NoReturn:
+async def amain(config: Config, *, quiet: bool) -> NoReturn:
     reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
     await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
-    await send(writer, f'NICK {config.username}\r\n')
-    await send(writer, f'JOIN #{config.channel}\r\n')
+    await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
+    await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
 
     while True:
-        data = await recv(reader)
+        data = await recv(reader, quiet=quiet)
         msg = data.decode('UTF-8', errors='backslashreplace')
+
+        msg_match = MSG_RE.match(msg)
+        if msg_match:
+            print(f'{dt_str()}<{msg_match[1]}> {msg_match[2]}')
+
         for pattern, handler in HANDLERS:
             match = pattern.match(msg)
             if match:
@@ -365,19 +369,26 @@ async def amain(config: Config) -> NoReturn:
                         msg=f'*** unhandled {type(e).__name__} -- see logs',
                     )
                 if res is not None:
-                    await send(writer, res)
+                    send_match = SEND_MSG_RE.match(res)
+                    if send_match:
+                        print(f'{dt_str()}<{config.username}> {send_match[1]}')
+                    await send(writer, res, quiet=quiet)
                 break
+        else:
+            if not quiet:
+                print(f'UNHANDLED: {msg}', end='')
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.json')
+    parser.add_argument('--verbose', action='store_true')
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = Config(**json.load(f))
 
-    asyncio.run(amain(config))
+    asyncio.run(amain(config, quiet=not args.verbose))
     return 0
 
 
