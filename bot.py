@@ -344,7 +344,7 @@ def msg_think(match: Match[str]) -> Response:
 
 def dt_str() -> str:
     dt_now = datetime.datetime.now()
-    return f'[{dt_now.hour}:{dt_now.minute}]'
+    return f'[{dt_now.hour:02}:{dt_now.minute:02}]'
 
 
 async def amain(config: Config, *, quiet: bool) -> NoReturn:
