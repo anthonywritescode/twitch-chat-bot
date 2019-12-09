@@ -335,6 +335,11 @@ def msg_gnu_please(match: Match[str]) -> Response:
         return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
 
 
+@handle_message(r'.*\bth[oi]nk(?:ing)?\b', flags=re.IGNORECASE)
+def msg_think(match: Match[str]) -> Response:
+    return MessageResponse(match, 'anthon63Pythonk ' * 5)
+
+
 # TODO: !tags, only allowed by stream admin / mods????
 
 def dt_str() -> str:
