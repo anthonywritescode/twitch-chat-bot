@@ -161,6 +161,14 @@ def cmd_emoji(match: Match[str]) -> Response:
     return MessageResponse(match, 'anthon63DumpsterFire anthon63Pythonk')
 
 
+@handle_message('!explain')
+def cmd_explain(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        'https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY',  # noqa: E501
+    )
+
+
 @handle_message('!keyboard2')
 def keyboard2(match: Match[str]) -> Response:
     return MessageResponse(
