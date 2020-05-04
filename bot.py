@@ -364,6 +364,16 @@ def cmd_pep(match: Match[str]) -> Response:
     return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
 
 
+@handle_message(r'!water')
+def cmd_water(match: Match[str]) -> Response:
+    return MessageResponse(match, 'DRINK WATER, BITCH')
+
+
+@handle_message(r'!levelup')
+def cmd_levelup(match: Match[str]) -> Response:
+    return MessageResponse(match, 'https://i.imgur.com/Uoq5vGx.gif')
+
+
 COMMAND_RE = re.compile(r'!\w+')
 SECRET_CMDS = frozenset(('!settoday',))
 
