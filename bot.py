@@ -349,7 +349,10 @@ def cmd_videoidea(match: Match[str]) -> Response:
 class UptimeResponse(Response):
     async def __call__(self, config: Config) -> Optional[str]:
         url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'  # noqa: E501
-        headers = {'Client-ID': config.client_id}
+        headers = {
+            'Authorization': f'Bearer {config.oauth_token.split(":")[1]}',
+            'Client-ID': config.client_id,
+        }
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
                 text = await response.text()
