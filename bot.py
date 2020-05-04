@@ -66,6 +66,8 @@ async def recv(
         quiet: bool = False,
 ) -> bytes:
     data = await reader.readline()
+    if not data:
+        raise SystemExit('unexpected EOF')
     if not quiet:
         sys.stderr.buffer.write(b'> ')
         sys.stderr.buffer.write(data)
