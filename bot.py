@@ -65,6 +65,23 @@ def _parse_color(s: str) -> Tuple[int, int, int]:
     return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
 
 
+def _badges(badges: str) -> str:
+    ret = ''
+    for reg, s in (
+        (re.compile('^vip/'), '\033[48;2;224;5;185m[♦]\033[m'),
+        (re.compile('^broadcaster/'), '\033[48;2;233;25;22m[☞]\033[m'),
+        (re.compile('^subscriber/'), '\033[48;2;130;5;180m[★]\033[m'),
+        (re.compile('^premium/'), '\033[48;2;0;160;214m[♕]\033[m'),
+        (re.compile('^sub-gifter/'), '\033[48;2;88;226;193m[◘]\033[m'),
+        (re.compile('^bits/'), '\033[48;2;203;200;208m[▴]\033[m'),
+        (re.compile('^bits-leader/'), '\033[48;2;230;186;72m[♦]\033[m'),
+    ):
+        for badge in badges.split(','):
+            if reg.match(badge):
+                ret += s
+    return ret
+
+
 def _gen_color(name: str) -> Tuple[int, int, int]:
     h = hashlib.sha256(name.encode())
     n, = struct.unpack('Q', h.digest()[:8])
@@ -465,6 +482,7 @@ async def amain(config: Config, *, quiet: bool) -> NoReturn:
 
             print(
                 f'{dt_str()}'
+                f'{_badges(info["badges"])}'
                 f'<\033[1m\033[38;2;{r};{g};{b}m{info["display-name"]}\033[m> '
                 f'{msg_match[3]}',
             )
