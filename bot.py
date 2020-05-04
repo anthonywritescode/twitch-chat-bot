@@ -480,12 +480,22 @@ async def amain(config: Config, *, quiet: bool) -> NoReturn:
             else:
                 r, g, b = _gen_color(info['display-name'])
 
-            print(
-                f'{dt_str()}'
-                f'{_badges(info["badges"])}'
-                f'<\033[1m\033[38;2;{r};{g};{b}m{info["display-name"]}\033[m> '
-                f'{msg_match[3]}',
-            )
+            color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
+
+            if msg_match[3].startswith('\x01ACTION '):
+                print(
+                    f'{dt_str()}'
+                    f'{_badges(info["badges"])}'
+                    f'{color_start}\033[3m * {info["display-name"]}\033[22m '
+                    f'{msg_match[3][8:-1]}\033[m',
+                )
+            else:
+                print(
+                    f'{dt_str()}'
+                    f'{_badges(info["badges"])}'
+                    f'<{color_start}{info["display-name"]}\033[m> '
+                    f'{msg_match[3]}',
+                )
 
         for pattern, handler in HANDLERS:
             match = pattern.match(msg)
