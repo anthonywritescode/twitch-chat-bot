@@ -1,14 +1,17 @@
 import argparse
 import asyncio.subprocess
 import datetime
+import hashlib
 import json
 import os.path
 import random
 import re
+import struct
 import sys
 import tempfile
 import traceback
 from typing import Callable
+from typing import Dict
 from typing import List
 from typing import Match
 from typing import NamedTuple
@@ -24,7 +27,7 @@ import aiosqlite
 HOST = 'irc.chat.twitch.tv'
 PORT = 6697
 
-MSG_RE = re.compile('^:([^!]+).* PRIVMSG #[^ ]+ :([^\r]+)')
+MSG_RE = re.compile('^@([^ ]+) :([^!]+).* PRIVMSG #[^ ]+ :([^\r]+)')
 PRIVMSG = 'PRIVMSG #{channel} :{msg}\r\n'
 SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
 
@@ -48,6 +51,29 @@ class Config(NamedTuple):
 
 def esc(s: str) -> str:
     return s.replace('{', '{{').replace('}', '}}')
+
+
+def _parse_badge_info(s: str) -> Dict[str, str]:
+    ret = {}
+    for part in s.split(';'):
+        k, v = part.split('=', 1)
+        ret[k] = v
+    return ret
+
+
+def _parse_color(s: str) -> Tuple[int, int, int]:
+    return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
+
+
+def _gen_color(name: str) -> Tuple[int, int, int]:
+    h = hashlib.sha256(name.encode())
+    n, = struct.unpack('Q', h.digest()[:8])
+    bits = [int(s) for s in bin(n)[2:]]
+
+    r = bits[0] * 0b1111111 + (bits[1] << 7)
+    g = bits[2] * 0b1111111 + (bits[3] << 7)
+    b = bits[4] * 0b1111111 + (bits[5] << 7)
+    return r, g, b
 
 
 async def send(
@@ -123,7 +149,7 @@ def handle_message(
 ) -> Callable[[Callback], Callback]:
     return handler(
         *(
-            f'^:(?P<user>[^!]+).* '
+            f'^@(?P<info>[^ ]+) :(?P<user>[^!]+).* '
             f'PRIVMSG #(?P<channel>[^ ]+) '
             f':(?P<msg>{message_prefix}.*)'
             for message_prefix in message_prefixes
@@ -202,8 +228,7 @@ def github(match: Match[str]) -> Response:
 
 @handle_message('!still')
 def cmd_still(match: Match[str]) -> Response:
-    _, _, msg = match.groups()
-    _, _, rest = msg.partition(' ')
+    _, _, rest = match['msg'].partition(' ')
     year = datetime.date.today().year
     lol = random.choice(['LOL', 'LOLW', 'LMAO', 'NUUU'])
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
@@ -268,8 +293,7 @@ def cmd_settoday(match: Match[str]) -> Response:
         return MessageResponse(
             match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
         )
-    _, _, msg = match.groups()
-    _, _, rest = msg.partition(' ')
+    _, _, rest = match['msg'].partition(' ')
     return SetTodayResponse(match, rest)
 
 
@@ -359,8 +383,7 @@ def cmd_uptime(match: Match[str]) -> Response:
 
 @handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})')
 def cmd_pep(match: Match[str]) -> Response:
-    *_, number = match.groups()
-    n = str(int(number)).zfill(4)
+    n = str(int(match['pep_num'])).zfill(4)
     return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
 
 
@@ -391,8 +414,7 @@ def cmd_help(match: Match[str]) -> Response:
 
 @handle_message('PING')
 def msg_ping(match: Match[str]) -> Response:
-    _, _, msg = match.groups()
-    _, _, rest = msg.partition(' ')
+    _, _, rest = match['msg'].partition(' ')
     return MessageResponse(match, f'PONG {esc(rest)}')
 
 
@@ -424,6 +446,7 @@ async def amain(config: Config, *, quiet: bool) -> NoReturn:
     await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
     await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
     await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
+    await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
 
     while True:
         data = await recv(reader, quiet=quiet)
@@ -431,7 +454,17 @@ async def amain(config: Config, *, quiet: bool) -> NoReturn:
 
         msg_match = MSG_RE.match(msg)
         if msg_match:
-            print(f'{dt_str()}<{msg_match[1]}> {msg_match[2]}')
+            info = _parse_badge_info(msg_match[1])
+            if info['color']:
+                r, g, b = _parse_color(info['color'])
+            else:
+                r, g, b = _gen_color(info['display-name'])
+
+            print(
+                f'{dt_str()}'
+                f'<\033[1m\033[38;2;{r};{g};{b}m{info["display-name"]}\033[m> '
+                f'{msg_match[3]}',
+            )
 
         for pattern, handler in HANDLERS:
             match = pattern.match(msg)
@@ -447,7 +480,12 @@ async def amain(config: Config, *, quiet: bool) -> NoReturn:
                 if res is not None:
                     send_match = SEND_MSG_RE.match(res)
                     if send_match:
-                        print(f'{dt_str()}<{config.username}> {send_match[1]}')
+                        color = '\033[1m\033[3m\033[38;5;21m'
+                        print(
+                            f'{dt_str()}'
+                            f'<{color}{config.username}\033[m> '
+                            f'{send_match[1]}',
+                        )
                     await send(writer, res, quiet=quiet)
                 break
         else:
