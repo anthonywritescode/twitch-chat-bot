@@ -1,6 +1,7 @@
 import argparse
 import asyncio.subprocess
 import datetime
+import functools
 import hashlib
 import json
 import os.path
@@ -179,68 +180,48 @@ def pong(match: Match[str]) -> Response:
     return CmdResponse(f'PONG {match.group(1)}\r\n')
 
 
-@handle_message('!ohai')
-def cmd_ohai(match: Match[str]) -> Response:
-    return MessageResponse(match, 'ohai, {user}!')
-
-
-@handle_message('!lurk')
-def cmd_lurk(match: Match[str]) -> Response:
-    return MessageResponse(match, 'thanks for lurking, {user}!')
-
-
-@handle_message('!discord')
-def cmd_discord(match: Match[str]) -> Response:
-    return MessageResponse(
-        match,
+_TEXT_COMMANDS = (
+    (
+        '!discord',
         'We do have Discord, you are welcome to join: '
         'https://discord.gg/HxpQ3px',
-    )
-
-
-@handle_message('!homeland')
-def cmd_russians(match: Match[str]) -> Response:
-    return MessageResponse(match, 'WE WILL PROTECT OUR HOMELAND!')
-
-
-@handle_message('!emoji')
-def cmd_emoji(match: Match[str]) -> Response:
-    return MessageResponse(match, 'anthon63DumpsterFire anthon63Pythonk')
-
-
-@handle_message('!explain')
-def cmd_explain(match: Match[str]) -> Response:
-    return MessageResponse(
-        match,
+    ),
+    ('!emoji', 'anthon63DumpsterFire anthon63Pythonk'),
+    (
+        '!explain',
         'https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY',  # noqa: E501
-    )
-
-
-@handle_message('!keyboard2')
-def keyboard2(match: Match[str]) -> Response:
-    return MessageResponse(
-        match,
-        'this is my second mechanical keyboard: '
-        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
-    )
-
-
-@handle_message('!keyboard')
-def keyboard(match: Match[str]) -> Response:
-    return MessageResponse(
-        match,
-        'this is my streaming keyboard (contributed by PhillipWei): '
-        'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
-    )
-
-
-@handle_message('!github')
-def github(match: Match[str]) -> Response:
-    return MessageResponse(
-        match,
+    ),
+    (
+        '!github',
         "anthony's github is https://github.com/asottile -- stream github is "
         "https://github.com/anthonywritescode",
-    )
+    ),
+    ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
+    (
+        '!keyboard',
+        'this is my streaming keyboard (contributed by PhillipWei): '
+        'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
+    ),
+    (
+        '!keyboard2',
+        'this is my second mechanical keyboard: '
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+    ),
+    ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
+    ('!lurk', 'thanks for lurking, {user}!'),
+    ('!ohai', 'ohai, {user}!'),
+    ('!twitter', 'https://twitter.com/codewithanthony'),
+    ('!water', 'DRINK WATER, BITCH'),
+    ('!youtube', 'https://youtube.com/anthonywritescode'),
+)
+
+
+def _generic_msg_handler(match: Match[str], *, msg: str) -> Response:
+    return MessageResponse(match, msg)
+
+
+for _cmd, _msg in _TEXT_COMMANDS:
+    handle_message(_cmd)(functools.partial(_generic_msg_handler, msg=_msg))
 
 
 @handle_message('!still')
@@ -405,16 +386,6 @@ def cmd_uptime(match: Match[str]) -> Response:
 def cmd_pep(match: Match[str]) -> Response:
     n = str(int(match['pep_num'])).zfill(4)
     return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
-
-
-@handle_message(r'!water')
-def cmd_water(match: Match[str]) -> Response:
-    return MessageResponse(match, 'DRINK WATER, BITCH')
-
-
-@handle_message(r'!levelup')
-def cmd_levelup(match: Match[str]) -> Response:
-    return MessageResponse(match, 'https://i.imgur.com/Uoq5vGx.gif')
 
 
 COMMAND_RE = re.compile(r'!\w+')
