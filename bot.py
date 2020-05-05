@@ -181,6 +181,13 @@ def pong(match: Match[str]) -> Response:
 
 
 _TEXT_COMMANDS = (
+    # this one has to be first so it does not get overridden by !keyboard
+    (
+        '!keyboard2',
+        'this is my second mechanical keyboard: '
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+    ),
+    # the rest of these are sorted by command
     (
         '!discord',
         'We do have Discord, you are welcome to join: '
@@ -201,11 +208,6 @@ _TEXT_COMMANDS = (
         '!keyboard',
         'this is my streaming keyboard (contributed by PhillipWei): '
         'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
-    ),
-    (
-        '!keyboard2',
-        'this is my second mechanical keyboard: '
-        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
