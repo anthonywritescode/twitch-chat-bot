@@ -229,6 +229,8 @@ for _cmd, _msg in _TEXT_COMMANDS:
 @handle_message('!still')
 def cmd_still(match: Match[str]) -> Response:
     _, _, rest = match['msg'].partition(' ')
+    if rest.startswith('/disconnect'):
+        rest = f' {rest}'
     year = datetime.date.today().year
     lol = random.choice(['LOL', 'LOLW', 'LMAO', 'NUUU'])
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
