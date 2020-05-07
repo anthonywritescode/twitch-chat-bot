@@ -68,14 +68,14 @@ def _parse_color(s: str) -> Tuple[int, int, int]:
 
 def _badges(badges: str) -> str:
     ret = ''
-    for reg, s in (
-        (re.compile('^vip/'), '\033[48;2;224;5;185m[♦]\033[m'),
-        (re.compile('^broadcaster/'), '\033[48;2;233;25;22m[☞]\033[m'),
-        (re.compile('^subscriber/'), '\033[48;2;130;5;180m[★]\033[m'),
-        (re.compile('^premium/'), '\033[48;2;0;160;214m[♕]\033[m'),
-        (re.compile('^sub-gifter/'), '\033[48;2;88;226;193m[◘]\033[m'),
-        (re.compile('^bits/'), '\033[48;2;203;200;208m[▴]\033[m'),
-        (re.compile('^bits-leader/'), '\033[48;2;230;186;72m[♦]\033[m'),
+    for s, reg in (
+        ('\033[48;2;224;005;185m♦\033[m', re.compile('^vip/')),
+        ('\033[48;2;233;025;022m☞\033[m', re.compile('^broadcaster/')),
+        ('\033[48;2;130;005;180m★\033[m', re.compile('^subscriber/')),
+        ('\033[48;2;000;160;214m♕\033[m', re.compile('^premium/')),
+        ('\033[48;2;088;226;193m◘\033[m', re.compile('^sub-gifter/')),
+        ('\033[48;2;203;200;208m▴\033[m', re.compile('^bits/')),
+        ('\033[48;2;230;186;072m♦\033[m', re.compile('^bits-leader/')),
     ):
         for badge in badges.split(','):
             if reg.match(badge):
