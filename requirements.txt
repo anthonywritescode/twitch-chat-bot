@@ -1,2 +1,4 @@
 aiohttp
 aiosqlite
+async-lru
+humanize

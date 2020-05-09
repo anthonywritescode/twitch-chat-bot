@@ -85,3 +85,18 @@ Show the discord url
 anthonywritescode: !discord
 anthonywritescodebot: We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px
 ```
+
+### `!followage [username]`
+
+Show how long you or a user you specified have been following the channel
+
+```
+not_cool_user: !followage
+anthonywritescodebot: not_cool_user is not a follower!
+
+cool_user: !followage
+anthonywritescodebot: cool_user has been following for 3 hours!
+
+some_user: !followage another_user
+anthonywritescodebot: another_user has been following for 5 years!
+```

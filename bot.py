@@ -11,6 +11,7 @@ import struct
 import sys
 import tempfile
 import traceback
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -23,13 +24,15 @@ from typing import Tuple
 
 import aiohttp
 import aiosqlite
+import async_lru
+from humanize import naturaldelta
 
 # TODO: allow host / port to be configurable
 HOST = 'irc.chat.twitch.tv'
 PORT = 6697
 
 MSG_RE = re.compile('^@([^ ]+) :([^!]+).* PRIVMSG #[^ ]+ :([^\r]+)')
-PRIVMSG = 'PRIVMSG #{channel} :{msg}\r\n'
+PRIVMSG = 'PRIVMSG #{channel} : {msg}\r\n'
 SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
 
 
@@ -202,7 +205,7 @@ _TEXT_COMMANDS = (
     (
         '!github',
         "anthony's github is https://github.com/asottile -- stream github is "
-        "https://github.com/anthonywritescode",
+        'https://github.com/anthonywritescode',
     ),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
@@ -230,8 +233,6 @@ for _cmd, _msg in _TEXT_COMMANDS:
 @handle_message('!still')
 def cmd_still(match: Match[str]) -> Response:
     _, _, rest = match['msg'].partition(' ')
-    if rest.startswith('/disconnect'):
-        rest = f' {rest}'
     year = datetime.date.today().year
     lol = random.choice(['LOL', 'LOLW', 'LMAO', 'NUUU'])
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
@@ -385,6 +386,119 @@ class UptimeResponse(Response):
 @handle_message('!uptime')
 def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
+
+
+@async_lru.alru_cache(maxsize=32)
+async def fetch_twitch_user(
+        user: str,
+        *,
+        oauth_token: str,
+        client_id: str
+) -> Optional[List[Dict[str, Any]]]:
+    url = 'https://api.twitch.tv/helix/users'
+    params = [('login', user)]
+    headers = {
+        'Authorization': f'Bearer {oauth_token}',
+        'Client-ID': client_id,
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params, headers=headers) as resp:
+            json_resp = await resp.json()
+            return json_resp.get('data')
+
+
+async def fetch_twitch_user_follows(
+        *,
+        from_id: int,
+        to_id: int,
+        oauth_token: str,
+        client_id: str
+) -> Optional[List[Dict[str, Any]]]:
+    url = 'https://api.twitch.tv/helix/users/follows'
+    params = [('from_id', from_id), ('to_id', to_id)]
+    headers = {
+        'Authorization': f'Bearer {oauth_token}',
+        'Client-ID': client_id,
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params, headers=headers) as resp:
+            json_resp = await resp.json()
+            return json_resp.get('data')
+
+
+class FollowageResponse(Response):
+    def __init__(self, username: str) -> None:
+        self.username = username
+
+    async def __call__(self, config: Config) -> Optional[str]:
+        token = config.oauth_token.split(':')[1]
+
+        fetched_users = await fetch_twitch_user(
+            config.channel,
+            oauth_token=token,
+            client_id=config.client_id,
+        )
+        assert fetched_users is not None
+        me, = fetched_users
+
+        fetched_users = await fetch_twitch_user(
+            self.username,
+            oauth_token=token,
+            client_id=config.client_id,
+        )
+        if not fetched_users:
+            msg = f'user {esc(self.username)} not found!'
+            return PRIVMSG.format(channel=config.channel, msg=msg)
+        target_user, = fetched_users
+
+        # if streamer wants to check the followage to their own channel
+        if me['id'] == target_user['id']:
+            msg = (
+                f"@{esc(target_user['login'])}, you can't check !followage "
+                f'to your own channel.  But I appreciate your curiosity!'
+            )
+            return PRIVMSG.format(channel=config.channel, msg=msg)
+
+        follow_age_results = await fetch_twitch_user_follows(
+            from_id=target_user['id'],
+            to_id=me['id'],
+            oauth_token=token,
+            client_id=config.client_id,
+        )
+        if not follow_age_results:
+            msg = f'{esc(target_user["login"])} is not a follower!'
+            return PRIVMSG.format(channel=config.channel, msg=msg)
+        follow_age, = follow_age_results
+
+        now = datetime.datetime.utcnow()
+        date_of_follow = datetime.datetime.fromisoformat(
+            # twitch sends ISO date string with "Z" at the end,
+            # which python's fromisoformat method does not like
+            follow_age['followed_at'].rstrip('Z'),
+        )
+        delta = now - date_of_follow
+        msg = (
+            f'{esc(follow_age["from_name"])} has been following for '
+            f'{esc(naturaldelta(delta))}!'
+        )
+        return PRIVMSG.format(channel=config.channel, msg=msg)
+
+
+# !followage -> valid, checks the caller
+# !followage anthonywritescode -> valid, checks the user passed in payload
+# !followage foo bar -> still valid, however the whole
+# "foo bar" will be processed as a username
+@handle_message(r'!followage(?P<payload> .*)?')
+def cmd_followage(match: Match[str]) -> Response:
+    user = match['user']
+    # "" is a default value if group is missing
+    groupdict = match.groupdict('')
+    payload = groupdict['payload'].strip()
+    if payload:
+        user = payload.lstrip('@')
+
+    return FollowageResponse(user)
 
 
 @handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})')
