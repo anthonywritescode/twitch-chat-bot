@@ -2,3 +2,4 @@ aiohttp
 aiosqlite
 async-lru
 humanize
+pyjokes

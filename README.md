@@ -100,3 +100,12 @@ anthonywritescodebot: cool_user has been following for 3 hours!
 some_user: !followage another_user
 anthonywritescodebot: another_user has been following for 5 years!
 ```
+
+### `!joke`
+
+Get a joke
+
+```
+anthonywritescode: !joke
+anthonywritescodebot: The best thing about a Boolean is even if you are wrong, you are only off by a bit.
+```
