@@ -186,11 +186,16 @@ def pong(match: Match[str]) -> Response:
 
 
 _TEXT_COMMANDS = (
-    # this one has to be first so it does not get overridden by !keyboard
+    # these have to be first so it does not get overridden by !keyboard
     (
         '!keyboard2',
         'this is my second mechanical keyboard: '
         'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+    ),
+    (
+        '!keyboard3',
+        'this is my stream deck keyboard (cherry mx black silent):'
+        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support',  # noqa: E501
     ),
     # the rest of these are sorted by command
     (
