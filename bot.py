@@ -25,6 +25,7 @@ from typing import Tuple
 import aiohttp
 import aiosqlite
 import async_lru
+import pyjokes
 from humanize import naturaldelta
 
 # TODO: allow host / port to be configurable
@@ -505,6 +506,11 @@ def cmd_followage(match: Match[str]) -> Response:
 def cmd_pep(match: Match[str]) -> Response:
     n = str(int(match['pep_num'])).zfill(4)
     return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
+
+
+@handle_message('!joke')
+def cmd_joke(match: Match[str]) -> Response:
+    return MessageResponse(match, esc(pyjokes.get_joke()))
 
 
 COMMAND_RE = re.compile(r'!\w+')
