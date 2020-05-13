@@ -626,11 +626,16 @@ async def amain(config: Config, *, quiet: bool) -> None:
                     f'{msg_match[3][8:-1]}\033[m',
                 )
             else:
+                if info.get('msg-id') == 'highlighted-message':
+                    msg_s = f'\033[48;2;117;094;188m{msg_match[3]}\033[m'
+                else:
+                    msg_s = msg_match[3]
+
                 print(
                     f'{dt_str()}'
                     f'{_badges(info["badges"])}'
                     f'<{color_start}{info["display-name"]}\033[m> '
-                    f'{msg_match[3]}',
+                    f'{msg_s}',
                 )
 
         for pattern, handler in HANDLERS:
