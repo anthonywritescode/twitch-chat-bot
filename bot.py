@@ -542,9 +542,13 @@ def msg_ping(match: Match[str]) -> Response:
     return MessageResponse(match, f'PONG {esc(rest)}')
 
 
-@handle_message(r'.*\b(nano|linux|windows|emacs)\b', flags=re.IGNORECASE)
+@handle_message(
+    r'.*\b(?P<word>nano|linux|windows|emacs)\b', flags=re.IGNORECASE,
+)
 def msg_gnu_please(match: Match[str]) -> Response:
-    msg, word = match[3], match[4]
+    if random.randrange(0, 100) < 90:
+        return Response()
+    msg, word = match['msg'], match['word']
     query = re.search(f'gnu[/+]{word}', msg, flags=re.IGNORECASE)
     if query:
         return MessageResponse(match, f'YES! {query[0]}')
