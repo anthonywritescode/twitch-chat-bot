@@ -206,6 +206,11 @@ _TEXT_COMMANDS = (
         'We do have Discord, you are welcome to join: '
         'https://discord.gg/HxpQ3px',
     ),
+    (
+        '!editor',
+        'this is my text editor I made, called babi! '
+        'https://github.com/asottile/babi',
+    ),
     ('!emoji', 'anthon63DumpsterFire anthon63Pythonk'),
     (
         '!explain',
