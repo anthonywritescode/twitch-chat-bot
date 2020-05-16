@@ -595,6 +595,34 @@ def _shutdown(
         closing_task.add_done_callback(cancel_tasks)
 
 
+async def handle_response(
+        config: Config,
+        match: Match[str],
+        handler: Callable[[Match[str]], Response],
+        writer: asyncio.StreamWriter,
+        *,
+        quiet: bool,
+) -> None:
+    try:
+        res = await handler(match)(config)
+    except Exception as e:
+        traceback.print_exc()
+        res = PRIVMSG.format(
+            channel=config.channel,
+            msg=f'*** unhandled {type(e).__name__} -- see logs',
+        )
+    if res is not None:
+        send_match = SEND_MSG_RE.match(res)
+        if send_match:
+            color = '\033[1m\033[3m\033[38;5;21m'
+            print(
+                f'{dt_str()}'
+                f'<{color}{config.username}\033[m> '
+                f'{send_match[1]}',
+            )
+        await send(writer, res, quiet=quiet)
+
+
 async def amain(config: Config, *, quiet: bool) -> None:
     reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
@@ -650,24 +678,10 @@ async def amain(config: Config, *, quiet: bool) -> None:
         for pattern, handler in HANDLERS:
             match = pattern.match(msg)
             if match:
-                try:
-                    res = await handler(match)(config)
-                except Exception as e:
-                    traceback.print_exc()
-                    res = PRIVMSG.format(
-                        channel=config.channel,
-                        msg=f'*** unhandled {type(e).__name__} -- see logs',
-                    )
-                if res is not None:
-                    send_match = SEND_MSG_RE.match(res)
-                    if send_match:
-                        color = '\033[1m\033[3m\033[38;5;21m'
-                        print(
-                            f'{dt_str()}'
-                            f'<{color}{config.username}\033[m> '
-                            f'{send_match[1]}',
-                        )
-                    await send(writer, res, quiet=quiet)
+                coro = handle_response(
+                    config, match, handler, writer, quiet=quiet,
+                )
+                loop.create_task(coro)
                 break
         else:
             if not quiet:
