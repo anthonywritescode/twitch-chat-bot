@@ -77,6 +77,7 @@ def _badges(badges: str) -> str:
     ret = ''
     for s, reg in (
         ('\033[48;2;000;000;000m⚙\033[m', re.compile('^staff/')),
+        ('\033[48;2;000;173;003m⚔\033[m', re.compile('^moderator/')),
         ('\033[48;2;224;005;185m♦\033[m', re.compile('^vip/')),
         ('\033[48;2;233;025;022m☞\033[m', re.compile('^broadcaster/')),
         ('\033[48;2;130;005;180m★\033[m', re.compile('^founder/')),
