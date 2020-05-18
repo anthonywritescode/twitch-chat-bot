@@ -83,6 +83,7 @@ def _badges(badges: str) -> str:
         ('\033[48;2;130;005;180m★\033[m', re.compile('^subscriber/')),
         ('\033[48;2;000;160;214m♕\033[m', re.compile('^premium/')),
         ('\033[48;2;089;057;154m♕\033[m', re.compile('^turbo/')),
+        ('\033[48;2;230;186;072m◘\033[m', re.compile('^sub-gift-leader/')),
         ('\033[48;2;088;226;193m◘\033[m', re.compile('^sub-gifter/')),
         ('\033[48;2;203;200;208m▴\033[m', re.compile('^bits/')),
         ('\033[48;2;230;186;072m♦\033[m', re.compile('^bits-leader/')),
