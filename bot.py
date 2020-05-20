@@ -597,11 +597,27 @@ def _shutdown(
         closing_task.add_done_callback(cancel_tasks)
 
 
+UNCOLOR_RE = re.compile(r'\033\[[^m]*m')
+
+
+class LogWriter:
+    def __init__(self) -> None:
+        self.date = str(datetime.date.today())
+
+    def write_message(self, msg: str) -> None:
+        print(msg)
+        uncolored_msg = UNCOLOR_RE.sub('', msg)
+        os.makedirs('logs', exist_ok=True)
+        with open(os.path.join('logs', f'{self.date}.log'), 'a+') as f:
+            f.write(f'{uncolored_msg}\n')
+
+
 async def handle_response(
         config: Config,
         match: Match[str],
         handler: Callable[[Match[str]], Response],
         writer: asyncio.StreamWriter,
+        log_writer: LogWriter,
         *,
         quiet: bool,
 ) -> None:
@@ -617,7 +633,7 @@ async def handle_response(
         send_match = SEND_MSG_RE.match(res)
         if send_match:
             color = '\033[1m\033[3m\033[38;5;21m'
-            print(
+            log_writer.write_message(
                 f'{dt_str()}'
                 f'<{color}{config.username}\033[m> '
                 f'{send_match[1]}',
@@ -626,6 +642,7 @@ async def handle_response(
 
 
 async def amain(config: Config, *, quiet: bool) -> None:
+    log_writer = LogWriter()
     reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
     loop = asyncio.get_event_loop()
@@ -658,7 +675,7 @@ async def amain(config: Config, *, quiet: bool) -> None:
             color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
 
             if msg_match[3].startswith('\x01ACTION '):
-                print(
+                log_writer.write_message(
                     f'{dt_str()}'
                     f'{_badges(info["badges"])}'
                     f'{color_start}\033[3m * {info["display-name"]}\033[22m '
@@ -670,7 +687,7 @@ async def amain(config: Config, *, quiet: bool) -> None:
                 else:
                     msg_s = msg_match[3]
 
-                print(
+                log_writer.write_message(
                     f'{dt_str()}'
                     f'{_badges(info["badges"])}'
                     f'<{color_start}{info["display-name"]}\033[m> '
@@ -681,7 +698,7 @@ async def amain(config: Config, *, quiet: bool) -> None:
             match = pattern.match(msg)
             if match:
                 coro = handle_response(
-                    config, match, handler, writer, quiet=quiet,
+                    config, match, handler, writer, log_writer, quiet=quiet,
                 )
                 loop.create_task(coro)
                 break
