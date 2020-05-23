@@ -204,6 +204,10 @@ _TEXT_COMMANDS = (
     ),
     # the rest of these are sorted by command
     (
+        '!bot',
+        'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
+    ),
+    (
         '!discord',
         'We do have Discord, you are welcome to join: '
         'https://discord.gg/HxpQ3px',
