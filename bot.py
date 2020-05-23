@@ -210,7 +210,7 @@ _TEXT_COMMANDS = (
     (
         '!discord',
         'We do have Discord, you are welcome to join: '
-        'https://discord.gg/HxpQ3px',
+        'https://discord.gg/V77fA9',
     ),
     (
         '!editor',
