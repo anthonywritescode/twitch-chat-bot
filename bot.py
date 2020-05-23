@@ -532,6 +532,15 @@ def cmd_joke(match: Match[str]) -> Response:
     return MessageResponse(match, esc(pyjokes.get_joke()))
 
 
+@handle_message('!so (?P<user_channel>.+)')
+def cmd_shoutout(match: Match[str]) -> Response:
+    user = match['user_channel']
+    return MessageResponse(
+        match,
+        f'you should check out https://twitch.tv/{esc(user)}!',
+    )
+
+
 COMMAND_RE = re.compile(r'!\w+')
 SECRET_CMDS = frozenset(('!settoday',))
 
