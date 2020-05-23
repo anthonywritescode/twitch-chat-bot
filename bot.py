@@ -313,10 +313,6 @@ class SetTodayResponse(MessageResponse):
 
 @handle_message('!settoday')
 def cmd_settoday(match: Match[str]) -> Response:
-    if match['user'] != match['channel']:
-        return MessageResponse(
-            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
-        )
     _, _, rest = match['msg'].partition(' ')
     return SetTodayResponse(match, rest)
 
@@ -534,6 +530,10 @@ def cmd_joke(match: Match[str]) -> Response:
 
 @handle_message('!so (?P<user_channel>.+)')
 def cmd_shoutout(match: Match[str]) -> Response:
+    if match['user'] != match['channel']:
+        return MessageResponse(
+            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
+        )
     user = match['user_channel']
     return MessageResponse(
         match,
@@ -542,7 +542,7 @@ def cmd_shoutout(match: Match[str]) -> Response:
 
 
 COMMAND_RE = re.compile(r'!\w+')
-SECRET_CMDS = frozenset(('!settoday',))
+SECRET_CMDS = frozenset(('!settoday', '!so'))
 
 
 @handle_message(r'!\w')
