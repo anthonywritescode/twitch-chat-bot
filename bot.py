@@ -230,7 +230,8 @@ _TEXT_COMMANDS = (
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!keyboard',
-        'this is my streaming keyboard (contributed by PhillipWei): '
+        'this is my streaming keyboard (cherry mx clears) '
+        '(contributed by PhillipWei): '
         'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
