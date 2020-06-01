@@ -202,6 +202,13 @@ _TEXT_COMMANDS = (
         'this is my stream deck keyboard (cherry mx black silent):'
         'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support',  # noqa: E501
     ),
+    (
+        '!keyboard4',
+        'this is my streaming keyboard (cherry mx clears) '
+        '(contributed by PhillipWei): '
+        'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
+    ),
+
     # the rest of these are sorted by command
     (
         '!bot',
@@ -230,9 +237,8 @@ _TEXT_COMMANDS = (
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!keyboard',
-        'this is my streaming keyboard (cherry mx clears) '
-        '(contributed by PhillipWei): '
-        'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
+        'kinesis freestyle pro (cherry mx reds) '
+        'https://kinesis-ergo.com/shop/freestyle-pro/',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
