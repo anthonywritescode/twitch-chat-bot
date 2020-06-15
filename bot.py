@@ -225,7 +225,7 @@ _TEXT_COMMANDS = (
         'this is my text editor I made, called babi! '
         'https://github.com/asottile/babi',
     ),
-    ('!emoji', 'anthon63DumpsterFire anthon63Pythonk'),
+    ('!emoji', 'anthon63DumpsterFire anthon63Pythonk anthon63HelloHello'),
     (
         '!explain',
         'https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY',  # noqa: E501
