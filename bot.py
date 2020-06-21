@@ -231,6 +231,10 @@ _TEXT_COMMANDS = (
         'https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY',  # noqa: E501
     ),
     (
+        '!faq',
+        'https://www.youtube.com/playlist?list=PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR',  # noqa: E501
+    ),
+    (
         '!github',
         "anthony's github is https://github.com/asottile -- stream github is "
         'https://github.com/anthonywritescode',
