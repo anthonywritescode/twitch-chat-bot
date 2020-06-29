@@ -223,7 +223,8 @@ _TEXT_COMMANDS = (
     (
         '!editor',
         'this is my text editor I made, called babi! '
-        'https://github.com/asottile/babi',
+        'https://github.com/asottile/babi '
+        'more info in this video: https://www.youtube.com/watch?v=WyR1hAGmR3g',
     ),
     ('!emoji', 'anthon63DumpsterFire anthon63Pythonk anthon63HelloHello'),
     (
