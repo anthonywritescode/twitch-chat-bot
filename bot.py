@@ -221,6 +221,11 @@ _TEXT_COMMANDS = (
         'https://discord.gg/xDKGPaW',
     ),
     (
+        '!donate',
+        "donations are appreciated but not necessary -- if you'd like to "
+        'donate, you can donate at https://streamlabs.com/anthonywritescode',
+    ),
+    (
         '!editor',
         'this is my text editor I made, called babi! '
         'https://github.com/asottile/babi '
