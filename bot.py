@@ -96,6 +96,12 @@ def _badges(badges: str) -> str:
     return ret
 
 
+def _is_moderator(match: Match[str]) -> bool:
+    info = _parse_badge_info(match['info'])
+    badges = info['badges'].split(',')
+    return any(badge.startswith('moderator/') for badge in badges)
+
+
 def _gen_color(name: str) -> Tuple[int, int, int]:
     h = hashlib.sha256(name.encode())
     n, = struct.unpack('Q', h.digest()[:8])
@@ -376,7 +382,7 @@ class VideoIdeaResponse(MessageResponse):
 
 @handle_message('![wv]ideoidea')
 def cmd_videoidea(match: Match[str]) -> Response:
-    if match['user'] != match['channel']:
+    if not _is_moderator(match) and match['user'] != match['channel']:
         return MessageResponse(
             match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
         )
@@ -548,7 +554,7 @@ def cmd_joke(match: Match[str]) -> Response:
 
 @handle_message('!so (?P<user_channel>.+)')
 def cmd_shoutout(match: Match[str]) -> Response:
-    if match['user'] != match['channel']:
+    if not _is_moderator(match) and match['user'] != match['channel']:
         return MessageResponse(
             match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
         )
