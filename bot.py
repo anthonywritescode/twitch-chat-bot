@@ -561,7 +561,7 @@ def cmd_shoutout(match: Match[str]) -> Response:
     user = match['user_channel']
     return MessageResponse(
         match,
-        f'you should check out https://twitch.tv/{esc(user)}!',
+        f'you should check out https://twitch.tv/{esc(user)} !',
     )
 
 
