@@ -282,6 +282,15 @@ def cmd_still(match: Match[str]) -> Response:
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
 
 
+@handle_message('!bonk')
+def cmd_bonk(match: Match[str]) -> Response:
+    return MessageResponse(
+        match,
+        'Makayla_Fox: '
+        'https://i.fluffy.cc/DM4QqzjR7wCpkGPwTl6zr907X50XgtBL.png',
+    )
+
+
 async def ensure_table_exists(db: aiosqlite.Connection) -> None:
     await db.execute(
         'CREATE TABLE IF NOT EXISTS today ('
