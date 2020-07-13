@@ -282,7 +282,7 @@ def cmd_still(match: Match[str]) -> Response:
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
 
 
-@handle_message('!bonk')
+@handle_message('!bonk', flags=re.IGNORECASE)
 def cmd_bonk(match: Match[str]) -> Response:
     return MessageResponse(
         match,
