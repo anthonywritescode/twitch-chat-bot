@@ -207,7 +207,8 @@ _TEXT_COMMANDS = (
     (
         '!keyboard3',
         'this is my stream deck keyboard (cherry mx black silent):'
-        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support',  # noqa: E501
+        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
+        'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
     ),
     (
         '!keyboard4',
