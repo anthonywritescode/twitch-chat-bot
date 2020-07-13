@@ -284,10 +284,12 @@ def cmd_still(match: Match[str]) -> Response:
 
 @handle_message('!bonk', flags=re.IGNORECASE)
 def cmd_bonk(match: Match[str]) -> Response:
+    _, _, rest = match['msg'].partition(' ')
+    rest = rest.strip() or 'Makayla_Fox'
     return MessageResponse(
         match,
-        'Makayla_Fox: '
-        'https://i.fluffy.cc/DM4QqzjR7wCpkGPwTl6zr907X50XgtBL.png',
+        f'{esc(rest)}: '
+        f'https://i.fluffy.cc/DM4QqzjR7wCpkGPwTl6zr907X50XgtBL.png',
     )
 
 
