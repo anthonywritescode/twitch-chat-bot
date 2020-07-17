@@ -350,6 +350,10 @@ class SetTodayResponse(MessageResponse):
 
 @handle_message('!settoday')
 def cmd_settoday(match: Match[str]) -> Response:
+    if not _is_moderator(match) and match['user'] != match['channel']:
+        return MessageResponse(
+            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
+        )
     _, _, rest = match['msg'].partition(' ')
     return SetTodayResponse(match, rest)
 
