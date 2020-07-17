@@ -261,6 +261,7 @@ _TEXT_COMMANDS = (
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
     ('!ohai', 'ohai, {user}!'),
+    ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
     ('!youtube', 'https://youtube.com/anthonywritescode'),
