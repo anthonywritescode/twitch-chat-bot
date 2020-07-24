@@ -238,8 +238,7 @@ _TEXT_COMMANDS = (
     (
         '!keyboard4',
         'this is my streaming keyboard (cherry mx clears) '
-        '(contributed by PhillipWei): '
-        'https://www.wasdkeyboards.com/code-v3-87-key-mechanical-keyboard-zealio-67g.html',  # noqa: E501
+        '(contributed by PhillipWei): https://amzn.to/3jzmwh3',
     ),
 
     # the rest of these are sorted by command
@@ -280,8 +279,7 @@ _TEXT_COMMANDS = (
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!keyboard',
-        'kinesis freestyle pro (cherry mx reds) '
-        'https://kinesis-ergo.com/shop/freestyle-pro/',
+        'kinesis freestyle pro (cherry mx reds) https://amzn.to/3jyN4PC',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
