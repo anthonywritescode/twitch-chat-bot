@@ -222,7 +222,7 @@ def pong(match: Match[str]) -> Response:
     return CmdResponse(f'PONG {match.group(1)}\r\n')
 
 
-_TEXT_COMMANDS = (
+_TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     # these have to be first so it does not get overridden by !keyboard
     (
         '!keyboard2',
@@ -276,7 +276,7 @@ _TEXT_COMMANDS = (
         '!keyboard',
         'either '
         '(normal) code v3 87-key (cherry mx clears) '
-        '(contributed by PhillipWei): https://amzn.to/3jzmwh3 ',
+        '(contributed by PhillipWei): https://amzn.to/3jzmwh3 '
         'or '
         '(split) kinesis freestyle pro (cherry mx reds)'
         'https://amzn.to/3jyN4PC',
