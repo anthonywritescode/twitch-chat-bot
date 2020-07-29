@@ -235,11 +235,6 @@ _TEXT_COMMANDS = (
         'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
         'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
     ),
-    (
-        '!keyboard4',
-        'this is my streaming keyboard (cherry mx clears) '
-        '(contributed by PhillipWei): https://amzn.to/3jzmwh3',
-    ),
 
     # the rest of these are sorted by command
     (
@@ -279,7 +274,12 @@ _TEXT_COMMANDS = (
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!keyboard',
-        'kinesis freestyle pro (cherry mx reds) https://amzn.to/3jyN4PC',
+        'either '
+        '(normal) code v3 87-key (cherry mx clears) '
+        '(contributed by PhillipWei): https://amzn.to/3jzmwh3 ',
+        'or '
+        '(split) kinesis freestyle pro (cherry mx reds)'
+        'https://amzn.to/3jyN4PC',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
