@@ -278,7 +278,7 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         '(normal) code v3 87-key (cherry mx clears) '
         '(contributed by PhillipWei): https://amzn.to/3jzmwh3 '
         'or '
-        '(split) kinesis freestyle pro (cherry mx reds)'
+        '(split) kinesis freestyle pro (cherry mx reds) '
         'https://amzn.to/3jyN4PC',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
