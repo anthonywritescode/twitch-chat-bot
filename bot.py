@@ -260,7 +260,8 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ('!emoji', 'anthon63DumpsterFire anthon63Pythonk anthon63HelloHello'),
     (
         '!explain',
-        'https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY',  # noqa: E501
+        'playlist: https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY '  # noqa: E501
+        'video list: https://github.com/anthonywritescode/explains',
     ),
     (
         '!faq',
