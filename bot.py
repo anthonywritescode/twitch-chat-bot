@@ -26,6 +26,7 @@ from typing import Match
 from typing import NamedTuple
 from typing import Optional
 from typing import Pattern
+from typing import Set
 from typing import Tuple
 
 import aiohttp
@@ -45,6 +46,9 @@ MSG_RE = re.compile(
 )
 PRIVMSG = 'PRIVMSG #{channel} : {msg}\r\n'
 SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
+COMMAND_RE = re.compile(r'^(?P<cmd>!\w+)')
+COMMAND_PATTERN_RE = re.compile(r'!\w+')
+USERNAME_RE = re.compile(r'\w+')
 
 
 class Config(NamedTuple):
@@ -178,8 +182,10 @@ class MessageResponse(Response):
 
 
 Callback = Callable[[Match[str]], Response]
-HANDLERS: List[Tuple[Pattern[str], Callable[[Match[str]], Response]]]
-HANDLERS = []
+HANDLERS: List[Tuple[Pattern[str], Callback]] = []
+COMMANDS: Dict[str, Callback] = {}
+POINTS_HANDLERS: Dict[str, Callback] = {}
+SECRET_CMDS: Set[str] = set()
 
 
 def handler(
@@ -207,12 +213,24 @@ def handle_message(
     )
 
 
-_POINTS_HANDLERS = {}
+def command(
+        *cmds: str,
+        secret: bool = False,
+) -> Callable[[Callback], Callback]:
+    def command_decorator(func: Callback) -> Callback:
+        for cmd in cmds:
+            COMMANDS[cmd] = func
+        if secret:
+            SECRET_CMDS.update(cmds)
+        else:
+            SECRET_CMDS.update(cmds[1:])
+        return func
+    return command_decorator
 
 
 def channel_points_handler(reward_id: str) -> Callable[[Callback], Callback]:
     def channel_points_handler_decorator(func: Callback) -> Callback:
-        _POINTS_HANDLERS[reward_id] = func
+        POINTS_HANDLERS[reward_id] = func
         return func
     return channel_points_handler_decorator
 
@@ -297,10 +315,10 @@ def _generic_msg_handler(match: Match[str], *, msg: str) -> Response:
 
 
 for _cmd, _msg in _TEXT_COMMANDS:
-    handle_message(_cmd)(functools.partial(_generic_msg_handler, msg=_msg))
+    command(_cmd)(functools.partial(_generic_msg_handler, msg=_msg))
 
 
-@handle_message('!still')
+@command('!still')
 def cmd_still(match: Match[str]) -> Response:
     _, _, rest = match['msg'].partition(' ')
     year = datetime.date.today().year
@@ -308,7 +326,7 @@ def cmd_still(match: Match[str]) -> Response:
     return MessageResponse(match, f'{esc(rest)}, in {year} - {lol}!')
 
 
-@handle_message('!bonk', flags=re.IGNORECASE)
+@command('!bonk')
 def cmd_bonk(match: Match[str]) -> Response:
     _, _, rest = match['msg'].partition(' ')
     rest = rest.strip() or 'Makayla_Fox'
@@ -356,7 +374,7 @@ class TodayResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@handle_message('!today', '!project')
+@command('!today', '!project')
 def cmd_today(match: Match[str]) -> Response:
     return TodayResponse(match)
 
@@ -372,12 +390,10 @@ class SetTodayResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@handle_message('!settoday')
+@command('!settoday', secret=True)
 def cmd_settoday(match: Match[str]) -> Response:
     if not _is_moderator(match) and match['user'] != match['channel']:
-        return MessageResponse(
-            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
-        )
+        return MessageResponse(match, 'https://youtu.be/RfiQYRn7fBg')
     _, _, rest = match['msg'].partition(' ')
     return SetTodayResponse(match, rest)
 
@@ -439,7 +455,7 @@ class MotdResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@handle_message('!motd')
+@command('!motd')
 def cmd_motd(match: Match[str]) -> Response:
     return MotdResponse(match)
 
@@ -483,12 +499,10 @@ class VideoIdeaResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@handle_message('![wv]ideoidea')
+@command('!wideoidea', '!videoidea')
 def cmd_videoidea(match: Match[str]) -> Response:
     if not _is_moderator(match) and match['user'] != match['channel']:
-        return MessageResponse(
-            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
-        )
+        return MessageResponse(match, 'https://youtu.be/RfiQYRn7fBg')
     _, _, rest = match['msg'].partition(' ')
     return VideoIdeaResponse(match, rest)
 
@@ -526,7 +540,7 @@ class UptimeResponse(Response):
                 return PRIVMSG.format(channel=config.channel, msg=msg)
 
 
-@handle_message('!uptime')
+@command('!uptime')
 def cmd_uptime(match: Match[str]) -> Response:
     return UptimeResponse()
 
@@ -632,7 +646,7 @@ class FollowageResponse(Response):
 # !followage anthonywritescode -> valid, checks the user passed in payload
 # !followage foo bar -> still valid, however the whole
 # "foo bar" will be processed as a username
-@handle_message('!followage')
+@command('!followage')
 def cmd_followage(match: Match[str]) -> Response:
     return FollowageResponse(_optional_user_arg(match))
 
@@ -643,18 +657,20 @@ def cmd_pep(match: Match[str]) -> Response:
     return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
 
 
-@handle_message('!joke')
+@command('!joke')
 def cmd_joke(match: Match[str]) -> Response:
     return MessageResponse(match, esc(pyjokes.get_joke()))
 
 
-@handle_message('!so (?P<user_channel>.+)')
+@command('!so', secret=True)
 def cmd_shoutout(match: Match[str]) -> Response:
+    channel = _optional_user_arg(match)
+    user_match = USERNAME_RE.match(channel)
     if not _is_moderator(match) and match['user'] != match['channel']:
-        return MessageResponse(
-            match, 'https://www.youtube.com/watch?v=RfiQYRn7fBg',
-        )
-    user = match['user_channel']
+        return MessageResponse(match, 'https://youtu.be/RfiQYRn7fBg')
+    elif channel == match['user'] or user_match is None:
+        return Response()
+    user = user_match[0]
     return MessageResponse(
         match,
         f'you should check out https://twitch.tv/{esc(user)} !',
@@ -702,7 +718,7 @@ def chat_rank(username: str) -> Optional[Tuple[int, int]]:
         return None
 
 
-@handle_message('!chatrank')
+@command('!chatrank')
 def cmd_chatrank(match: Match[str]) -> Response:
     user = _optional_user_arg(match)
     ret = chat_rank(user)
@@ -719,7 +735,7 @@ def cmd_chatrank(match: Match[str]) -> Response:
         )
 
 
-@handle_message('!top10chat')
+@command('!top10chat')
 def cmd_top_10_chat(match: Match[str]) -> Response:
     total = _chat_rank_counts()
     return MessageResponse(
@@ -731,14 +747,12 @@ def cmd_top_10_chat(match: Match[str]) -> Response:
     )
 
 
-COMMAND_RE = re.compile(r'!\w+')
-SECRET_CMDS = frozenset(('!settoday', '!so'))
-
-
 @handle_message(r'!\w')
 def cmd_help(match: Match[str]) -> Response:
-    possible = [COMMAND_RE.search(reg.pattern) for reg, _ in HANDLERS]
-    possible_cmds = {match[0] for match in possible if match} - SECRET_CMDS
+    possible = [COMMAND_PATTERN_RE.search(reg.pattern) for reg, _ in HANDLERS]
+    possible_cmds = {match[0] for match in possible if match}
+    possible_cmds.update(COMMANDS)
+    possible_cmds.difference_update(SECRET_CMDS)
     commands = ['!help'] + sorted(possible_cmds)
     msg = f'possible commands: {", ".join(commands)}'
     if not match['msg'].startswith('!help'):
@@ -900,8 +914,8 @@ async def amain(config: Config, *, quiet: bool) -> None:
                 )
 
             if 'custom-reward-id' in info:
-                if info['custom-reward-id'] in _POINTS_HANDLERS:
-                    handler = _POINTS_HANDLERS[info['custom-reward-id']]
+                if info['custom-reward-id'] in POINTS_HANDLERS:
+                    handler = POINTS_HANDLERS[info['custom-reward-id']]
                     coro = handle_response(
                         config, msg_match, handler, writer, log_writer,
                         quiet=quiet,
@@ -909,6 +923,17 @@ async def amain(config: Config, *, quiet: bool) -> None:
                     loop.create_task(coro)
                 elif not quiet:
                     print(f'UNHANDLED reward({info["custom-reward-id"]})')
+                continue
+
+        if msg_match:
+            cmd_match = COMMAND_RE.match(msg_match['msg'])
+            if cmd_match and cmd_match['cmd'].lower() in COMMANDS:
+                handler = COMMANDS[cmd_match['cmd'].lower()]
+                coro = handle_response(
+                    config, msg_match, handler, writer, log_writer,
+                    quiet=quiet,
+                )
+                loop.create_task(coro)
                 continue
 
         for pattern, handler in HANDLERS:
