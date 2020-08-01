@@ -235,6 +235,12 @@ def channel_points_handler(reward_id: str) -> Callable[[Callback], Callback]:
     return channel_points_handler_decorator
 
 
+def add_alias(cmd: str, *aliases: str) -> None:
+    for alias in aliases:
+        COMMANDS[alias] = COMMANDS[cmd]
+        SECRET_CMDS.add(alias)
+
+
 @handler('^PING (.*)')
 def pong(match: Match[str]) -> Response:
     return CmdResponse(f'PONG {match.group(1)}\r\n')
@@ -675,6 +681,13 @@ def cmd_shoutout(match: Match[str]) -> Response:
         match,
         f'you should check out https://twitch.tv/{esc(user)} !',
     )
+
+
+_ALIASES = (
+    ('!editor', ('!babi', '!nano', '!vim', '!emacs')),
+)
+for _alias_name, _aliases in _ALIASES:
+    add_alias(_alias_name, *_aliases)
 
 
 CHAT_LOG_RE = re.compile(
