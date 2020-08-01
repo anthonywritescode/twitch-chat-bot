@@ -247,20 +247,6 @@ def pong(match: Match[str]) -> Response:
 
 
 _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
-    # these have to be first so it does not get overridden by !keyboard
-    (
-        '!keyboard2',
-        'this is my second mechanical keyboard: '
-        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
-    ),
-    (
-        '!keyboard3',
-        'this is my stream deck keyboard (cherry mx black silent):'
-        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
-        'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
-    ),
-
-    # the rest of these are sorted by command
     (
         '!bot',
         'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
@@ -305,6 +291,17 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         'or '
         '(split) kinesis freestyle pro (cherry mx reds) '
         'https://amzn.to/3jyN4PC',
+    ),
+    (
+        '!keyboard2',
+        'this is my second mechanical keyboard: '
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+    ),
+    (
+        '!keyboard3',
+        'this is my stream deck keyboard (cherry mx black silent):'
+        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
+        'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
