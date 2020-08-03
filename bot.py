@@ -510,6 +510,19 @@ def cmd_videoidea(match: Match[str]) -> Response:
     return VideoIdeaResponse(match, rest)
 
 
+def seconds_to_readable(seconds: int) -> str:
+    parts = []
+    for n, unit in (
+            (60 * 60, 'hours'),
+            (60, 'minutes'),
+            (1, 'seconds'),
+    ):
+        if seconds // n:
+            parts.append(f'{seconds // n} {unit}')
+        seconds %= n
+    return ', '.join(parts)
+
+
 class UptimeResponse(Response):
     async def __call__(self, config: Config) -> Optional[str]:
         url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'  # noqa: E501
@@ -530,16 +543,7 @@ class UptimeResponse(Response):
                 )
                 elapsed = (datetime.datetime.utcnow() - start_time).seconds
 
-                parts = []
-                for n, unit in (
-                        (60 * 60, 'hours'),
-                        (60, 'minutes'),
-                        (1, 'seconds'),
-                ):
-                    if elapsed // n:
-                        parts.append(f'{elapsed // n} {unit}')
-                    elapsed %= n
-                msg = f'streaming for: {", ".join(parts)}'
+                msg = f'streaming for: {seconds_to_readable(elapsed)}'
                 return PRIVMSG.format(channel=config.channel, msg=msg)
 
 
