@@ -836,7 +836,7 @@ def msg_ping(match: Match[str]) -> Response:
 
 
 @handle_message(
-    r'.*\b(?P<word>nano|linux|windows|emacs)\b', flags=re.IGNORECASE,
+    r'.*\b(?P<word>nano|linux|windows|emacs|NT)\b', flags=re.IGNORECASE,
 )
 def msg_gnu_please(match: Match[str]) -> Response:
     if random.randrange(0, 100) < 90:
