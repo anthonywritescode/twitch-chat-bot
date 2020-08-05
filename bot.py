@@ -894,7 +894,8 @@ class LogWriter:
         print(msg)
         uncolored_msg = UNCOLOR_RE.sub('', msg)
         os.makedirs('logs', exist_ok=True)
-        with open(os.path.join('logs', f'{self.date}.log'), 'a+') as f:
+        log = os.path.join('logs', f'{self.date}.log')
+        with open(log, 'a+', encoding='UTF-8') as f:
             f.write(f'{uncolored_msg}\n')
 
 
