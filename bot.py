@@ -100,6 +100,7 @@ def _badges(badges: str) -> str:
         ('\033[48;2;183;125;029m♕\033[m', re.compile('^hype-train/')),
         ('\033[48;2;203;200;208m▴\033[m', re.compile('^bits/')),
         ('\033[48;2;230;186;072m♦\033[m', re.compile('^bits-leader/')),
+        ('\033[48;2;145;070;255m☑\033[m', re.compile('^partner/')),
     ):
         for badge in badges.split(','):
             if reg.match(badge):
