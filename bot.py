@@ -257,6 +257,11 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         'https://discord.gg/xDKGPaW',
     ),
     (
+        '!distro',
+        'Windows 10 with Ubuntu 20.04 LTS virtual machine, more info here: '
+        'https://www.youtube.com/watch?v=8KdAqlESQJo',
+    ),
+    (
         '!donate',
         "donations are appreciated but not necessary -- if you'd like to "
         'donate, you can donate at https://streamlabs.com/anthonywritescode',
