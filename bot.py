@@ -269,11 +269,15 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ),
     (
         '!editor',
-        'this is my text editor I made, called babi! '
+        'awcBabi this is my text editor I made, called babi! '
         'https://github.com/asottile/babi '
         'more info in this video: https://www.youtube.com/watch?v=WyR1hAGmR3g',
     ),
-    ('!emoji', 'anthon63DumpsterFire anthon63Pythonk anthon63HelloHello'),
+    (
+        '!emotes',
+        'awcDumpsterFire awcPythonk awcHelloHello awcKeebL awcKeebR '
+        'awcPreCommit awcBabi awcFLogo',
+    ),
     (
         '!explain',
         'playlist: https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY '  # noqa: E501
@@ -295,7 +299,7 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         '(normal) code v3 87-key (cherry mx clears) '
         '(contributed by PhillipWei): https://amzn.to/3jzmwh3 '
         'or '
-        '(split) kinesis freestyle pro (cherry mx reds) '
+        '(split) awcKeebL awcKeebR kinesis freestyle pro (cherry mx reds) '
         'https://amzn.to/3jyN4PC',
     ),
     (
@@ -692,6 +696,7 @@ def cmd_shoutout(match: Match[str]) -> Response:
 
 _ALIASES = (
     ('!editor', ('!babi', '!nano', '!vim', '!emacs')),
+    ('!emotes', ('!emoji', '!emote')),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
@@ -857,7 +862,7 @@ def msg_gnu_please(match: Match[str]) -> Response:
 
 @handle_message(r'.*\bth[oi]nk(?:ing)?\b', flags=re.IGNORECASE)
 def msg_think(match: Match[str]) -> Response:
-    return MessageResponse(match, 'anthon63Pythonk ' * 5)
+    return MessageResponse(match, 'awcPythonk ' * 5)
 
 
 # TODO: !tags, only allowed by stream admin / mods????
