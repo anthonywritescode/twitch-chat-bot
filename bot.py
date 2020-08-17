@@ -259,8 +259,8 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ),
     (
         '!distro',
-        'Windows 10 with Ubuntu 20.04 LTS virtual machine, more info here: '
-        'https://www.youtube.com/watch?v=8KdAqlESQJo',
+        'awcActuallyWindows Windows 10 with Ubuntu 20.04 LTS virtual machine, '
+        'more info here: https://www.youtube.com/watch?v=8KdAqlESQJo',
     ),
     (
         '!donate',
@@ -276,7 +276,7 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     (
         '!emotes',
         'awcDumpsterFire awcPythonk awcHelloHello awcKeebL awcKeebR '
-        'awcPreCommit awcBabi awcFLogo',
+        'awcPreCommit awcBabi awcFLogo awcCarpet awcActuallyWindows',
     ),
     (
         '!explain',
