@@ -317,6 +317,12 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ('!lurk', 'thanks for lurking, {user}!'),
     ('!ohai', 'ohai, {user}!'),
     ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
+    (
+        '!theme',
+        'awcBabi this is vs dark plus in !babi with one modification to '
+        'highlight ini headers: '
+        'https://github.com/asottile/babi#setting-up-syntax-highlighting',
+    ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
     ('!youtube', 'https://youtube.com/anthonywritescode'),
