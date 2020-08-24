@@ -703,6 +703,7 @@ def cmd_shoutout(match: Match[str]) -> Response:
 _ALIASES = (
     ('!editor', ('!babi', '!nano', '!vim', '!emacs')),
     ('!emotes', ('!emoji', '!emote')),
+    ('!explain', ('!explains',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
