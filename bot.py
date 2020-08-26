@@ -529,12 +529,14 @@ def cmd_videoidea(match: Match[str]) -> Response:
 def seconds_to_readable(seconds: int) -> str:
     parts = []
     for n, unit in (
-            (60 * 60, 'hours'),
-            (60, 'minutes'),
-            (1, 'seconds'),
+            (60 * 60, 'hour'),
+            (60, 'minute'),
+            (1, 'second'),
     ):
         if seconds // n:
             parts.append(f'{seconds // n} {unit}')
+            if seconds//n != 1:
+                parts.append('s')
         seconds %= n
     return ', '.join(parts)
 
