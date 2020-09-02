@@ -868,6 +868,11 @@ def msg_gnu_please(match: Match[str]) -> Response:
         return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
 
 
+@handle_message('(is this|are you using) vim', flags=re.IGNORECASE)
+def msg_is_this_vim(match: Match[str]) -> Response:
+    return COMMANDS['!editor'](match)
+
+
 @handle_message(r'.*\bth[oi]nk(?:ing)?\b', flags=re.IGNORECASE)
 def msg_think(match: Match[str]) -> Response:
     return MessageResponse(match, 'awcPythonk ' * 5)
