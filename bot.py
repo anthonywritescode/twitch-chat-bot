@@ -868,7 +868,7 @@ def msg_gnu_please(match: Match[str]) -> Response:
         return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
 
 
-@handle_message('(is this|are you using) vim', flags=re.IGNORECASE)
+@handle_message('(is this|are you using) (vim|nano)', flags=re.IGNORECASE)
 def msg_is_this_vim(match: Match[str]) -> Response:
     return COMMANDS['!editor'](match)
 
