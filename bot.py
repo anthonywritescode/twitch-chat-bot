@@ -56,6 +56,8 @@ class Config(NamedTuple):
     channel: str
     oauth_token: str
     client_id: str
+    youtube_api_key: str
+    youtube_playlists: Dict[str, str]
 
     def __repr__(self) -> str:
         return (
@@ -64,6 +66,8 @@ class Config(NamedTuple):
             f'channel={self.channel!r}, '
             f'oauth_token={"***"!r}, '
             f'client_id={"***"!r}, '
+            f'youtube_api_key={"***"!r}, '
+            f'youtube_playlists={self.youtube_playlists!r}, '
             f')'
         )
 
@@ -279,13 +283,9 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         'awcPreCommit awcBabi awcFLogo awcCarpet awcActuallyWindows',
     ),
     (
-        '!explain',
+        '!explainlist',
         'playlist: https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY '  # noqa: E501
         'video list: https://github.com/anthonywritescode/explains',
-    ),
-    (
-        '!faq',
-        'https://www.youtube.com/playlist?list=PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR',  # noqa: E501
     ),
     (
         '!github',
@@ -700,11 +700,205 @@ def cmd_shoutout(match: Match[str]) -> Response:
     )
 
 
+class YouTubeVideo(NamedTuple):
+    video_id: str
+    title: str
+    playlist_id: str
+
+    def chat_message(self) -> str:
+        return (
+            f'{esc(self.title)} - '
+            f'https://youtu.be/{self.video_id}?list={self.playlist_id}'
+        )
+
+
+async def ensure_youtube_playlist_videos_table_exists(
+    db: aiosqlite.Connection
+) -> None:
+    await db.execute(
+        'CREATE VIRTUAL TABLE IF NOT EXISTS youtube_playlist_videos using FTS5'
+        '('
+        '   video_id,'
+        '   title,'
+        '   playlist_id'
+        ')',
+    )
+    await db.commit()
+
+
+async def clear_youtube_playlist_from_store(
+    db: aiosqlite.Connection,
+    playlist_id: str
+) -> None:
+    await db.execute(
+        'DELETE FROM youtube_playlist_videos WHERE playlist_id = ?', (
+            playlist_id,
+        ),
+    )
+    await db.commit()
+
+
+async def fetch_youtube_playlist_videos(
+        playlist_id: str,
+        *,
+        youtube_api_key: str
+) -> List[YouTubeVideo]:
+    url = 'https://www.googleapis.com/youtube/v3/playlistItems'
+    params = {
+        'part': 'snippet',
+        'playlistId': playlist_id,
+        'key': youtube_api_key,
+        'maxResults': 50,
+    }
+    playlist_videos = []
+    more_pages = True
+    async with aiohttp.ClientSession() as session:
+        while more_pages:
+            async with session.get(url, params=params) as resp:
+                json_resp = await resp.json()
+                playlist_videos.extend(json_resp.get('items'))
+                next_page_token = json_resp.get('nextPageToken')
+                if next_page_token:
+                    params['pageToken'] = next_page_token
+                else:
+                    more_pages = False
+
+        return [
+            YouTubeVideo(
+                video_id=v['snippet']['resourceId']['videoId'],
+                title=v['snippet']['title'],
+                playlist_id=v['snippet']['playlistId'],
+            ) for v in playlist_videos
+        ]
+
+
+async def add_youtube_videos_to_store(
+    db: aiosqlite.Connection,
+    videos: List[YouTubeVideo]
+) -> None:
+    await db.executemany(
+        (
+            'INSERT INTO youtube_playlist_videos '
+            'VALUES (?, ?, ?)'
+        ),
+        videos,
+    )
+    await db.commit()
+
+
+@async_lru.alru_cache(maxsize=None)
+async def populate_youtube_playlist_store(
+        playlist_id: str,
+        *,
+        youtube_api_key: str
+) -> None:
+    async with aiosqlite.connect('db.db') as db:
+        await ensure_youtube_playlist_videos_table_exists(db)
+        await clear_youtube_playlist_from_store(db, playlist_id)
+
+        videos = await fetch_youtube_playlist_videos(
+            playlist_id,
+            youtube_api_key=youtube_api_key,
+        )
+        await add_youtube_videos_to_store(db, videos)
+
+
+def youtube_video_row_factory(
+    cursor: aiosqlite.Cursor,
+    row: aiosqlite.Row,
+) -> YouTubeVideo:
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return YouTubeVideo(**d)
+
+
+async def search_youtube_videos(
+    db: aiosqlite.Connection,
+    playlist_id: str,
+    search_terms: str
+) -> List[YouTubeVideo]:
+    query = (
+        'SELECT playlist_id, title, video_id '
+        'FROM youtube_playlist_videos '
+        'WHERE playlist_id = ? AND title MATCH ? ORDER BY rank'
+    )
+    db.row_factory = youtube_video_row_factory
+    # Append a wildcard character to the search to include plurals etc.
+    if not search_terms.endswith('*'):
+        search_terms += '*'
+    async with db.execute(query, (playlist_id, search_terms)) as cursor:
+        return await cursor.fetchall()
+
+
+class PlaylistVideoResponse(MessageResponse):
+    def __init__(
+        self, match: Match[str],
+        playlist_name: str, search_terms: str,
+    ) -> None:
+        self.playlist_name = playlist_name
+        self.search_terms = search_terms
+        super().__init__(match, '')
+
+    async def __call__(self, config: Config) -> Optional[str]:
+        playlist_id = config.youtube_playlists[self.playlist_name]
+        playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
+        if not self.search_terms:
+            self.msg_fmt = f'see playlist: {playlist_url}'
+            return await super().__call__(config)
+
+        await populate_youtube_playlist_store(
+            playlist_id,
+            youtube_api_key=config.youtube_api_key,
+        )
+
+        async with aiosqlite.connect('db.db') as db:
+            try:
+                videos = await search_youtube_videos(
+                    db, playlist_id, self.search_terms,
+                )
+            except aiosqlite.OperationalError:
+                self.msg_fmt = 'invalid search syntax used'
+                return await super().__call__(config)
+
+            if not videos:
+                self.msg_fmt = (
+                    f'no video found - see playlist: {playlist_url}'
+                )
+            elif len(videos) > 2:
+                self.msg_fmt = (
+                    f'{videos[0].chat_message()} and {len(videos)} other '
+                    f'videos found - see playlist: {playlist_url}'
+                )
+            elif len(videos) == 2:
+                self.msg_fmt = (
+                    '2 videos found: '
+                    f'{videos[0].chat_message()} & {videos[1].chat_message()}'
+                )
+            else:
+                self.msg_fmt = videos[0].chat_message()
+
+        return await super().__call__(config)
+
+
+@command('!explain')
+def cmd_explain(match: Match[str]) -> Response:
+    _, _, rest = match['msg'].partition(' ')
+    return PlaylistVideoResponse(match, 'explains', rest)
+
+
+@command('!faq')
+def cmd_faq(match: Match[str]) -> Response:
+    _, _, rest = match['msg'].partition(' ')
+    return PlaylistVideoResponse(match, 'faq', rest)
+
+
 _ALIASES = (
     ('!distro', ('!os',)),
     ('!editor', ('!babi', '!nano', '!vim', '!emacs', '!vscode')),
     ('!emotes', ('!emoji', '!emote')),
     ('!explain', ('!explains',)),
+    ('!explainlist', ('!explainslist',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)

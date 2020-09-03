@@ -15,7 +15,12 @@ and this felt like a decent project to dive in on.
      "username": "...",
      "channel": "...",
      "oauth_token": "...",
-     "client_id": "..."
+     "client_id": "...",
+     "youtube_api_key": "...",
+     "youtube_playlists": {
+       "explains": "PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY",
+       "faq": "PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR"
+      }
    }
    ```
 
@@ -24,18 +29,21 @@ and this felt like a decent project to dive in on.
      the streamer's channel name
    - `oauth_token`: follow the directions [here][docs-irc] to get a token
    - `client_id`: set up an application for your chat bot [here][app-setup]
+   - `youtube_api_key`: set up an API key for a YouTube account to fetch playlist videos [here][youtube-setup]
+   - `youtube_playlists`: a dictionary of YouTube playlists that can be searched via commands
 
-1. Use python3.7 or newer and install `aiohttp`
+1. Use python3.7 or newer and install the dependencies in `requirements.txt`
 
    ```bash
    virtualenv venv -ppython3.7
-   venv/bin/pip install aiohttp
+   venv/bin/pip install -r requirements.txt
    ```
 
 1. Run! `venv/bin/python bot.py`
 
 [docs-irc]: https://dev.twitch.tv/docs/irc/
 [app-setup]: https://dev.twitch.tv/docs/authentication/#registration
+[youtube-setup]: https://console.developers.google.com/apis/credentials
 
 ## implemented commands
 
