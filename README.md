@@ -18,8 +18,13 @@ and this felt like a decent project to dive in on.
      "client_id": "...",
      "youtube_api_key": "...",
      "youtube_playlists": {
-       "explains": "PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY",
-       "faq": "PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR"
+       "explains": {
+         "playlist_id": "PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY",
+         "github": "https://github.com/anthonywritescode/explains"
+       },
+       "faq": {
+         "playlist_id": "PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR"
+       }
       }
    }
    ```

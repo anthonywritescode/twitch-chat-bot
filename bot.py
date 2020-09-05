@@ -57,7 +57,7 @@ class Config(NamedTuple):
     oauth_token: str
     client_id: str
     youtube_api_key: str
-    youtube_playlists: Dict[str, str]
+    youtube_playlists: Dict[str, Dict[str, str]]
 
     def __repr__(self) -> str:
         return (
@@ -281,11 +281,6 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         '!emotes',
         'awcDumpsterFire awcPythonk awcHelloHello awcKeebL awcKeebR '
         'awcPreCommit awcBabi awcFLogo awcCarpet awcActuallyWindows',
-    ),
-    (
-        '!explainlist',
-        'playlist: https://www.youtube.com/playlist?list=PLWBKAf81pmOaP9naRiNAqug6EBnkPakvY '  # noqa: E501
-        'video list: https://github.com/anthonywritescode/explains',
     ),
     (
         '!github',
@@ -800,10 +795,13 @@ class PlaylistVideoResponse(MessageResponse):
         super().__init__(match, '')
 
     async def __call__(self, config: Config) -> Optional[str]:
-        playlist_id = config.youtube_playlists[self.playlist_name]
+        info = config.youtube_playlists[self.playlist_name]
+        playlist_id = info['playlist_id']
         playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
         if not self.search_terms:
-            self.msg_fmt = f'see playlist: {playlist_url}'
+            self.msg_fmt = f'playlist: {playlist_url}'
+            if info.get('github'):
+                self.msg_fmt = f'{self.msg_fmt} video list: {info["github"]}'
             return await super().__call__(config)
 
         await _populate_playlist(playlist_id, api_key=config.youtube_api_key)
@@ -852,7 +850,6 @@ _ALIASES = (
     ('!editor', ('!babi', '!nano', '!vim', '!emacs', '!vscode')),
     ('!emotes', ('!emoji', '!emote')),
     ('!explain', ('!explains',)),
-    ('!explainlist', ('!explainslist',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
