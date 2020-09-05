@@ -29,8 +29,10 @@ and this felt like a decent project to dive in on.
      the streamer's channel name
    - `oauth_token`: follow the directions [here][docs-irc] to get a token
    - `client_id`: set up an application for your chat bot [here][app-setup]
-   - `youtube_api_key`: set up an API key for a YouTube account to fetch playlist videos [here][youtube-setup]
-   - `youtube_playlists`: a dictionary of YouTube playlists that can be searched via commands
+   - `youtube_api_key`: set up an API key for a YouTube account to fetch
+      playlist videos [here][youtube-setup]
+   - `youtube_playlists`: a dictionary of YouTube playlists that can be
+     searched via commands
 
 1. Use python3.7 or newer and install the dependencies in `requirements.txt`
 

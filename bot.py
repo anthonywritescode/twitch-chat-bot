@@ -712,42 +712,16 @@ class YouTubeVideo(NamedTuple):
         )
 
 
-async def ensure_youtube_playlist_videos_table_exists(
-    db: aiosqlite.Connection
-) -> None:
-    await db.execute(
-        'CREATE VIRTUAL TABLE IF NOT EXISTS youtube_playlist_videos using FTS5'
-        '('
-        '   video_id,'
-        '   title,'
-        '   playlist_id'
-        ')',
-    )
-    await db.commit()
-
-
-async def clear_youtube_playlist_from_store(
-    db: aiosqlite.Connection,
-    playlist_id: str
-) -> None:
-    await db.execute(
-        'DELETE FROM youtube_playlist_videos WHERE playlist_id = ?', (
-            playlist_id,
-        ),
-    )
-    await db.commit()
-
-
-async def fetch_youtube_playlist_videos(
+async def _fetch_playlist(
         playlist_id: str,
         *,
-        youtube_api_key: str
+        api_key: str,
 ) -> List[YouTubeVideo]:
     url = 'https://www.googleapis.com/youtube/v3/playlistItems'
     params = {
         'part': 'snippet',
         'playlistId': playlist_id,
-        'key': youtube_api_key,
+        'key': api_key,
         'maxResults': 50,
     }
     playlist_videos = []
@@ -756,7 +730,7 @@ async def fetch_youtube_playlist_videos(
         while more_pages:
             async with session.get(url, params=params) as resp:
                 json_resp = await resp.json()
-                playlist_videos.extend(json_resp.get('items'))
+                playlist_videos.extend(json_resp['items'])
                 next_page_token = json_resp.get('nextPageToken')
                 if next_page_token:
                     params['pageToken'] = next_page_token
@@ -768,73 +742,58 @@ async def fetch_youtube_playlist_videos(
                 video_id=v['snippet']['resourceId']['videoId'],
                 title=v['snippet']['title'],
                 playlist_id=v['snippet']['playlistId'],
-            ) for v in playlist_videos
+            )
+            for v in playlist_videos
         ]
 
 
-async def add_youtube_videos_to_store(
-    db: aiosqlite.Connection,
-    videos: List[YouTubeVideo]
-) -> None:
-    await db.executemany(
-        (
-            'INSERT INTO youtube_playlist_videos '
-            'VALUES (?, ?, ?)'
-        ),
-        videos,
-    )
-    await db.commit()
-
-
 @async_lru.alru_cache(maxsize=None)
-async def populate_youtube_playlist_store(
-        playlist_id: str,
-        *,
-        youtube_api_key: str
-) -> None:
+async def _populate_playlist(playlist_id: str, *, api_key: str) -> None:
     async with aiosqlite.connect('db.db') as db:
-        await ensure_youtube_playlist_videos_table_exists(db)
-        await clear_youtube_playlist_from_store(db, playlist_id)
-
-        videos = await fetch_youtube_playlist_videos(
-            playlist_id,
-            youtube_api_key=youtube_api_key,
+        await db.execute(
+            'CREATE VIRTUAL TABLE IF NOT EXISTS youtube_videos using FTS5 ('
+            '   video_id,'
+            '   title,'
+            '   playlist_id'
+            ')',
         )
-        await add_youtube_videos_to_store(db, videos)
+        await db.commit()
+
+        videos = await _fetch_playlist(playlist_id, api_key=api_key)
+
+        query = 'DELETE FROM youtube_videos WHERE playlist_id = ?'
+        await db.execute(query, (playlist_id,))
+
+        query = 'INSERT INTO youtube_videos VALUES (?, ?, ?)'
+        await db.executemany(query, videos)
+
+        await db.commit()
 
 
-def youtube_video_row_factory(
-    cursor: aiosqlite.Cursor,
-    row: aiosqlite.Row,
-) -> YouTubeVideo:
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return YouTubeVideo(**d)
-
-
-async def search_youtube_videos(
-    db: aiosqlite.Connection,
-    playlist_id: str,
-    search_terms: str
+async def _search_playlist(
+        db: aiosqlite.Connection,
+        playlist_id: str,
+        search_terms: str
 ) -> List[YouTubeVideo]:
     query = (
-        'SELECT playlist_id, title, video_id '
-        'FROM youtube_playlist_videos '
+        'SELECT video_id, title, playlist_id '
+        'FROM youtube_videos '
         'WHERE playlist_id = ? AND title MATCH ? ORDER BY rank'
     )
-    db.row_factory = youtube_video_row_factory
     # Append a wildcard character to the search to include plurals etc.
     if not search_terms.endswith('*'):
         search_terms += '*'
     async with db.execute(query, (playlist_id, search_terms)) as cursor:
-        return await cursor.fetchall()
+        results = await cursor.fetchall()
+        return [YouTubeVideo(*row) for row in results]
 
 
 class PlaylistVideoResponse(MessageResponse):
     def __init__(
-        self, match: Match[str],
-        playlist_name: str, search_terms: str,
+            self,
+            match: Match[str],
+            playlist_name: str,
+            search_terms: str,
     ) -> None:
         self.playlist_name = playlist_name
         self.search_terms = search_terms
@@ -847,14 +806,11 @@ class PlaylistVideoResponse(MessageResponse):
             self.msg_fmt = f'see playlist: {playlist_url}'
             return await super().__call__(config)
 
-        await populate_youtube_playlist_store(
-            playlist_id,
-            youtube_api_key=config.youtube_api_key,
-        )
+        await _populate_playlist(playlist_id, api_key=config.youtube_api_key)
 
         async with aiosqlite.connect('db.db') as db:
             try:
-                videos = await search_youtube_videos(
+                videos = await _search_playlist(
                     db, playlist_id, self.search_terms,
                 )
             except aiosqlite.OperationalError:
@@ -862,9 +818,7 @@ class PlaylistVideoResponse(MessageResponse):
                 return await super().__call__(config)
 
             if not videos:
-                self.msg_fmt = (
-                    f'no video found - see playlist: {playlist_url}'
-                )
+                self.msg_fmt = f'no video found - see playlist: {playlist_url}'
             elif len(videos) > 2:
                 self.msg_fmt = (
                     f'{videos[0].chat_message()} and {len(videos)} other '
