@@ -1000,6 +1000,14 @@ def msg_ping(match: Match[str]) -> Response:
 
 
 @handle_message(
+    '.*(is (this|that)|are you using) (vim|nano)',
+    flags=re.IGNORECASE,
+)
+def msg_is_this_vim(match: Match[str]) -> Response:
+    return COMMANDS['!editor'](match)
+
+
+@handle_message(
     r'.*\b(?P<word>nano|linux|windows|emacs|NT)\b', flags=re.IGNORECASE,
 )
 def msg_gnu_please(match: Match[str]) -> Response:
@@ -1011,14 +1019,6 @@ def msg_gnu_please(match: Match[str]) -> Response:
         return MessageResponse(match, f'YES! {query[0]}')
     else:
         return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
-
-
-@handle_message(
-    '(is (this|that)|are you using) (vim|nano)',
-    flags=re.IGNORECASE,
-)
-def msg_is_this_vim(match: Match[str]) -> Response:
-    return COMMANDS['!editor'](match)
 
 
 @handle_message(r'.*\bth[oi]nk(?:ing)?\b', flags=re.IGNORECASE)
