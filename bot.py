@@ -1071,6 +1071,19 @@ class LogWriter:
             f.write(f'{uncolored_msg}\n')
 
 
+def get_printed_output(config: Config, res: str) -> Optional[str]:
+    send_match = SEND_MSG_RE.match(res)
+    if send_match:
+        color = '\033[1m\033[3m\033[38;5;21m'
+        return (
+            f'{dt_str()}'
+            f'<{color}{config.username}\033[m> '
+            f'{send_match[1]}'
+        )
+    else:
+        return None
+
+
 async def handle_response(
         config: Config,
         match: Match[str],
@@ -1089,15 +1102,69 @@ async def handle_response(
             msg=f'*** unhandled {type(e).__name__} -- see logs',
         )
     if res is not None:
-        send_match = SEND_MSG_RE.match(res)
-        if send_match:
-            color = '\033[1m\033[3m\033[38;5;21m'
-            log_writer.write_message(
-                f'{dt_str()}'
-                f'<{color}{config.username}\033[m> '
-                f'{send_match[1]}',
-            )
+        printed_output = get_printed_output(config, res)
+        if printed_output is not None:
+            log_writer.write_message(printed_output)
         await send(writer, res, quiet=quiet)
+
+
+def get_printed_input(msg: str) -> Optional[str]:
+    msg_match = MSG_RE.match(msg)
+    if msg_match:
+        info = _parse_badge_info(msg_match['info'])
+        if info['color']:
+            r, g, b = _parse_color(info['color'])
+        else:
+            r, g, b = _gen_color(info['display-name'])
+
+        color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
+
+        if msg_match['msg'].startswith('\x01ACTION '):
+            return (
+                f'{dt_str()}'
+                f'{_badges(info["badges"])}'
+                f'{color_start}\033[3m * {info["display-name"]}\033[22m '
+                f'{msg_match["msg"][8:-1]}\033[m'
+            )
+        else:
+            if info.get('msg-id') == 'highlighted-message':
+                msg_s = f'\033[48;2;117;094;188m{msg_match["msg"]}\033[m'
+            elif 'custom-reward-id' in info:
+                msg_s = f'\033[48;2;029;091;130m{msg_match["msg"]}\033[m'
+            else:
+                msg_s = msg_match['msg']
+
+            return (
+                f'{dt_str()}'
+                f'{_badges(info["badges"])}'
+                f'<{color_start}{info["display-name"]}\033[m> '
+                f'{msg_s}'
+            )
+
+    return None
+
+
+def get_handler(msg: str) -> Optional[Tuple[Callback, Match[str]]]:
+    msg_match = MSG_RE.match(msg)
+    if msg_match:
+        info = _parse_badge_info(msg_match['info'])
+
+        if 'custom-reward-id' in info:
+            if info['custom-reward-id'] in POINTS_HANDLERS:
+                return POINTS_HANDLERS[info['custom-reward-id']], msg_match
+            else:
+                return None
+
+        cmd_match = COMMAND_RE.match(msg_match['msg'])
+        if cmd_match and cmd_match['cmd'].lower() in COMMANDS:
+            return COMMANDS[cmd_match['cmd'].lower()], msg_match
+
+    for pattern, handler in HANDLERS:
+        match = pattern.match(msg)
+        if match:
+            return handler, match
+
+    return None
 
 
 async def amain(config: Config, *, quiet: bool) -> None:
@@ -1123,85 +1190,60 @@ async def amain(config: Config, *, quiet: bool) -> None:
             return
         msg = data.decode('UTF-8', errors='backslashreplace')
 
-        msg_match = MSG_RE.match(msg)
-        if msg_match:
-            info = _parse_badge_info(msg_match['info'])
-            if info['color']:
-                r, g, b = _parse_color(info['color'])
+        printed_input = get_printed_input(msg)
+        if printed_input is not None:
+            log_writer.write_message(printed_input)
+
+        maybe_handler_match = get_handler(msg)
+        if maybe_handler_match is not None:
+            handler, match = maybe_handler_match
+            coro = handle_response(
+                config, match, handler, writer, log_writer, quiet=quiet,
+            )
+            loop.create_task(coro)
+        elif not quiet:
+            print(f'UNHANDLED: {msg}', end='')
+
+
+async def chat_message_test(config: Config, msg: str) -> None:
+    info = '@color=;display-name=username;badges='
+    line = f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
+
+    printed_input = get_printed_input(line)
+    assert printed_input is not None
+    print(printed_input)
+
+    maybe_handler_match = get_handler(line)
+    if maybe_handler_match is not None:
+        handler, match = maybe_handler_match
+        result = await handler(match)(config)
+        if result is not None:
+            printed_output = get_printed_output(config, result)
+            if printed_output is not None:
+                print(printed_output)
             else:
-                r, g, b = _gen_color(info['display-name'])
-
-            color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
-
-            if msg_match['msg'].startswith('\x01ACTION '):
-                log_writer.write_message(
-                    f'{dt_str()}'
-                    f'{_badges(info["badges"])}'
-                    f'{color_start}\033[3m * {info["display-name"]}\033[22m '
-                    f'{msg_match["msg"][8:-1]}\033[m',
-                )
-            else:
-                if info.get('msg-id') == 'highlighted-message':
-                    msg_s = f'\033[48;2;117;094;188m{msg_match["msg"]}\033[m'
-                elif 'custom-reward-id' in info:
-                    msg_s = f'\033[48;2;029;091;130m{msg_match["msg"]}\033[m'
-                else:
-                    msg_s = msg_match['msg']
-
-                log_writer.write_message(
-                    f'{dt_str()}'
-                    f'{_badges(info["badges"])}'
-                    f'<{color_start}{info["display-name"]}\033[m> '
-                    f'{msg_s}',
-                )
-
-            if 'custom-reward-id' in info:
-                if info['custom-reward-id'] in POINTS_HANDLERS:
-                    handler = POINTS_HANDLERS[info['custom-reward-id']]
-                    coro = handle_response(
-                        config, msg_match, handler, writer, log_writer,
-                        quiet=quiet,
-                    )
-                    loop.create_task(coro)
-                elif not quiet:
-                    print(f'UNHANDLED reward({info["custom-reward-id"]})')
-                continue
-
-        if msg_match:
-            cmd_match = COMMAND_RE.match(msg_match['msg'])
-            if cmd_match and cmd_match['cmd'].lower() in COMMANDS:
-                handler = COMMANDS[cmd_match['cmd'].lower()]
-                coro = handle_response(
-                    config, msg_match, handler, writer, log_writer,
-                    quiet=quiet,
-                )
-                loop.create_task(coro)
-                continue
-
-        for pattern, handler in HANDLERS:
-            match = pattern.match(msg)
-            if match:
-                coro = handle_response(
-                    config, match, handler, writer, log_writer, quiet=quiet,
-                )
-                loop.create_task(coro)
-                break
+                print(result)
         else:
-            if not quiet:
-                print(f'UNHANDLED: {msg}', end='')
+            print('<<handler returned None>>')
+    else:
+        print('<<no handler>>')
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.json')
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--test')
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = Config(**json.load(f))
 
-    with contextlib.suppress(KeyboardInterrupt):
-        asyncio.run(amain(config, quiet=not args.verbose))
+    if args.test:
+        asyncio.run(chat_message_test(config, args.test))
+    else:
+        with contextlib.suppress(KeyboardInterrupt):
+            asyncio.run(amain(config, quiet=not args.verbose))
 
     return 0
 
