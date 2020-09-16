@@ -25,7 +25,8 @@ and this felt like a decent project to dive in on.
        "faq": {
          "playlist_id": "PLWBKAf81pmOZEPeIV2_pIESK5hRMAo1hR"
        }
-      }
+     },
+     "airnow_api_key": "..."
    }
    ```
 
@@ -38,6 +39,7 @@ and this felt like a decent project to dive in on.
       playlist videos [here][youtube-setup]
    - `youtube_playlists`: a dictionary of YouTube playlists that can be
      searched via commands
+   - `airnow_api_key`: api key for https://airnowapi.org
 
 1. Use python3.7 or newer and install the dependencies in `requirements.txt`
 

@@ -58,6 +58,7 @@ class Config(NamedTuple):
     client_id: str
     youtube_api_key: str
     youtube_playlists: Dict[str, Dict[str, str]]
+    airnow_api_key: str
 
     def __repr__(self) -> str:
         return (
@@ -68,6 +69,7 @@ class Config(NamedTuple):
             f'client_id={"***"!r}, '
             f'youtube_api_key={"***"!r}, '
             f'youtube_playlists={self.youtube_playlists!r}, '
+            f'airnow_api_key={"***"!r}, '
             f')'
         )
 
@@ -543,12 +545,11 @@ class UptimeResponse(Response):
         }
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
-                text = await response.text()
-                data = json.loads(text)['data']
-                if not data:
+                json_resp = await response.json()
+                if not json_resp['data']:
                     msg = 'not currently streaming!'
                     return PRIVMSG.format(channel=config.channel, msg=msg)
-                start_time_s = data[0]['started_at']
+                start_time_s = json_resp['data'][0]['started_at']
                 start_time = datetime.datetime.strptime(
                     start_time_s, '%Y-%m-%dT%H:%M:%SZ',
                 )
@@ -843,6 +844,51 @@ def cmd_explain(match: Match[str]) -> Response:
 def cmd_faq(match: Match[str]) -> Response:
     _, _, rest = match['msg'].partition(' ')
     return PlaylistVideoResponse(match, 'faq', rest)
+
+
+class AQIResponse(MessageResponse):
+    def __init__(self, match: Match[str], zip_code: str) -> None:
+        super().__init__(match, '')
+        self.zip_code = zip_code
+
+    async def __call__(self, config: Config) -> Optional[str]:
+        params = {
+            'format': 'application/json',
+            'zipCode': self.zip_code,
+            'API_KEY': config.airnow_api_key,
+        }
+        url = 'https://www.airnowapi.org/aq/observation/zipCode/current/'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as resp:
+                json_resp = await resp.json()
+                pm_25 = [d for d in json_resp if d['ParameterName'] == 'PM2.5']
+                if not pm_25:
+                    self.msg_fmt = 'No PM2.5 info -- is this a US zip code?'
+                else:
+                    data, = pm_25
+                    self.msg_fmt = (
+                        f'Current AQI ({esc(data["ParameterName"])}) in '
+                        f'{esc(data["ReportingArea"])}, '
+                        f'{esc(data["StateCode"])}: '
+                        f'{esc(str(data["AQI"]))} '
+                        f'({esc(data["Category"]["Name"])})'
+                    )
+                return await super().__call__(config)
+
+
+@command('!aqi')
+def cmd_aq(match: Match[str]) -> Response:
+    _, _, rest = match['msg'].partition(' ')
+    if rest:
+        zip_code = rest.split()[0]
+        if not re.match(r'^\d{5}$', zip_code, re.ASCII):
+            return MessageResponse(
+                match, '(invalid zip) usage: !aqi [US_ZIP_CODE]',
+            )
+    else:
+        zip_code = '94401'
+
+    return AQIResponse(match, zip_code)
 
 
 _ALIASES = (
