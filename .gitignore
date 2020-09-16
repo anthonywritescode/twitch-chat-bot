@@ -1,3 +1,4 @@
+*.pyc
 /.mypy_cache
 /config.json
 /db.db
