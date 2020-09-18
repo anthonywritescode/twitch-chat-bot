@@ -151,7 +151,7 @@ class PlaylistVideoResponse(MessageResponse):
         return await super().__call__(config)
 
 
-@command('!explain', '!explain')
+@command('!explain', '!explains')
 def cmd_explain(match: Match[str]) -> PlaylistVideoResponse:
     _, _, rest = match['msg'].partition(' ')
     return PlaylistVideoResponse(match, 'explains', rest)
