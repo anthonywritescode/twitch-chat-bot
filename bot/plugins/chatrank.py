@@ -10,9 +10,10 @@ from typing import Optional
 from typing import Pattern
 from typing import Tuple
 
+from bot.config import Config
 from bot.data import command
 from bot.data import esc
-from bot.data import MessageResponse
+from bot.data import format_msg
 from bot.permissions import optional_user_arg
 
 CHAT_LOG_RE = re.compile(
@@ -68,14 +69,14 @@ def _log_start_date() -> str:
 
 
 @command('!chatrank')
-def cmd_chatrank(match: Match[str]) -> MessageResponse:
+async def cmd_chatrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     ret = _rank(user, CHAT_LOG_RE)
     if ret is None:
-        return MessageResponse(match, f'user not found {esc(user)}')
+        return format_msg(match, f'user not found {esc(user)}')
     else:
         rank, n = ret
-        return MessageResponse(
+        return format_msg(
             match,
             f'{esc(user)} is ranked #{rank} with {n} messages '
             f'(since {_log_start_date()})',
@@ -83,58 +84,58 @@ def cmd_chatrank(match: Match[str]) -> MessageResponse:
 
 
 @command('!top10chat')
-def cmd_top_10_chat(match: Match[str]) -> MessageResponse:
+async def cmd_top_10_chat(config: Config, match: Match[str]) -> str:
     total = _chat_rank_counts(CHAT_LOG_RE)
     user_list = ', '.join(
         f'{rank}. {user}({n})'
         for rank, (user, n) in enumerate(total.most_common(10), start=1)
     )
-    return MessageResponse(match, f'{user_list} (since {_log_start_date()})')
+    return format_msg(match, f'{user_list} (since {_log_start_date()})')
 
 
 @command('!bonkrank')
-def cmd_bonkrank(match: Match[str]) -> MessageResponse:
+async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     ret = _rank(user, BONKER_RE)
     if ret is None:
-        return MessageResponse(match, f'user not found {esc(user)}')
+        return format_msg(match, f'user not found {esc(user)}')
     else:
         rank, n = ret
-        return MessageResponse(
+        return format_msg(
             match,
             f'{esc(user)} is ranked #{rank}, has bonked others {n} times',
         )
 
 
 @command('!top5bonkers')
-def cmd_top_5_bonkers(match: Match[str]) -> MessageResponse:
+async def cmd_top_5_bonkers(config: Config, match: Match[str]) -> str:
     total = _chat_rank_counts(BONKER_RE)
     user_list = ', '.join(
         f'{rank}. {user}({n})'
         for rank, (user, n) in enumerate(total.most_common(5), start=1)
     )
-    return MessageResponse(match, user_list)
+    return format_msg(match, user_list)
 
 
 @command('!bonkedrank')
-def cmd_bonkedrank(match: Match[str]) -> MessageResponse:
+async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     ret = _rank(user, BONKED_RE)
     if ret is None:
-        return MessageResponse(match, f'user not found {esc(user)}')
+        return format_msg(match, f'user not found {esc(user)}')
     else:
         rank, n = ret
-        return MessageResponse(
+        return format_msg(
             match,
             f'{esc(user)} is ranked #{rank}, has been bonked {n} times',
         )
 
 
 @command('!top5bonked')
-def cmd_top_5_bonked(match: Match[str]) -> MessageResponse:
+async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
     total = _chat_rank_counts(BONKED_RE)
     user_list = ', '.join(
         f'{rank}. {user}({n})'
         for rank, (user, n) in enumerate(total.most_common(5), start=1)
     )
-    return MessageResponse(match, user_list)
+    return format_msg(match, user_list)

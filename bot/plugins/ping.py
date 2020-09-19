@@ -1,11 +1,12 @@
 from typing import Match
 
+from bot.config import Config
 from bot.data import esc
+from bot.data import format_msg
 from bot.data import handle_message
-from bot.data import MessageResponse
 
 
 @handle_message('PING')
-def msg_ping(match: Match[str]) -> MessageResponse:
+async def msg_ping(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
-    return MessageResponse(match, f'PONG {esc(rest)}')
+    return format_msg(match, f'PONG {esc(rest)}')

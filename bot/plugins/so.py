@@ -1,10 +1,11 @@
 import re
 from typing import Match
+from typing import Optional
 
+from bot.config import Config
 from bot.data import command
 from bot.data import esc
-from bot.data import MessageResponse
-from bot.data import Response
+from bot.data import format_msg
 from bot.permissions import is_moderator
 from bot.permissions import optional_user_arg
 
@@ -12,15 +13,15 @@ USERNAME_RE = re.compile(r'\w+')
 
 
 @command('!so', secret=True)
-def cmd_shoutout(match: Match[str]) -> Response:
+async def cmd_shoutout(config: Config, match: Match[str]) -> Optional[str]:
     channel = optional_user_arg(match)
     user_match = USERNAME_RE.match(channel)
     if not is_moderator(match) and match['user'] != match['channel']:
-        return MessageResponse(match, 'https://youtu.be/RfiQYRn7fBg')
+        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
     elif channel == match['user'] or user_match is None:
-        return Response()
+        return None
     user = user_match[0]
-    return MessageResponse(
+    return format_msg(
         match,
         f'you should check out https://twitch.tv/{esc(user)} !',
     )

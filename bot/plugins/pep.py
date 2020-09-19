@@ -1,10 +1,11 @@
 from typing import Match
 
+from bot.config import Config
+from bot.data import format_msg
 from bot.data import handle_message
-from bot.data import MessageResponse
 
 
 @handle_message(r'!pep[ ]?(?P<pep_num>\d{1,4})')
-def cmd_pep(match: Match[str]) -> MessageResponse:
+async def cmd_pep(config: Config, match: Match[str]) -> str:
     n = str(int(match['pep_num'])).zfill(4)
-    return MessageResponse(match, f'https://www.python.org/dev/peps/pep-{n}/')
+    return format_msg(match, f'https://www.python.org/dev/peps/pep-{n}/')

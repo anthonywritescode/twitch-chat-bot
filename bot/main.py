@@ -166,7 +166,7 @@ async def handle_response(
         quiet: bool,
 ) -> None:
     try:
-        res = await handler(match)(config)
+        res = await handler(config, match)
     except Exception as e:
         traceback.print_exc()
         res = PRIVMSG.format(
@@ -288,7 +288,7 @@ async def chat_message_test(config: Config, msg: str) -> None:
     maybe_handler_match = get_handler(line)
     if maybe_handler_match is not None:
         handler, match = maybe_handler_match
-        result = await handler(match)(config)
+        result = await handler(config, match)
         if result is not None:
             printed_output = get_printed_output(config, result)
             if printed_output is not None:

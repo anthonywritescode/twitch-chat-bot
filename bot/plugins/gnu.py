@@ -1,12 +1,13 @@
 import random
 import re
 from typing import Match
+from typing import Optional
 
+from bot.config import Config
 from bot.data import COMMANDS
 from bot.data import esc
+from bot.data import format_msg
 from bot.data import handle_message
-from bot.data import MessageResponse
-from bot.data import Response
 
 
 # XXX: this doesn't belong here, but ordering is important
@@ -14,19 +15,19 @@ from bot.data import Response
     '.*(is (this|that)|are you using) (vim|nano)',
     flags=re.IGNORECASE,
 )
-def msg_is_this_vim(match: Match[str]) -> Response:
-    return COMMANDS['!editor'](match)
+async def msg_is_this_vim(config: Config, match: Match[str]) -> Optional[str]:
+    return await COMMANDS['!editor'](config, match)
 
 
 @handle_message(
     r'.*\b(?P<word>nano|linux|windows|emacs|NT)\b', flags=re.IGNORECASE,
 )
-def msg_gnu_please(match: Match[str]) -> Response:
+async def msg_gnu_please(config: Config, match: Match[str]) -> Optional[str]:
     if random.randrange(0, 100) < 90:
-        return Response()
+        return None
     msg, word = match['msg'], match['word']
     query = re.search(f'gnu[/+]{word}', msg, flags=re.IGNORECASE)
     if query:
-        return MessageResponse(match, f'YES! {query[0]}')
+        return format_msg(match, f'YES! {query[0]}')
     else:
-        return MessageResponse(match, f"Um please, it's GNU+{esc(word)}!")
+        return format_msg(match, f"Um please, it's GNU+{esc(word)}!")

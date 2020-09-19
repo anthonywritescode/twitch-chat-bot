@@ -1,7 +1,6 @@
 from typing import List
 from typing import Match
 from typing import NamedTuple
-from typing import Optional
 
 import aiohttp
 import aiosqlite
@@ -10,7 +9,7 @@ import async_lru
 from bot.config import Config
 from bot.data import command
 from bot.data import esc
-from bot.data import MessageResponse
+from bot.data import format_msg
 
 
 class YouTubeVideo(NamedTuple):
@@ -101,63 +100,48 @@ async def _search_playlist(
         return [YouTubeVideo(*row) for row in results]
 
 
-class PlaylistVideoResponse(MessageResponse):
-    def __init__(
-            self,
-            match: Match[str],
-            playlist_name: str,
-            search_terms: str,
-    ) -> None:
-        self.playlist_name = playlist_name
-        self.search_terms = search_terms
-        super().__init__(match, '')
+async def _msg(config: Config, playlist_name: str, search_terms: str) -> str:
+    info = config.youtube_playlists[playlist_name]
+    playlist_id = info['playlist_id']
+    playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
+    if not search_terms:
+        msg = f'playlist: {playlist_url}'
+        if info.get('github'):
+            return f'{msg} video list: {info["github"]}'
+        else:
+            return msg
 
-    async def __call__(self, config: Config) -> Optional[str]:
-        info = config.youtube_playlists[self.playlist_name]
-        playlist_id = info['playlist_id']
-        playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
-        if not self.search_terms:
-            self.msg_fmt = f'playlist: {playlist_url}'
-            if info.get('github'):
-                self.msg_fmt = f'{self.msg_fmt} video list: {info["github"]}'
-            return await super().__call__(config)
+    await _populate_playlist(playlist_id, api_key=config.youtube_api_key)
 
-        await _populate_playlist(playlist_id, api_key=config.youtube_api_key)
+    async with aiosqlite.connect('db.db') as db:
+        try:
+            videos = await _search_playlist(db, playlist_id, search_terms)
+        except aiosqlite.OperationalError:
+            return 'invalid search syntax used'
 
-        async with aiosqlite.connect('db.db') as db:
-            try:
-                videos = await _search_playlist(
-                    db, playlist_id, self.search_terms,
-                )
-            except aiosqlite.OperationalError:
-                self.msg_fmt = 'invalid search syntax used'
-                return await super().__call__(config)
-
-            if not videos:
-                self.msg_fmt = f'no video found - see playlist: {playlist_url}'
-            elif len(videos) > 2:
-                self.msg_fmt = (
-                    f'{videos[0].chat_message()} and {len(videos)} other '
-                    f'videos found - see playlist: {playlist_url}'
-                )
-            elif len(videos) == 2:
-                self.msg_fmt = (
-                    '2 videos found: '
-                    f'{videos[0].chat_message()} & {videos[1].chat_message()}'
-                )
-            else:
-                self.msg_fmt = videos[0].chat_message()
-
-        return await super().__call__(config)
+        if not videos:
+            return f'no video found - see playlist: {playlist_url}'
+        elif len(videos) > 2:
+            return (
+                f'{videos[0].chat_message()} and {len(videos)} other '
+                f'videos found - see playlist: {playlist_url}'
+            )
+        elif len(videos) == 2:
+            return (
+                '2 videos found: '
+                f'{videos[0].chat_message()} & {videos[1].chat_message()}'
+            )
+        else:
+            return videos[0].chat_message()
 
 
 @command('!explain', '!explains')
-def cmd_explain(match: Match[str]) -> PlaylistVideoResponse:
+async def cmd_explain(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
-    return PlaylistVideoResponse(match, 'explains', rest)
+    return format_msg(match, await _msg(config, 'explains', rest))
 
 
 @command('!faq')
-def cmd_faq(match: Match[str]) -> PlaylistVideoResponse:
+async def cmd_faq(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
-    return PlaylistVideoResponse(match, 'faq', rest)
+    return format_msg(match, await _msg(config, 'faq', rest))

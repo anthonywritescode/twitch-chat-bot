@@ -1,5 +1,6 @@
 import pkgutil
 import re
+from typing import Awaitable
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -34,31 +35,13 @@ def esc(s: str) -> str:
     return s.replace('{', '{{').replace('}', '}}')
 
 
-class Response:
-    async def __call__(self, config: Config) -> Optional[str]:
-        return None
+def format_msg(match: Match[str], fmt: str) -> str:
+    params = match.groupdict()
+    params['msg'] = fmt.format(**params)
+    return PRIVMSG.format(**params)
 
 
-class CmdResponse(Response):
-    def __init__(self, cmd: str) -> None:
-        self.cmd = cmd
-
-    async def __call__(self, config: Config) -> Optional[str]:
-        return self.cmd
-
-
-class MessageResponse(Response):
-    def __init__(self, match: Match[str], msg_fmt: str) -> None:
-        self.match = match
-        self.msg_fmt = msg_fmt
-
-    async def __call__(self, config: Config) -> Optional[str]:
-        params = self.match.groupdict()
-        params['msg'] = self.msg_fmt.format(**params)
-        return PRIVMSG.format(**params)
-
-
-Callback = Callable[[Match[str]], Response]
+Callback = Callable[[Config, Match[str]], Awaitable[Optional[str]]]
 HANDLERS: List[Tuple[Pattern[str], Callback]] = []
 COMMANDS: Dict[str, Callback] = {}
 POINTS_HANDLERS: Dict[str, Callback] = {}
@@ -158,14 +141,14 @@ for _, name, _ in mod_infos:
 
 
 @handler('^PING (.*)')
-def pong(match: Match[str]) -> Response:
+async def pong(config: Config, match: Match[str]) -> str:
     """keeps the bot alive, need to reply with all PINGs with PONG"""
-    return CmdResponse(f'PONG {match.group(1)}\r\n')
+    return f'PONG {match.group(1)}\r\n'
 
 
 # make this always last so that help is implemented properly
 @handle_message(r'!\w')
-def cmd_help(match: Match[str]) -> Response:
+async def cmd_help(config: Config, match: Match[str]) -> str:
     possible = [COMMAND_PATTERN_RE.search(reg.pattern) for reg, _ in HANDLERS]
     possible_cmds = {match[0] for match in possible if match}
     possible_cmds.update(COMMANDS)
@@ -174,4 +157,4 @@ def cmd_help(match: Match[str]) -> Response:
     msg = f'possible commands: {", ".join(commands)}'
     if not match['msg'].startswith('!help'):
         msg = f'unknown command ({esc(match["msg"].split()[0])}), {msg}'
-    return MessageResponse(match, msg)
+    return format_msg(match, msg)

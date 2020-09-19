@@ -1,12 +1,11 @@
 from typing import Match
-from typing import Optional
 
 import aiosqlite
 
 from bot.config import Config
 from bot.data import command
 from bot.data import esc
-from bot.data import MessageResponse
+from bot.data import format_msg
 from bot.permissions import is_moderator
 
 
@@ -37,35 +36,19 @@ async def get_today(db: aiosqlite.Connection) -> str:
             return esc(row[0])
 
 
-class TodayResponse(MessageResponse):
-    def __init__(self, match: Match[str]) -> None:
-        super().__init__(match, '')
-
-    async def __call__(self, config: Config) -> Optional[str]:
-        async with aiosqlite.connect('db.db') as db:
-            self.msg_fmt = await get_today(db)
-        return await super().__call__(config)
-
-
 @command('!today', '!project')
-def cmd_today(match: Match[str]) -> TodayResponse:
-    return TodayResponse(match)
-
-
-class SetTodayResponse(MessageResponse):
-    def __init__(self, match: Match[str], msg: str) -> None:
-        super().__init__(match, 'updated!')
-        self.msg = msg
-
-    async def __call__(self, config: Config) -> Optional[str]:
-        async with aiosqlite.connect('db.db') as db:
-            await set_today(db, self.msg)
-        return await super().__call__(config)
+async def cmd_today(config: Config, match: Match[str]) -> str:
+    async with aiosqlite.connect('db.db') as db:
+        return format_msg(match, await get_today(db))
 
 
 @command('!settoday', secret=True)
-def cmd_settoday(match: Match[str]) -> MessageResponse:
+async def cmd_settoday(config: Config, match: Match[str]) -> str:
     if not is_moderator(match) and match['user'] != match['channel']:
-        return MessageResponse(match, 'https://youtu.be/RfiQYRn7fBg')
+        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
     _, _, rest = match['msg'].partition(' ')
-    return SetTodayResponse(match, rest)
+
+    async with aiosqlite.connect('db.db') as db:
+        await set_today(db, rest)
+
+    return format_msg(match, 'updated!')

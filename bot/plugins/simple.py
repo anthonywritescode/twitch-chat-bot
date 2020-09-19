@@ -2,9 +2,10 @@ import functools
 from typing import Match
 from typing import Tuple
 
+from bot.config import Config
 from bot.data import add_alias
 from bot.data import command
-from bot.data import MessageResponse
+from bot.data import format_msg
 
 
 _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
@@ -81,12 +82,12 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
 )
 
 
-def _generic_msg_handler(match: Match[str], *, msg: str) -> MessageResponse:
-    return MessageResponse(match, msg)
+async def _generic_msg(config: Config, match: Match[str], *, msg: str) -> str:
+    return format_msg(match, msg)
 
 
 for _cmd, _msg in _TEXT_COMMANDS:
-    command(_cmd)(functools.partial(_generic_msg_handler, msg=_msg))
+    command(_cmd)(functools.partial(_generic_msg, msg=_msg))
 
 
 _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
