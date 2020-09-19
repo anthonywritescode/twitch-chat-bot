@@ -24,6 +24,11 @@ MSG_RE = re.compile(
 COMMAND_RE = re.compile(r'^(?P<cmd>!\w+)')
 
 
+def get_fake_msg(config: Config, msg: str) -> str:
+    info = '@color=;display-name=username;badges='
+    return f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
+
+
 # TODO: move this and/or delete this
 def esc(s: str) -> str:
     return s.replace('{', '{{').replace('}', '}}')
@@ -58,11 +63,12 @@ HANDLERS: List[Tuple[Pattern[str], Callback]] = []
 COMMANDS: Dict[str, Callback] = {}
 POINTS_HANDLERS: Dict[str, Callback] = {}
 SECRET_CMDS: Set[str] = set()
+PERIODIC_HANDLERS: List[Tuple[int, Callback]] = []
 
 
 def handler(
-    *prefixes: str,
-    flags: re.RegexFlag = re.U,
+        *prefixes: str,
+        flags: re.RegexFlag = re.U,
 ) -> Callable[[Callback], Callback]:
     def handler_decorator(func: Callback) -> Callback:
         for prefix in prefixes:
@@ -111,6 +117,13 @@ def add_alias(cmd: str, *aliases: str) -> None:
     for alias in aliases:
         COMMANDS[alias] = COMMANDS[cmd]
         SECRET_CMDS.add(alias)
+
+
+def periodic_handler(*, minutes: int) -> Callable[[Callback], Callback]:
+    def periodic_handler_decorator(func: Callback) -> Callback:
+        PERIODIC_HANDLERS.append((minutes, func))
+        return func
+    return periodic_handler_decorator
 
 
 def get_handler(msg: str) -> Optional[Tuple[Callback, Match[str]]]:

@@ -20,8 +20,10 @@ from typing import Tuple
 
 from bot.config import Config
 from bot.data import Callback
+from bot.data import get_fake_msg
 from bot.data import get_handler
 from bot.data import MSG_RE
+from bot.data import PERIODIC_HANDLERS
 from bot.data import PRIVMSG
 from bot.permissions import parse_badge_info
 
@@ -178,6 +180,28 @@ async def handle_response(
         await send(writer, res, quiet=quiet)
 
 
+def _start_periodic(
+        config: Config,
+        writer: asyncio.StreamWriter,
+        log_writer: LogWriter,
+        *,
+        quiet: bool,
+) -> None:
+    async def periodic(minutes: int, func: Callback) -> None:
+        line = get_fake_msg(config, 'dummy message')
+        match = MSG_RE.match(line)
+        assert match is not None
+        while True:
+            await asyncio.sleep(minutes * 60)
+            await handle_response(
+                config, match, func, writer, log_writer, quiet=quiet,
+            )
+
+    loop = asyncio.get_event_loop()
+    for minutes, func in PERIODIC_HANDLERS:
+        loop.create_task(periodic(minutes, func))
+
+
 def get_printed_input(msg: str) -> Optional[str]:
     msg_match = MSG_RE.match(msg)
     if msg_match:
@@ -231,6 +255,8 @@ async def amain(config: Config, *, quiet: bool) -> None:
     await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
     await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
 
+    _start_periodic(config, writer, log_writer, quiet=quiet)
+
     while not writer.is_closing():
         data = await recv(reader, quiet=quiet)
         if not data:
@@ -253,8 +279,7 @@ async def amain(config: Config, *, quiet: bool) -> None:
 
 
 async def chat_message_test(config: Config, msg: str) -> None:
-    info = '@color=;display-name=username;badges='
-    line = f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
+    line = get_fake_msg(config, msg)
 
     printed_input = get_printed_input(line)
     assert printed_input is not None
