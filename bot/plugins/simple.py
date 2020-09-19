@@ -8,6 +8,7 @@ from bot.data import MessageResponse
 
 
 _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
+    ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
     (
         '!bot',
         'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
