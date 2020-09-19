@@ -90,7 +90,16 @@ for _cmd, _msg in _TEXT_COMMANDS:
 
 _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ('!distro', ('!os',)),
-    ('!editor', ('!babi', '!nano', '!vim', '!emacs', '!vscode')),
+    (
+        '!editor', (
+            '!babi',
+            '!nano',
+            '!vim',
+            '!emacs',
+            '!vscode',
+            '!wheredobabiscomefrom',
+        ),
+    ),
     ('!emotes', ('!emoji', '!emote')),
 )
 for _alias_name, _aliases in _ALIASES:
