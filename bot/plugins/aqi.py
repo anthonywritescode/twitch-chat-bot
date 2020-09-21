@@ -12,7 +12,7 @@ ZIP_CODE_RE = re.compile(r'^\d{5}$', re.ASCII)
 
 
 @command('!aqi')
-async def cmd_aq(config: Config, match: Match[str]) -> str:
+async def cmd_aqi(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
     if rest:
         zip_code = rest.split()[0]
