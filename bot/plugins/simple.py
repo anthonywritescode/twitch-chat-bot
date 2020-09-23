@@ -16,7 +16,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!discord',
-        'We do have Dicsord, you are welcome to join: '
+        'We do have Discord, you are welcome to join: '
         'https://discord.gg/xDKGPaW',
     ),
     (
@@ -113,7 +113,7 @@ _SECRET_COMMANDS = (
         'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
         'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
     ),
-    ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
+    # ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
         '!overlay',
         'https://github.com/anthonywritescode/data-url-twitch-overlays',
@@ -133,19 +133,19 @@ _SECRET_COMMANDS = (
         '!question',
         '"udp your questions, don\'t tcp your questions" - marsha_socks',
     ),
-    (
-        '!rebase',
-        'https://clips.twitch.tv/HonestCrowdedGalagoStoneLightning-khp2n3Fqvo0Wdpno',  # noqa: E501
-    ),
+    # (
+    #     '!rebase',
+    #     'https://clips.twitch.tv/HonestCrowdedGalagoStoneLightning-khp2n3Fqvo0Wdpno',  # noqa: E501
+    # ),
     (
         '!schedule',
         'Monday evenings and Saturday at noon (EST) - '
-        'Check !twitter and !dicsord for more, or see the google calendar '
+        'Check !twitter and !discord for more, or see the google calendar '
         'link below the stream video.',
     ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
-    ('!water', 'DRINK WATER, BITCH'),
+    ('!water', 'DRINK WATER, ANTHONY'),
     (
         '!wm',
         'the anthony window manager '
