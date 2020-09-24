@@ -32,6 +32,7 @@ async def givewawaystart(config: Config, match: Match[str]) -> Optional[str]:
 
     async with aiosqlite.connect('db.db') as db:
         await ensure_giveaway_tables_exist(db)
+
         await db.execute('INSERT OR REPLACE INTO giveaway VALUES (1)')
         await db.commit()
 
@@ -47,6 +48,8 @@ async def giveaway(config: Config, match: Match[str]) -> str:
         return format_msg(match, 'not a subscriber! subscribe to enter')
 
     async with aiosqlite.connect('db.db') as db:
+        await ensure_giveaway_tables_exist(db)
+
         async with db.execute('SELECT active FROM giveaway') as cursor:
             row = await cursor.fetchone()
             if row is None or not row[0]:
