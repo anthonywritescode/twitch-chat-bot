@@ -22,3 +22,10 @@ def is_moderator(match: Match[str]) -> bool:
     info = parse_badge_info(match['info'])
     badges = info['badges'].split(',')
     return any(badge.startswith('moderator/') for badge in badges)
+
+
+def is_subscriber(match: Match[str]) -> bool:
+    info = parse_badge_info(match['info'])
+    badges = info['badges'].split(',')
+    possible = ('founder/', 'subscriber/')
+    return any(badge.startswith(possible) for badge in badges)
