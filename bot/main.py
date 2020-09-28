@@ -7,12 +7,12 @@ import datetime
 import functools
 import hashlib
 import json
-import os.path
 import re
 import signal
 import struct
 import sys
 import traceback
+from pathlib import Path
 from typing import Any
 from typing import Match
 from typing import Optional
@@ -137,8 +137,9 @@ class LogWriter:
     def write_message(self, msg: str) -> None:
         print(msg)
         uncolored_msg = UNCOLOR_RE.sub('', msg)
-        os.makedirs('logs', exist_ok=True)
-        log = os.path.join('logs', f'{self.date}.log')
+        logs_path = Path('logs')
+        logs_path.mkdir(exist_ok=True)
+        log = logs_path / f'{self.date}.log'
         with open(log, 'a+', encoding='UTF-8') as f:
             f.write(f'{uncolored_msg}\n')
 

@@ -1,8 +1,8 @@
 import collections
 import datetime
 import functools
-import os
 import re
+from pathlib import Path
 from typing import Counter
 from typing import Mapping
 from typing import Match
@@ -40,8 +40,9 @@ def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
 
 def _chat_rank_counts(reg: Pattern[str]) -> Counter[str]:
     total: Counter[str] = collections.Counter()
-    for filename in os.listdir('logs'):
-        full_filename = os.path.join('logs', filename)
+    logs_path = Path('logs')
+    for filename in logs_path.iterdir():
+        full_filename = logs_path / filename
         if filename != f'{datetime.date.today()}.log':
             total.update(_counts_per_file(full_filename, reg))
         else:
@@ -63,8 +64,7 @@ def _rank(username: str, reg: Pattern[str]) -> Optional[Tuple[int, int]]:
 
 @functools.lru_cache(maxsize=1)
 def _log_start_date() -> str:
-    logs_start = min(os.listdir('logs'))
-    logs_start, _, _ = logs_start.partition('.')
+    logs_start = min(Path('logs').iterdir()).stem
     return logs_start
 
 

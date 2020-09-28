@@ -1,6 +1,7 @@
 import asyncio.subprocess
 import os
 import tempfile
+from pathlib import Path
 from typing import Match
 
 from bot.config import Config
@@ -32,7 +33,7 @@ async def cmd_videoidea(config: Config, match: Match[str]) -> str:
             'clone', '--depth=1', '--quiet',
             'git@github.com:asottile/scratch.wiki', '.',
         )
-        ideas_file = os.path.join(tmpdir, 'anthony-explains-ideas.md')
+        ideas_file = Path(tmpdir) / 'anthony-explains-ideas.md'
         with open(ideas_file, 'rb+') as f:
             f.seek(-1, os.SEEK_END)
             c = f.read()
