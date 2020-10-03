@@ -18,7 +18,7 @@ async def _check_call(*cmd: str) -> None:
         raise ValueError(cmd, proc.returncode)
 
 
-@command('!wideoidea', '!videoidea')
+@command('!wideoidea', '!videoidea', secret=True)
 async def cmd_videoidea(config: Config, match: Match[str]) -> str:
     if not is_moderator(match) and match['user'] != match['channel']:
         return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
