@@ -39,11 +39,23 @@ async def get_motd(db: aiosqlite.Connection) -> str:
             return esc(row[0])
 
 
+async def msg_count(db: aiosqlite.Connection, msg: str) -> int:
+    await ensure_motd_table_exists(db)
+    query = 'SELECT COUNT(1) FROM motd WHERE msg = ?'
+    async with db.execute(query, (msg,)) as cursor:
+        ret, = await cursor.fetchone()
+        return ret
+
+
 @channel_points_handler('a2fa47a2-851e-40db-b909-df001801cade')
 async def cmd_set_motd(config: Config, match: Match[str]) -> str:
     async with aiosqlite.connect('db.db') as db:
         await set_motd(db, match['user'], match['msg'])
-    return format_msg(match, 'motd updated!  thanks for spending points!')
+        msg = 'motd updated!  thanks for spending points!'
+        if match['msg'] == '!motd':
+            motd_count = await msg_count(db, match['msg'])
+            msg = f'{msg}  it has been set to !motd {motd_count} times!'
+    return format_msg(match, msg)
 
 
 @command('!motd')
