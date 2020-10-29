@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/asottile/asottile/_apis/build/status/anthonywritescode.twitch-chat-bot?branchName=master)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=55&branchName=master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/anthonywritescode/twitch-chat-bot/master.svg)](https://results.pre-commit.ci/latest/github/anthonywritescode/twitch-chat-bot/master)
 
 twitch-chat-bot
 ===============
