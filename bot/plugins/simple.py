@@ -76,6 +76,10 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         'highlight ini headers: '
         'https://github.com/asottile/babi#setting-up-syntax-highlighting',
     ),
+    (
+        '!question',
+        '"udp your questions, don\'t tcp your questions" - Makayla_Fox',
+    ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
     ('!youtube', 'https://youtube.com/anthonywritescode'),
@@ -104,6 +108,7 @@ _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
         ),
     ),
     ('!emotes', ('!emoji', '!emote')),
+    ('!question', ('!questions',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
