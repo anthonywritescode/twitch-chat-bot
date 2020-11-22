@@ -1,13 +1,17 @@
 import collections
 import datetime
 import functools
+import json
 import os
 import re
+import urllib.request
 from typing import Counter
+from typing import List
 from typing import Mapping
 from typing import Match
 from typing import Optional
 from typing import Pattern
+from typing import Sequence
 from typing import Tuple
 
 from bot.config import Config
@@ -139,3 +143,94 @@ async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
         for rank, (user, n) in enumerate(total.most_common(5), start=1)
     )
     return format_msg(match, user_list)
+
+
+def lin_regr(x: Sequence[float], y: Sequence[float]) -> Tuple[float, float]:
+    sum_x = sum(x)
+    sum_xx = sum(xi * xi for xi in x)
+    sum_y = sum(y)
+    sum_xy = sum(xi * yi for xi, yi in zip(x, y))
+    b = (sum_y * sum_xx - sum_x * sum_xy) / (len(x) * sum_xx - sum_x * sum_x)
+    a = (sum_xy - b * sum_x) / sum_xx
+    return a, b
+
+
+@command('!chatplot')
+async def cmd_chatplot(config: Config, match: Match[str]) -> str:
+    user = optional_user_arg(match).lower()
+
+    min_date = datetime.date.fromisoformat(_log_start_date())
+    x: List[int] = []
+    y = []
+
+    for filename in sorted(os.listdir('logs')):
+        if filename == f'{datetime.date.today()}.log':
+            continue
+
+        filename_date = datetime.date.fromisoformat(filename.split('.')[0])
+
+        full_filename = os.path.join('logs', filename)
+        counts = _counts_per_file(full_filename, CHAT_LOG_RE)
+        if x or counts[user]:
+            x.append((filename_date - min_date).days)
+            y.append(counts[user])
+
+    if len(x) < 2:
+        return format_msg(
+            match, f'sorry {esc(user)}, need at least 2 days of data',
+        )
+
+    m, c = lin_regr(x, y)
+
+    chart = {
+        'type': 'scatter',
+        'data': {
+            'datasets': [
+                {
+                    'label': 'chats',
+                    'data': [
+                        {'x': x_i, 'y': y_i}
+                        for x_i, y_i in zip(x, y)
+                        if y_i
+                    ],
+                },
+                {
+                    'label': 'trend',
+                    'type': 'line',
+                    'fill': False,
+                    'pointRadius': 0,
+                    'data': [
+                        {'x': x[0], 'y': m * x[0] + c},
+                        {'x': x[-1], 'y': m * x[-1] + c},
+                    ],
+                },
+            ],
+        },
+        'options': {
+            'scales': {'xAxes': [{'ticks': {'callback': 'CALLBACK'}}]},
+            'title': {
+                'display': True,
+                'text': f"{user}'s chat in twitch.tv/{config.channel}",
+            },
+        },
+    }
+
+    callback = (
+        'x=>{'
+        f'y=new Date({str(min_date)!r});'
+        'y.setDate(x+y.getDate());return y.toISOString().slice(0,10)'
+        '}'
+    )
+    data = json.dumps(chart, separators=(',', ':'))
+    data = data.replace('"CALLBACK"', callback)
+
+    post_data = {'chart': data}
+    request = urllib.request.Request(
+        'https://quickchart.io/chart/create',
+        method='POST',
+        data=json.dumps(post_data).encode(),
+        headers={'Content-Type': 'application/json'},
+    )
+    resp = urllib.request.urlopen(request)
+    contents = json.load(resp)
+    return format_msg(match, f'{esc(user)}: {contents["url"]}')
