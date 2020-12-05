@@ -14,13 +14,13 @@ from bot.permissions import parse_badge_info
 
 # TODO: maybe move this?
 PRIVMSG = 'PRIVMSG #{channel} : {msg}\r\n'
-COMMAND_PATTERN_RE = re.compile(r'!\w+')
+COMMAND_PATTERN_RE = re.compile(r'!+\w+')
 MSG_RE = re.compile(
     '^@(?P<info>[^ ]+) :(?P<user>[^!]+).* '
     'PRIVMSG #(?P<channel>[^ ]+) '
     ':(?P<msg>[^\r]+)',
 )
-COMMAND_RE = re.compile(r'^(?P<cmd>!\w+)')
+COMMAND_RE = re.compile(r'^(?P<cmd>!+\w+)')
 
 
 def get_fake_msg(config: Config, msg: str) -> str:
@@ -119,8 +119,10 @@ def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
                 return None
 
         cmd_match = COMMAND_RE.match(msg_match['msg'])
-        if cmd_match and cmd_match['cmd'].lower() in COMMANDS:
-            return COMMANDS[cmd_match['cmd'].lower()], msg_match
+        if cmd_match:
+            command = f'!{cmd_match["cmd"].lstrip("!").lower()}'
+            if command in COMMANDS:
+                return COMMANDS[command], msg_match
 
     for pattern, handler in HANDLERS:
         match = pattern.match(msg)
@@ -148,7 +150,7 @@ async def pong(config: Config, match: Match[str]) -> str:
 
 
 # make this always last so that help is implemented properly
-@handle_message(r'!\w')
+@handle_message(r'!+\w')
 async def cmd_help(config: Config, match: Match[str]) -> str:
     possible = [COMMAND_PATTERN_RE.search(reg.pattern) for reg, _ in HANDLERS]
     possible_cmds = {match[0] for match in possible if match}
