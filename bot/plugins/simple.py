@@ -59,7 +59,7 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
         '(contributed by PhillipWei): https://amzn.to/3jzmwh3 '
         'or '
         '(split) awcKeebL awcKeebR kinesis freestyle pro (cherry mx reds) '
-        'https://amzn.to/3jyN4PC (faq: https://youtu.be/DZgCUWf9DZM)',
+        'https://amzn.to/3jyN4PC (faq: https://youtu.be/DZgCUWf9DZM )',
     ),
     (
         '!keyboard2',
