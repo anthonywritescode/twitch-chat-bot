@@ -88,6 +88,11 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
+    (
+        '!wm',
+        'the anthony window manager '
+        'https://clips.twitch.tv/RefinedFunnyRavenFailFish',
+    ),
     ('!youtube', 'https://youtube.com/anthonywritescode'),
 )
 
