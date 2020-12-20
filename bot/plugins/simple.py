@@ -107,6 +107,7 @@ for _cmd, _msg in _TEXT_COMMANDS:
 
 _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ('!bluething', ('!blueball',)),
+    ('!discord', ('!dicsord',)),
     ('!distro', ('!os',)),
     (
         '!editor', (
