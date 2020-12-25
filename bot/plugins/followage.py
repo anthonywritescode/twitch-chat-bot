@@ -6,7 +6,6 @@ from typing import Match
 from typing import Optional
 
 import aiohttp
-import async_lru
 import humanize
 
 from bot.config import Config
@@ -14,25 +13,7 @@ from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
 from bot.permissions import optional_user_arg
-
-
-@async_lru.alru_cache(maxsize=32)
-async def fetch_twitch_user(
-        user: str,
-        *,
-        oauth_token: str,
-        client_id: str
-) -> Optional[List[Dict[str, Any]]]:
-    url = 'https://api.twitch.tv/helix/users'
-    params = [('login', user)]
-    headers = {
-        'Authorization': f'Bearer {oauth_token}',
-        'Client-ID': client_id,
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params, headers=headers) as resp:
-            json_resp = await resp.json()
-            return json_resp.get('data')
+from bot.twitch_api import fetch_twitch_user
 
 
 async def fetch_twitch_user_follows(
@@ -64,22 +45,20 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
     username = optional_user_arg(match)
     token = config.oauth_token.split(':')[1]
 
-    fetched_users = await fetch_twitch_user(
+    me = await fetch_twitch_user(
         config.channel,
         oauth_token=token,
         client_id=config.client_id,
     )
-    assert fetched_users is not None
-    me, = fetched_users
+    assert me is not None
 
-    fetched_users = await fetch_twitch_user(
+    target_user = await fetch_twitch_user(
         username,
         oauth_token=token,
         client_id=config.client_id,
     )
-    if not fetched_users:
+    if target_user is None:
         return format_msg(match, f'user {esc(username)} not found!')
-    target_user, = fetched_users
 
     # if streamer wants to check the followage to their own channel
     if me['id'] == target_user['id']:
