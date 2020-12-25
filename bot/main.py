@@ -45,30 +45,6 @@ def _parse_color(s: str) -> Tuple[int, int, int]:
     return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
 
 
-def _badges(badges: str) -> str:
-    ret = ''
-    for s, reg in (
-        ('\033[48;2;000;000;000m⚙\033[m', re.compile('^staff/')),
-        ('\033[48;2;000;173;003m⚔\033[m', re.compile('^moderator/')),
-        ('\033[48;2;224;005;185m♦\033[m', re.compile('^vip/')),
-        ('\033[48;2;233;025;022m☞\033[m', re.compile('^broadcaster/')),
-        ('\033[48;2;130;005;180m★\033[m', re.compile('^founder/')),
-        ('\033[48;2;130;005;180m★\033[m', re.compile('^subscriber/')),
-        ('\033[48;2;000;160;214m♕\033[m', re.compile('^premium/')),
-        ('\033[48;2;089;057;154m♕\033[m', re.compile('^turbo/')),
-        ('\033[48;2;230;186;072m◘\033[m', re.compile('^sub-gift-leader/')),
-        ('\033[48;2;088;226;193m◘\033[m', re.compile('^sub-gifter/')),
-        ('\033[48;2;183;125;029m♕\033[m', re.compile('^hype-train/')),
-        ('\033[48;2;203;200;208m▴\033[m', re.compile('^bits/')),
-        ('\033[48;2;230;186;072m♦\033[m', re.compile('^bits-leader/')),
-        ('\033[48;2;145;070;255m☑\033[m', re.compile('^partner/')),
-    ):
-        for badge in badges.split(','):
-            if reg.match(badge):
-                ret += s
-    return ret
-
-
 def _gen_color(name: str) -> Tuple[int, int, int]:
     h = hashlib.sha256(name.encode())
     n, = struct.unpack('Q', h.digest()[:8])
