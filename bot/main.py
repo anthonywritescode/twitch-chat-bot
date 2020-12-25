@@ -25,6 +25,9 @@ from bot.data import get_handler
 from bot.data import MSG_RE
 from bot.data import PERIODIC_HANDLERS
 from bot.data import PRIVMSG
+from bot.emote import download_all_emotes
+from bot.emote import parse_emote_info
+from bot.emote import replace_emotes
 from bot.permissions import parse_badge_info
 
 # TODO: allow host / port to be configurable
@@ -135,7 +138,6 @@ class LogWriter:
         self.date = str(datetime.date.today())
 
     def write_message(self, msg: str) -> None:
-        print(msg)
         uncolored_msg = UNCOLOR_RE.sub('', msg)
         os.makedirs('logs', exist_ok=True)
         log = os.path.join('logs', f'{self.date}.log')
@@ -176,6 +178,7 @@ async def handle_response(
     if res is not None:
         printed_output = get_printed_output(config, res)
         if printed_output is not None:
+            print(printed_output)
             log_writer.write_message(printed_output)
         await send(writer, res, quiet=quiet)
 
@@ -202,7 +205,11 @@ def _start_periodic(
         loop.create_task(periodic(minutes, func))
 
 
-def get_printed_input(msg: str) -> Optional[str]:
+async def get_printed_input(
+        msg: str,
+        *,
+        emotes: bool,
+) -> Optional[Tuple[str, str]]:
     msg_match = MSG_RE.match(msg)
     if msg_match:
         info = parse_badge_info(msg_match['info'])
@@ -213,32 +220,53 @@ def get_printed_input(msg: str) -> Optional[str]:
 
         color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
 
-        if msg_match['msg'].startswith('\x01ACTION '):
-            return (
+        msg_s = msg_match['msg']
+        is_action = msg_s.startswith('\x01ACTION ')
+        if is_action:
+            msg_s = msg_s[8:-1]
+
+        if emotes:
+            emote_info = parse_emote_info(info['emotes'])
+            await download_all_emotes(emote_info)
+            msg_s_emotes = replace_emotes(msg_s, emote_info)
+        else:
+            msg_s_emotes = msg_s
+
+        if is_action:
+            fmt = (
                 f'{dt_str()}'
                 f'{_badges(info["badges"])}'
                 f'{color_start}\033[3m * {info["display-name"]}\033[22m '
-                f'{msg_match["msg"][8:-1]}\033[m'
+                f'{{msg}}\033[m'
             )
-        else:
-            if info.get('msg-id') == 'highlighted-message':
-                msg_s = f'\033[48;2;117;094;188m{msg_match["msg"]}\033[m'
-            elif 'custom-reward-id' in info:
-                msg_s = f'\033[48;2;029;091;130m{msg_match["msg"]}\033[m'
-            else:
-                msg_s = msg_match['msg']
-
-            return (
+        elif info.get('msg-id') == 'highlighted-message':
+            fmt = (
                 f'{dt_str()}'
                 f'{_badges(info["badges"])}'
                 f'<{color_start}{info["display-name"]}\033[m> '
-                f'{msg_s}'
+                f'\033[48;2;117;094;188m{{msg}}\033[m'
             )
+        elif 'custom-reward-id' in info:
+            fmt = (
+                f'{dt_str()}'
+                f'{_badges(info["badges"])}'
+                f'<{color_start}{info["display-name"]}\033[m> '
+                f'\033[48;2;029;091;130m{{msg}}\033[m'
+            )
+        else:
+            fmt = (
+                f'{dt_str()}'
+                f'{_badges(info["badges"])}'
+                f'<{color_start}{info["display-name"]}\033[m> '
+                f'{{msg}}'
+            )
+
+        return fmt.format(msg=msg_s_emotes), fmt.format(msg=msg_s)
 
     return None
 
 
-async def amain(config: Config, *, quiet: bool) -> None:
+async def amain(config: Config, *, quiet: bool, emotes: bool) -> None:
     log_writer = LogWriter()
     reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
@@ -263,9 +291,11 @@ async def amain(config: Config, *, quiet: bool) -> None:
             return
         msg = data.decode('UTF-8', errors='backslashreplace')
 
-        printed_input = get_printed_input(msg)
-        if printed_input is not None:
-            log_writer.write_message(printed_input)
+        input_ret = await get_printed_input(msg, emotes=emotes)
+        if input_ret is not None:
+            to_print, to_log = input_ret
+            print(to_print)
+            log_writer.write_message(to_log)
 
         maybe_handler_match = get_handler(msg)
         if maybe_handler_match is not None:
@@ -281,9 +311,10 @@ async def amain(config: Config, *, quiet: bool) -> None:
 async def chat_message_test(config: Config, msg: str) -> None:
     line = get_fake_msg(config, msg)
 
-    printed_input = get_printed_input(line)
-    assert printed_input is not None
-    print(printed_input)
+    input_ret = await get_printed_input(line, emotes=False)
+    assert input_ret is not None
+    to_print, _ = input_ret
+    print(to_print)
 
     maybe_handler_match = get_handler(line)
     if maybe_handler_match is not None:
@@ -305,8 +336,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.json')
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--emotes', action='store_true')
     parser.add_argument('--test')
     args = parser.parse_args()
+
+    quiet = not args.verbose
 
     with open(args.config) as f:
         config = Config(**json.load(f))
@@ -315,7 +349,7 @@ def main() -> int:
         asyncio.run(chat_message_test(config, args.test))
     else:
         with contextlib.suppress(KeyboardInterrupt):
-            asyncio.run(amain(config, quiet=not args.verbose))
+            asyncio.run(amain(config, quiet=quiet, emotes=args.emotes))
 
     return 0
 
