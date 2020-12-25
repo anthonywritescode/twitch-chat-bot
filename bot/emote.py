@@ -1,13 +1,11 @@
 import asyncio
-import contextlib
 import os.path
-import tempfile
-from typing import Generator
-from typing import IO
 from typing import List
 from typing import NamedTuple
 
 import aiohttp
+
+from bot.util import atomic_open
 
 EMOTE_CACHE = '.emote_cache'
 
@@ -23,11 +21,10 @@ class EmotePosition(NamedTuple):
 
 
 def parse_emote_info(s: str) -> List[EmotePosition]:
-    ret: List[EmotePosition] = []
-
     if not s:
-        return ret
+        return []
 
+    ret = []
     for part in s.split('/'):
         emote, _, positions = part.partition(':')
         for pos in positions.split(','):
@@ -37,22 +34,10 @@ def parse_emote_info(s: str) -> List[EmotePosition]:
     return ret
 
 
-@contextlib.contextmanager
-def _atomic_open(filename: str) -> Generator[IO[bytes], None, None]:
-    fd, fname = tempfile.mkstemp(dir=os.path.dirname(filename))
-    try:
-        with open(fd, 'wb') as f:
-            yield f
-        os.replace(fname, filename)
-    except BaseException:
-        os.remove(fname)
-        raise
-
-
-async def _ensure_downloaded(emote: str) -> str:
+async def _ensure_downloaded(emote: str) -> None:
     emote_path = _emote_path(emote)
     if os.path.exists(emote_path):
-        return emote_path
+        return
 
     os.makedirs(EMOTE_CACHE, exist_ok=True)
 
@@ -61,9 +46,8 @@ async def _ensure_downloaded(emote: str) -> str:
         async with session.get(dl_url) as resp:
             data = await resp.read()
 
-    with _atomic_open(emote_path) as f:
+    with atomic_open(emote_path) as f:
         f.write(data)
-    return emote_path
 
 
 async def download_all_emotes(emotes: List[EmotePosition]) -> None:

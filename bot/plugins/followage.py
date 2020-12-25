@@ -43,18 +43,17 @@ async def fetch_twitch_user_follows(
 @command('!followage')
 async def cmd_followage(config: Config, match: Match[str]) -> str:
     username = optional_user_arg(match)
-    token = config.oauth_token.split(':')[1]
 
     me = await fetch_twitch_user(
         config.channel,
-        oauth_token=token,
+        oauth_token=config.oauth_token_token,
         client_id=config.client_id,
     )
     assert me is not None
 
     target_user = await fetch_twitch_user(
         username,
-        oauth_token=token,
+        oauth_token=config.oauth_token_token,
         client_id=config.client_id,
     )
     if target_user is None:
@@ -71,7 +70,7 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
     follow_age_results = await fetch_twitch_user_follows(
         from_id=target_user['id'],
         to_id=me['id'],
-        oauth_token=token,
+        oauth_token=config.oauth_token_token,
         client_id=config.client_id,
     )
     if not follow_age_results:

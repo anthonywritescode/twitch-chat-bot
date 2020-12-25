@@ -18,6 +18,10 @@ from typing import Match
 from typing import Optional
 from typing import Tuple
 
+from bot.badges import badges_images
+from bot.badges import badges_plain_text
+from bot.badges import download_all_badges
+from bot.badges import parse_badges
 from bot.config import Config
 from bot.data import Callback
 from bot.data import get_fake_msg
@@ -206,9 +210,10 @@ def _start_periodic(
 
 
 async def get_printed_input(
+        config: Config,
         msg: str,
         *,
-        emotes: bool,
+        images: bool,
 ) -> Optional[Tuple[str, str]]:
     msg_match = MSG_RE.match(msg)
     if msg_match:
@@ -225,48 +230,63 @@ async def get_printed_input(
         if is_action:
             msg_s = msg_s[8:-1]
 
-        if emotes:
+        badges_s = badges_plain_text(info['badges'])
+        if images:
+            badges = parse_badges(info['badges'])
+            await download_all_badges(
+                badges,
+                channel=config.channel,
+                oauth_token=config.oauth_token_token,
+                client_id=config.client_id,
+            )
+            badges_s_images = badges_images(badges)
+        else:
+            badges_s_images = badges_s
+
+        if images:
             emote_info = parse_emote_info(info['emotes'])
             await download_all_emotes(emote_info)
-            msg_s_emotes = replace_emotes(msg_s, emote_info)
+            msg_s_images = replace_emotes(msg_s, emote_info)
         else:
-            msg_s_emotes = msg_s
+            msg_s_images = msg_s
 
         if is_action:
             fmt = (
                 f'{dt_str()}'
-                f'{_badges(info["badges"])}'
+                f'{{badges}}'
                 f'{color_start}\033[3m * {info["display-name"]}\033[22m '
                 f'{{msg}}\033[m'
             )
         elif info.get('msg-id') == 'highlighted-message':
             fmt = (
                 f'{dt_str()}'
-                f'{_badges(info["badges"])}'
+                f'{{badges}}'
                 f'<{color_start}{info["display-name"]}\033[m> '
                 f'\033[48;2;117;094;188m{{msg}}\033[m'
             )
         elif 'custom-reward-id' in info:
             fmt = (
                 f'{dt_str()}'
-                f'{_badges(info["badges"])}'
+                f'{{badges}}'
                 f'<{color_start}{info["display-name"]}\033[m> '
                 f'\033[48;2;029;091;130m{{msg}}\033[m'
             )
         else:
             fmt = (
                 f'{dt_str()}'
-                f'{_badges(info["badges"])}'
+                f'{{badges}}'
                 f'<{color_start}{info["display-name"]}\033[m> '
                 f'{{msg}}'
             )
 
-        return fmt.format(msg=msg_s_emotes), fmt.format(msg=msg_s)
+        to_print = fmt.format(badges=badges_s_images, msg=msg_s_images)
+        to_log = fmt.format(badges=badges_s, msg=msg_s)
+        return to_print, to_log
 
     return None
 
 
-async def amain(config: Config, *, quiet: bool, emotes: bool) -> None:
+async def amain(config: Config, *, quiet: bool, images: bool) -> None:
     log_writer = LogWriter()
     reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
@@ -291,7 +311,7 @@ async def amain(config: Config, *, quiet: bool, emotes: bool) -> None:
             return
         msg = data.decode('UTF-8', errors='backslashreplace')
 
-        input_ret = await get_printed_input(msg, emotes=emotes)
+        input_ret = await get_printed_input(config, msg, images=images)
         if input_ret is not None:
             to_print, to_log = input_ret
             print(to_print)
@@ -311,7 +331,7 @@ async def amain(config: Config, *, quiet: bool, emotes: bool) -> None:
 async def chat_message_test(config: Config, msg: str) -> None:
     line = get_fake_msg(config, msg)
 
-    input_ret = await get_printed_input(line, emotes=False)
+    input_ret = await get_printed_input(config, line, images=False)
     assert input_ret is not None
     to_print, _ = input_ret
     print(to_print)
@@ -336,7 +356,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.json')
     parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('--emotes', action='store_true')
+    parser.add_argument('--images', action='store_true')
     parser.add_argument('--test')
     args = parser.parse_args()
 
@@ -349,7 +369,7 @@ def main() -> int:
         asyncio.run(chat_message_test(config, args.test))
     else:
         with contextlib.suppress(KeyboardInterrupt):
-            asyncio.run(amain(config, quiet=quiet, emotes=args.emotes))
+            asyncio.run(amain(config, quiet=quiet, images=args.images))
 
     return 0
 

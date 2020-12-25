@@ -11,6 +11,11 @@ class Config(NamedTuple):
     youtube_playlists: Dict[str, Dict[str, str]]
     airnow_api_key: str
 
+    @property
+    def oauth_token_token(self) -> str:
+        _, token = self.oauth_token.split(':', 1)
+        return token
+
     def __repr__(self) -> str:
         return (
             f'{type(self).__name__}('

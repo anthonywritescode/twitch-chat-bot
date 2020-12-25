@@ -13,7 +13,7 @@ from bot.util import seconds_to_readable
 async def cmd_uptime(config: Config, match: Match[str]) -> str:
     url = f'https://api.twitch.tv/helix/streams?user_login={config.channel}'
     headers = {
-        'Authorization': f'Bearer {config.oauth_token.split(":")[1]}',
+        'Authorization': f'Bearer {config.oauth_token_token}',
         'Client-ID': config.client_id,
     }
     async with aiohttp.ClientSession() as session:
