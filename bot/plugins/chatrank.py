@@ -207,7 +207,10 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
             ],
         },
         'options': {
-            'scales': {'xAxes': [{'ticks': {'callback': 'CALLBACK'}}]},
+            'scales': {
+                'xAxes': [{'ticks': {'callback': 'CALLBACK'}}],
+                'yAxes': [{'ticks': {'beginAtZero': True, 'min': 0}}],
+            },
             'title': {
                 'display': True,
                 'text': f"{user}'s chat in twitch.tv/{config.channel}",
