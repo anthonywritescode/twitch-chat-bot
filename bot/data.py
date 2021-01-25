@@ -132,12 +132,15 @@ def get_handler(msg: str) -> Optional[Tuple[Callback, Match[str]]]:
     return None
 
 
-# trigger an import of all of the plugins
-# https://github.com/python/mypy/issues/1422
-plugins_path: str = plugins.__path__  # type: ignore
-mod_infos = pkgutil.walk_packages(plugins_path, f'{plugins.__name__}.')
-for _, name, _ in mod_infos:
-    __import__(name, fromlist=['_trash'])
+def _import_plugins() -> None:
+    # https://github.com/python/mypy/issues/1422
+    plugins_path: str = plugins.__path__  # type: ignore
+    mod_infos = pkgutil.walk_packages(plugins_path, f'{plugins.__name__}.')
+    for _, name, _ in mod_infos:
+        __import__(name, fromlist=['_trash'])
+
+
+_import_plugins()
 
 
 @handler('^PING (.*)')

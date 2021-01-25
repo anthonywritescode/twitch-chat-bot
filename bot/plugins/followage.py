@@ -21,7 +21,7 @@ async def fetch_twitch_user_follows(
         from_id: int,
         to_id: int,
         oauth_token: str,
-        client_id: str
+        client_id: str,
 ) -> Optional[List[Dict[str, Any]]]:
     url = 'https://api.twitch.tv/helix/users/follows'
     params = [('from_id', from_id), ('to_id', to_id)]
