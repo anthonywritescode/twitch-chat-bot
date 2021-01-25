@@ -11,7 +11,7 @@ async def fetch_twitch_user(
         username: str,
         *,
         oauth_token: str,
-        client_id: str
+        client_id: str,
 ) -> Optional[Dict[str, Any]]:
     url = f'https://api.twitch.tv/helix/users?login={username}'
     headers = {

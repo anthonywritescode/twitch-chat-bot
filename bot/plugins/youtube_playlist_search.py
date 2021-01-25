@@ -85,7 +85,7 @@ async def _populate_playlist(playlist_id: str, *, api_key: str) -> None:
 async def _search_playlist(
         db: aiosqlite.Connection,
         playlist_id: str,
-        search_terms: str
+        search_terms: str,
 ) -> List[YouTubeVideo]:
     query = (
         'SELECT video_id, title, playlist_id '
