@@ -53,6 +53,11 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
+        '!job',
+        'I will be starting as a Staff Software Engineer at Stripe in '
+        'February',
+    ),
+    (
         '!keyboard',
         'either '
         '(normal) code v3 87-key (cherry mx clears) '
@@ -120,6 +125,7 @@ _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
         ),
     ),
     ('!emotes', ('!emoji', '!emote')),
+    ('!job', ('!jorb',)),
     ('!question', ('!questions',)),
 )
 for _alias_name, _aliases in _ALIASES:
