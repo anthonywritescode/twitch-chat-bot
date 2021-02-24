@@ -54,8 +54,7 @@ _TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!job',
-        'I will be starting as a Staff Software Engineer at Stripe in '
-        'February',
+        'I am a Staff Software Engineer at Stripe working on Python Infra',
     ),
     (
         '!keyboard',
