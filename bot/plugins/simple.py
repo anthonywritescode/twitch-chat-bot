@@ -125,6 +125,7 @@ _ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ),
     ('!emotes', ('!emoji', '!emote')),
     ('!job', ('!jorb',)),
+    ('!keyboard', ('!keyboard1',)),
     ('!question', ('!questions',)),
 )
 for _alias_name, _aliases in _ALIASES:
