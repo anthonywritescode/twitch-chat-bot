@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import asyncio
 import os.path
-from typing import List
 from typing import NamedTuple
 
 import aiohttp
@@ -20,7 +21,7 @@ class EmotePosition(NamedTuple):
     emote: str
 
 
-def parse_emote_info(s: str) -> List[EmotePosition]:
+def parse_emote_info(s: str) -> list[EmotePosition]:
     if not s:
         return []
 
@@ -50,13 +51,13 @@ async def _ensure_downloaded(emote: str) -> None:
         f.write(data)
 
 
-async def download_all_emotes(emotes: List[EmotePosition]) -> None:
+async def download_all_emotes(emotes: list[EmotePosition]) -> None:
     unique_emotes = {emote.emote for emote in emotes}
     futures = [_ensure_downloaded(emote) for emote in unique_emotes]
     await asyncio.gather(*futures)
 
 
-def replace_emotes(msg: str, emotes: List[EmotePosition]) -> str:
+def replace_emotes(msg: str, emotes: list[EmotePosition]) -> str:
     parts = []
     pos = 0
     for emote in emotes:

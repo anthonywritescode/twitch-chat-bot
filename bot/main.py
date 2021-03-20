@@ -15,8 +15,6 @@ import sys
 import traceback
 from typing import Any
 from typing import Match
-from typing import Optional
-from typing import Tuple
 
 from bot.badges import badges_images
 from bot.badges import badges_plain_text
@@ -41,11 +39,11 @@ PORT = 6697
 SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
 
 
-def _parse_color(s: str) -> Tuple[int, int, int]:
+def _parse_color(s: str) -> tuple[int, int, int]:
     return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
 
 
-def _gen_color(name: str) -> Tuple[int, int, int]:
+def _gen_color(name: str) -> tuple[int, int, int]:
     h = hashlib.sha256(name.encode())
     n, = struct.unpack('Q', h.digest()[:8])
     bits = [int(s) for s in bin(n)[2:]]
@@ -91,7 +89,7 @@ def dt_str() -> str:
 def _shutdown(
         writer: asyncio.StreamWriter,
         loop: asyncio.AbstractEventLoop,
-        shutdown_task: Optional[asyncio.Task[Any]] = None,
+        shutdown_task: asyncio.Task[Any] | None = None,
 ) -> None:
     print('bye!')
     ignored_tasks = set()
@@ -125,7 +123,7 @@ class LogWriter:
             f.write(f'{uncolored_msg}\n')
 
 
-def get_printed_output(config: Config, res: str) -> Optional[str]:
+def get_printed_output(config: Config, res: str) -> str | None:
     send_match = SEND_MSG_RE.match(res)
     if send_match:
         color = '\033[1m\033[3m\033[38;5;21m'
@@ -190,7 +188,7 @@ async def get_printed_input(
         msg: str,
         *,
         images: bool,
-) -> Optional[Tuple[str, str]]:
+) -> tuple[str, str] | None:
     msg_match = MSG_RE.match(msg)
     if msg_match:
         info = parse_badge_info(msg_match['info'])

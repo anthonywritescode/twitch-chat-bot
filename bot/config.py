@@ -1,4 +1,5 @@
-from typing import Dict
+from __future__ import annotations
+
 from typing import NamedTuple
 
 
@@ -8,7 +9,7 @@ class Config(NamedTuple):
     oauth_token: str
     client_id: str
     youtube_api_key: str
-    youtube_playlists: Dict[str, Dict[str, str]]
+    youtube_playlists: dict[str, dict[str, str]]
     airnow_api_key: str
 
     @property

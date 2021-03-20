@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 import datetime
 from typing import Any
-from typing import Dict
-from typing import List
 from typing import Match
-from typing import Optional
 
 import aiohttp
 import humanize
@@ -22,7 +21,7 @@ async def fetch_twitch_user_follows(
         to_id: int,
         oauth_token: str,
         client_id: str,
-) -> Optional[List[Dict[str, Any]]]:
+) -> list[dict[str, Any]] | None:
     url = 'https://api.twitch.tv/helix/users/follows'
     params = [('from_id', from_id), ('to_id', to_id)]
     headers = {

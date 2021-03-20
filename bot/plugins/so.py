@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import re
 from typing import Match
-from typing import Optional
 
 from bot.config import Config
 from bot.data import command
@@ -13,7 +14,7 @@ USERNAME_RE = re.compile(r'\w+')
 
 
 @command('!so', secret=True)
-async def cmd_shoutout(config: Config, match: Match[str]) -> Optional[str]:
+async def cmd_shoutout(config: Config, match: Match[str]) -> str | None:
     channel = optional_user_arg(match)
     user_match = USERNAME_RE.match(channel)
     if not is_moderator(match) and match['user'] != match['channel']:

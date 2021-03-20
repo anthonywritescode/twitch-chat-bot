@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Match
 
 from bot.config import Config

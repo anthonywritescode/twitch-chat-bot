@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import random
 from typing import Match
-from typing import Optional
 
 import aiosqlite
 
@@ -26,7 +27,7 @@ async def ensure_giveaway_tables_exist(db: aiosqlite.Connection) -> None:
 
 
 @command('!giveawaystart', secret=True)
-async def givewawaystart(config: Config, match: Match[str]) -> Optional[str]:
+async def givewawaystart(config: Config, match: Match[str]) -> str | None:
     if not is_moderator(match) and match['user'] != match['channel']:
         return None
 
@@ -64,7 +65,7 @@ async def giveaway(config: Config, match: Match[str]) -> str:
 
 
 @command('!giveawayend', secret=True)
-async def giveawayend(config: Config, match: Match[str]) -> Optional[str]:
+async def giveawayend(config: Config, match: Match[str]) -> str | None:
     if not is_moderator(match) and match['user'] != match['channel']:
         return None
 

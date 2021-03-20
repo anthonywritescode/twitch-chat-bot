@@ -1,4 +1,5 @@
-from typing import Dict
+from __future__ import annotations
+
 from typing import Match
 
 
@@ -10,7 +11,7 @@ def optional_user_arg(match: Match[str]) -> str:
         return match['user']
 
 
-def parse_badge_info(s: str) -> Dict[str, str]:
+def parse_badge_info(s: str) -> dict[str, str]:
     ret = {}
     for part in s.split(';'):
         k, v = part.split('=', 1)

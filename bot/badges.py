@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import asyncio
 import collections
 import os.path
 import re
-from typing import List
 from typing import Mapping
 from typing import NamedTuple
 
@@ -97,7 +98,7 @@ class Badge(NamedTuple):
         return os.path.abspath(os.path.join(BADGE_CACHE, fname))
 
 
-def parse_badges(badges: str) -> List[Badge]:
+def parse_badges(badges: str) -> list[Badge]:
     if not badges:
         return []
 
@@ -139,7 +140,7 @@ async def _download_badge(
 
 
 async def download_all_badges(
-        badges: List[Badge],
+        badges: list[Badge],
         *,
         channel: str,
         oauth_token: str,
@@ -157,7 +158,7 @@ async def download_all_badges(
     await asyncio.gather(*futures)
 
 
-def badges_images(badges: List[Badge]) -> str:
+def badges_images(badges: list[Badge]) -> str:
     return ''.join(
         f'\033}}ic#2;1;{badge.fs_path}\000'
         f'\033}}ib\000##\033}}ie\000'

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import functools
 from typing import Match
-from typing import Tuple
 
 from bot.config import Config
 from bot.data import add_alias
@@ -8,7 +9,7 @@ from bot.data import command
 from bot.data import format_msg
 
 
-_TEXT_COMMANDS: Tuple[Tuple[str, str], ...] = (
+_TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!aoc',
         'advent of code is a series of puzzles which come out daily as an '
@@ -109,7 +110,7 @@ for _cmd, _msg in _TEXT_COMMANDS:
     command(_cmd)(functools.partial(_generic_msg, msg=_msg))
 
 
-_ALIASES: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+_ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!bluething', ('!blueball',)),
     ('!discord', ('!dicsord',)),
     ('!distro', ('!os', '!windows')),

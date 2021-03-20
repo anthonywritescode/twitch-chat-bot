@@ -1,14 +1,12 @@
+from __future__ import annotations
+
 import pkgutil
 import re
 from typing import Awaitable
 from typing import Callable
-from typing import Dict
-from typing import List
 from typing import Match
 from typing import Optional
 from typing import Pattern
-from typing import Set
-from typing import Tuple
 
 from bot import plugins
 from bot.config import Config
@@ -42,11 +40,11 @@ def format_msg(match: Match[str], fmt: str) -> str:
 
 
 Callback = Callable[[Config, Match[str]], Awaitable[Optional[str]]]
-HANDLERS: List[Tuple[Pattern[str], Callback]] = []
-COMMANDS: Dict[str, Callback] = {}
-POINTS_HANDLERS: Dict[str, Callback] = {}
-SECRET_CMDS: Set[str] = set()
-PERIODIC_HANDLERS: List[Tuple[int, Callback]] = []
+HANDLERS: list[tuple[Pattern[str], Callback]] = []
+COMMANDS: dict[str, Callback] = {}
+POINTS_HANDLERS: dict[str, Callback] = {}
+SECRET_CMDS: set[str] = set()
+PERIODIC_HANDLERS: list[tuple[int, Callback]] = []
 
 
 def handler(
@@ -109,7 +107,7 @@ def periodic_handler(*, minutes: int) -> Callable[[Callback], Callback]:
     return periodic_handler_decorator
 
 
-def get_handler(msg: str) -> Optional[Tuple[Callback, Match[str]]]:
+def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
     msg_match = MSG_RE.match(msg)
     if msg_match:
         info = parse_badge_info(msg_match['info'])

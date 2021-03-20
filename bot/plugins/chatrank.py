@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections
 import datetime
 import functools
@@ -6,13 +8,10 @@ import os
 import re
 import urllib.request
 from typing import Counter
-from typing import List
 from typing import Mapping
 from typing import Match
-from typing import Optional
 from typing import Pattern
 from typing import Sequence
-from typing import Tuple
 
 from bot.config import Config
 from bot.data import command
@@ -54,7 +53,7 @@ def _chat_rank_counts(reg: Pattern[str]) -> Counter[str]:
     return total
 
 
-def _rank(username: str, reg: Pattern[str]) -> Optional[Tuple[int, int]]:
+def _rank(username: str, reg: Pattern[str]) -> tuple[int, int] | None:
     total = _chat_rank_counts(reg)
 
     username = username.lower()
@@ -145,7 +144,7 @@ async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
     return format_msg(match, user_list)
 
 
-def lin_regr(x: Sequence[float], y: Sequence[float]) -> Tuple[float, float]:
+def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
     sum_x = sum(x)
     sum_xx = sum(xi * xi for xi in x)
     sum_y = sum(y)
@@ -160,7 +159,7 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match).lower()
 
     min_date = datetime.date.fromisoformat(_log_start_date())
-    x: List[int] = []
+    x: list[int] = []
     y = []
 
     for filename in sorted(os.listdir('logs')):

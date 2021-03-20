@@ -1,6 +1,6 @@
+from __future__ import annotations
+
 from typing import Any
-from typing import Dict
-from typing import Optional
 
 import aiohttp
 import async_lru
@@ -12,7 +12,7 @@ async def fetch_twitch_user(
         *,
         oauth_token: str,
         client_id: str,
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     url = f'https://api.twitch.tv/helix/users?login={username}'
     headers = {
         'Authorization': f'Bearer {oauth_token}',

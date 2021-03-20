@@ -1,4 +1,5 @@
-from typing import List
+from __future__ import annotations
+
 from typing import Match
 from typing import NamedTuple
 
@@ -28,7 +29,7 @@ async def _fetch_playlist(
         playlist_id: str,
         *,
         api_key: str,
-) -> List[YouTubeVideo]:
+) -> list[YouTubeVideo]:
     url = 'https://www.googleapis.com/youtube/v3/playlistItems'
     params = {
         'part': 'snippet',
@@ -86,7 +87,7 @@ async def _search_playlist(
         db: aiosqlite.Connection,
         playlist_id: str,
         search_terms: str,
-) -> List[YouTubeVideo]:
+) -> list[YouTubeVideo]:
     query = (
         'SELECT video_id, title, playlist_id '
         'FROM youtube_videos '
