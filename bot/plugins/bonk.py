@@ -14,6 +14,5 @@ async def cmd_bonk(config: Config, match: Match[str]) -> str:
     rest = rest.strip() or 'Makayla_Fox'
     return format_msg(
         match,
-        f'{esc(rest)}: '
-        f'https://i.fluffy.cc/DM4QqzjR7wCpkGPwTl6zr907X50XgtBL.png',
+        f'awcBonk awcBonk awcBonk {esc(rest)} awcBonk awcBonk awcBonk',
     )
