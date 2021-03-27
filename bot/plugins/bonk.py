@@ -11,7 +11,7 @@ from bot.data import format_msg
 @command('!bonk')
 async def cmd_bonk(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
-    rest = rest.strip() or 'Makayla_Fox'
+    rest = rest.strip() or 'marsha_socks'
     return format_msg(
         match,
         f'awcBonk awcBonk awcBonk {esc(rest)} awcBonk awcBonk awcBonk',

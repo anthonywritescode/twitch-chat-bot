@@ -89,7 +89,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!question',
-        '"udp your questions, don\'t tcp your questions" - Makayla_Fox',
+        '"udp your questions, don\'t tcp your questions" - marsha_socks',
     ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
