@@ -91,6 +91,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         '!question',
         '"udp your questions, don\'t tcp your questions" - marsha_socks',
     ),
+    ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
     (
