@@ -13,7 +13,7 @@ from bot.data import format_msg
 ZIP_CODE_RE = re.compile(r'^\d{5}$', re.ASCII)
 
 
-@command('!aqi')
+@command('!aqi', secret=True)
 async def cmd_aqi(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
     if rest:

@@ -11,13 +11,6 @@ from bot.data import format_msg
 
 _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
-        '!aoc',
-        'advent of code is a series of puzzles which come out daily as an '
-        'advent calendar in december -- for more information watch this '
-        'wideo: https://youtu.be/QAwQ8eKBpYw',
-    ),
-    ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
-    (
         '!bot',
         'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
     ),
@@ -52,7 +45,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         "anthony's github is https://github.com/asottile -- stream github is "
         'https://github.com/anthonywritescode',
     ),
-    ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
         '!job',
         'I am a Staff Software Engineer at Stripe working on Python Infra',
@@ -77,7 +69,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
         'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
     ),
-    ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     ('!lurk', 'thanks for lurking, {user}!'),
     ('!ohai', 'ohai, {user}!'),
     ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
@@ -87,19 +78,31 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'highlight ini headers: '
         'https://github.com/asottile/babi#setting-up-syntax-highlighting',
     ),
+    ('!speechless', 'Good code changed like a ghost.Garbage.'),
+    ('!twitter', 'https://twitter.com/codewithanthony'),
+    ('!youtube', 'https://youtube.com/anthonywritescode'),
+)
+
+_SECRET_COMMANDS = (
+    (
+        '!aoc',
+        'advent of code is a series of puzzles which come out daily as an '
+        'advent calendar in december -- for more information watch this '
+        'wideo: https://youtu.be/QAwQ8eKBpYw',
+    ),
+    ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
+    ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
+    ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
         '!question',
         '"udp your questions, don\'t tcp your questions" - marsha_socks',
     ),
-    ('!speechless', 'Good code changed like a ghost.Garbage.'),
-    ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!water', 'DRINK WATER, BITCH'),
     (
         '!wm',
         'the anthony window manager '
         'https://clips.twitch.tv/RefinedFunnyRavenFailFish',
     ),
-    ('!youtube', 'https://youtube.com/anthonywritescode'),
 )
 
 
@@ -109,6 +112,8 @@ async def _generic_msg(config: Config, match: Match[str], *, msg: str) -> str:
 
 for _cmd, _msg in _TEXT_COMMANDS:
     command(_cmd)(functools.partial(_generic_msg, msg=_msg))
+for _cmd, _msg in _SECRET_COMMANDS:
+    command(_cmd, secret=True)(functools.partial(_generic_msg, msg=_msg))
 
 
 _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
