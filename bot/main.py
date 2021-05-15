@@ -169,7 +169,7 @@ def _start_periodic(
         quiet: bool,
 ) -> None:
     async def periodic(minutes: int, func: Callback) -> None:
-        line = get_fake_msg(config, 'dummy message')
+        line = get_fake_msg(config, 'placeholder message')
         match = MSG_RE.match(line)
         assert match is not None
         while True:
