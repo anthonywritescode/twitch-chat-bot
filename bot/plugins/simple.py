@@ -81,7 +81,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
     (
         '!support',
-        'Here are the great ways to support my content:'
+        'Here are the great ways to support my content: '
         'https://github.com/asottile/asottile/blob/master/supporting.md',
     ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
