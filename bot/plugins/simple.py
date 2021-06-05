@@ -79,6 +79,11 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'https://github.com/asottile/babi#setting-up-syntax-highlighting',
     ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
+    (
+        '!support',
+        'Here are the great ways to support my content:'
+        'https://github.com/asottile/asottile/blob/master/supporting.md',
+    ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     ('!youtube', 'https://youtube.com/anthonywritescode'),
 )
