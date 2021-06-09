@@ -61,7 +61,8 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!keyboard2',
         'this is my second mechanical keyboard: '
-        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png',
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png '
+        'here is more info: https://youtu.be/rBngGyWCV-4',
     ),
     (
         '!keyboard3',
