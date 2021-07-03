@@ -21,7 +21,7 @@ async def cmd_aqi(config: Config, match: Match[str]) -> str:
         if not ZIP_CODE_RE.match(zip_code):
             return format_msg(match, '(invalid zip) usage: !aqi [US_ZIP_CODE]')
     else:
-        zip_code = '94401'
+        zip_code = '48105'
 
     params = {
         'format': 'application/json',
