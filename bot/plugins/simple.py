@@ -145,6 +145,7 @@ _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!job', ('!jorb',)),
     ('!keyboard', ('!keyboard1',)),
     ('!question', ('!questions',)),
+    ('!speechless', ('!ghost',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
