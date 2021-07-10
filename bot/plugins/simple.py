@@ -15,6 +15,11 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
     ),
     (
+        '!copilot',
+        'Quick TLDR of my thoughts on Github copilot: '
+        'https://clips.twitch.tv/EphemeralDignifiedArugulaMingLee-f1BW6NhHmxUjrtxX',  # noqa: E501
+    ),
+    (
         '!discord',
         'We do have Discord, you are welcome to join: '
         'https://discord.gg/xDKGPaW',
