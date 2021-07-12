@@ -43,7 +43,8 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!emotes',
         'awcDumpsterFire awcPythonk awcHelloHello awcKeebL awcKeebR '
-        'awcPreCommit awcBabi awcBonk awcFLogo awcCarpet awcActuallyWindows awcBongo',
+        'awcPreCommit awcBabi awcBonk awcFLogo awcCarpet awcActuallyWindows '
+        'awcBongo',
     ),
     (
         '!github',
