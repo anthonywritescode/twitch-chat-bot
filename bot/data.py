@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import difflib
 import pkgutil
 import re
 from typing import Awaitable
@@ -157,7 +158,15 @@ async def cmd_help(config: Config, match: Match[str]) -> str:
     possible_cmds.update(COMMANDS)
     possible_cmds.difference_update(SECRET_CMDS)
     commands = ['!help'] + sorted(possible_cmds)
-    msg = f'possible commands: {", ".join(commands)}'
-    if not match['msg'].startswith('!help'):
-        msg = f'unknown command ({esc(match["msg"].split()[0])}), {msg}'
+
+    cmd = match['msg'].split()[0]
+    if cmd.startswith('!help'):
+        msg = f' possible commands: {", ".join(commands)}'
+    else:
+        msg = f'unknown command ({esc(cmd)}).'
+        suggestions = difflib.get_close_matches(cmd, commands, cutoff=0.7)
+        if suggestions:
+            msg += f' did you mean: {", ".join(suggestions)}?'
+        else:
+            msg += f' possible commands: {", ".join(commands)}'
     return format_msg(match, msg)
