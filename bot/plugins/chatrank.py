@@ -3,11 +3,13 @@ from __future__ import annotations
 import collections
 import datetime
 import functools
+import itertools
 import json
 import os
 import re
 import urllib.request
 from typing import Counter
+from typing import Iterator
 from typing import Mapping
 from typing import Match
 from typing import Pattern
@@ -29,7 +31,7 @@ BONKED_RE = re.compile(r'^\[[^]]+\][^<*]*<[^>]+> !bonk @?(?P<chat_user>\w+)')
 @functools.lru_cache(maxsize=None)
 def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
     counts: Counter[str] = collections.Counter()
-    with open(filename) as f:
+    with open(filename, encoding='utf8') as f:
         for line in f:
             match = reg.match(line)
             if match is None:
@@ -53,15 +55,34 @@ def _chat_rank_counts(reg: Pattern[str]) -> Counter[str]:
     return total
 
 
-def _rank(username: str, reg: Pattern[str]) -> tuple[int, int] | None:
-    total = _chat_rank_counts(reg)
+def _tied_rank(
+        counts: Sequence[tuple[str, int]],
+) -> Iterator[tuple[int, tuple[int, Iterator[tuple[str, int]]]]]:
+    # "counts" should be sorted, usually produced by Counter.most_common()
+    grouped = itertools.groupby(counts, key=lambda pair: pair[1])
+    yield from enumerate(grouped, start=1)
 
-    username = username.lower()
-    for i, (candidate, count) in enumerate(total.most_common(), start=1):
-        if candidate == username:
-            return i, count
+
+def _user_rank_by_line_type(
+        username: str, reg: Pattern[str],
+) -> tuple[int, int] | None:
+    total = _chat_rank_counts(reg)
+    target_username = username.lower()
+    for rank, (count, users) in _tied_rank(total.most_common()):
+        for username, _ in users:
+            if target_username == username:
+                return rank, count
     else:
         return None
+
+
+def _top_n_rank_by_line_type(reg: Pattern[str], n: int = 10) -> list[str]:
+    total = _chat_rank_counts(reg)
+    user_list = []
+    for rank, (count, users) in _tied_rank(total.most_common(n)):
+        usernames = ', '.join(username for username, _ in users)
+        user_list.append(f'{rank}. {usernames} ({count})')
+    return user_list
 
 
 @functools.lru_cache(maxsize=1)
@@ -74,7 +95,7 @@ def _log_start_date() -> str:
 @command('!chatrank')
 async def cmd_chatrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
-    ret = _rank(user, CHAT_LOG_RE)
+    ret = _user_rank_by_line_type(user, CHAT_LOG_RE)
     if ret is None:
         return format_msg(match, f'user not found {esc(user)}')
     else:
@@ -88,18 +109,14 @@ async def cmd_chatrank(config: Config, match: Match[str]) -> str:
 
 @command('!top10chat')
 async def cmd_top_10_chat(config: Config, match: Match[str]) -> str:
-    total = _chat_rank_counts(CHAT_LOG_RE)
-    user_list = ', '.join(
-        f'{rank}. {user}({n})'
-        for rank, (user, n) in enumerate(total.most_common(10), start=1)
-    )
-    return format_msg(match, f'{user_list} (since {_log_start_date()})')
+    top_10_s = ', '.join(_top_n_rank_by_line_type(CHAT_LOG_RE, n=10))
+    return format_msg(match, f'{top_10_s} (since {_log_start_date()})')
 
 
 @command('!bonkrank')
 async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
-    ret = _rank(user, BONKER_RE)
+    ret = _user_rank_by_line_type(user, BONKER_RE)
     if ret is None:
         return format_msg(match, f'user not found {esc(user)}')
     else:
@@ -112,18 +129,14 @@ async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
 
 @command('!top5bonkers')
 async def cmd_top_5_bonkers(config: Config, match: Match[str]) -> str:
-    total = _chat_rank_counts(BONKER_RE)
-    user_list = ', '.join(
-        f'{rank}. {user}({n})'
-        for rank, (user, n) in enumerate(total.most_common(5), start=1)
-    )
-    return format_msg(match, user_list)
+    top_5_s = ', '.join(_top_n_rank_by_line_type(BONKER_RE, n=5))
+    return format_msg(match, top_5_s)
 
 
 @command('!bonkedrank')
 async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
-    ret = _rank(user, BONKED_RE)
+    ret = _user_rank_by_line_type(user, BONKED_RE)
     if ret is None:
         return format_msg(match, f'user not found {esc(user)}')
     else:
@@ -136,12 +149,8 @@ async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
 
 @command('!top5bonked')
 async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
-    total = _chat_rank_counts(BONKED_RE)
-    user_list = ', '.join(
-        f'{rank}. {user}({n})'
-        for rank, (user, n) in enumerate(total.most_common(5), start=1)
-    )
-    return format_msg(match, user_list)
+    top_5_s = ', '.join(_top_n_rank_by_line_type(BONKED_RE, n=5))
+    return format_msg(match, top_5_s)
 
 
 def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
