@@ -42,7 +42,7 @@ async def _ensure_downloaded(emote: str) -> None:
 
     os.makedirs(EMOTE_CACHE, exist_ok=True)
 
-    dl_url = f'https://static-cdn.jtvnw.net/emoticons/v1/{emote}/1.0'
+    dl_url = f'https://static-cdn.jtvnw.net/emoticons/v2/{emote}/default/dark/2.0'  # noqa: E501
     async with aiohttp.ClientSession() as session:
         async with session.get(dl_url) as resp:
             data = await resp.read()
