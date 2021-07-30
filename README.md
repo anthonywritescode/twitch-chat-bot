@@ -100,7 +100,7 @@ Show the discord url
 
 ```
 anthonywritescode: !discord
-anthonywritescodebot: We do have Discord, you are welcome to join: https://discord.gg/HxpQ3px
+anthonywritescodebot: We do have Discord, you are welcome to join: https://discord.gg/xDKGPaW
 ```
 
 ### `!followage [username]`
