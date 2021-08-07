@@ -146,3 +146,9 @@ async def cmd_explain(config: Config, match: Match[str]) -> str:
 async def cmd_faq(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
     return format_msg(match, await _msg(config, 'faq', rest))
+
+
+@command('!puzzle', '!puzzles')
+async def cmd_puzzle(config: Config, match: Match[str]) -> str:
+    _, _, rest = match['msg'].partition(' ')
+    return format_msg(match, await _msg(config, 'puzzles', rest))
