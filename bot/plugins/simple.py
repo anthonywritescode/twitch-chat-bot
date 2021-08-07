@@ -80,6 +80,14 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ('!ohai', 'ohai, {user}!'),
     ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
     (
+        '!puzzles',
+        'I have made a series of puzzles for people to attempt. '
+        'Here is a link to the youtube playlist: '
+        'https://www.youtube.com/playlist?list=PLWBKAf81pmOZdQZfVoWFPu0GyvGwmCWNr. '  # noqa: E501
+        'Here is a link to the GitHub repo with solutions: '
+        'https://github.com/anthonywritescode/puzzles. ',
+    ),
+    (
         '!theme',
         'awcBabi this is vs dark plus in !babi with one modification to '
         'highlight ini headers: '
