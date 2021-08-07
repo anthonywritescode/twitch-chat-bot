@@ -160,7 +160,7 @@ async def cmd_help(config: Config, match: Match[str]) -> str:
     commands = ['!help'] + sorted(possible_cmds)
 
     cmd = match['msg'].split()[0]
-    if cmd.startswith('!help'):
+    if cmd.startswith(('!help', '!halp')):
         msg = f' possible commands: {", ".join(commands)}'
     else:
         msg = f'unknown command ({esc(cmd)}).'
