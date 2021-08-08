@@ -168,19 +168,19 @@ def _start_periodic(
         *,
         quiet: bool,
 ) -> None:
-    async def periodic(minutes: int, func: Callback) -> None:
+    async def periodic(seconds: int, func: Callback) -> None:
         line = get_fake_msg(config, 'placeholder message')
         match = MSG_RE.match(line)
         assert match is not None
         while True:
-            await asyncio.sleep(minutes * 60)
+            await asyncio.sleep(seconds)
             await handle_response(
                 config, match, func, writer, log_writer, quiet=quiet,
             )
 
     loop = asyncio.get_event_loop()
-    for minutes, func in PERIODIC_HANDLERS:
-        loop.create_task(periodic(minutes, func))
+    for seconds, func in PERIODIC_HANDLERS:
+        loop.create_task(periodic(seconds, func))
 
 
 async def get_printed_input(
@@ -302,8 +302,8 @@ async def amain(config: Config, *, quiet: bool, images: bool) -> None:
             print(f'UNHANDLED: {msg}', end='')
 
 
-async def chat_message_test(config: Config, msg: str) -> None:
-    line = get_fake_msg(config, msg)
+async def chat_message_test(config: Config, msg: str, bits: int) -> None:
+    line = get_fake_msg(config, msg, bits)
 
     input_ret = await get_printed_input(config, line, images=False)
     assert input_ret is not None
@@ -332,6 +332,7 @@ def main() -> int:
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--images', action='store_true')
     parser.add_argument('--test')
+    parser.add_argument('--bits', type=int, default=0)
     args = parser.parse_args()
 
     quiet = not args.verbose
@@ -340,7 +341,7 @@ def main() -> int:
         config = Config(**json.load(f))
 
     if args.test:
-        asyncio.run(chat_message_test(config, args.test))
+        asyncio.run(chat_message_test(config, args.test, args.bits))
     else:
         with contextlib.suppress(KeyboardInterrupt):
             asyncio.run(amain(config, quiet=quiet, images=args.images))

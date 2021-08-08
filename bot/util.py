@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio.subprocess
 import contextlib
 import os.path
 import tempfile
@@ -38,3 +39,12 @@ def atomic_open(filename: str) -> Generator[IO[bytes], None, None]:
     except BaseException:
         os.remove(fname)
         raise
+
+
+async def check_call(*cmd: str) -> None:
+    proc = await asyncio.subprocess.create_subprocess_exec(
+        *cmd, stdout=asyncio.subprocess.DEVNULL,
+    )
+    await proc.communicate()
+    if proc.returncode != 0:
+        raise ValueError(cmd, proc.returncode)

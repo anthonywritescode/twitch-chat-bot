@@ -24,8 +24,8 @@ MSG_RE = re.compile(
 COMMAND_RE = re.compile(r'^(?P<cmd>!+\w+)')
 
 
-def get_fake_msg(config: Config, msg: str) -> str:
-    info = '@color=;display-name=username;badges='
+def get_fake_msg(config: Config, msg: str, bits: int = 0) -> str:
+    info = f'@badges=;bits={bits};color=;display-name=username'
     return f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
 
 
@@ -101,9 +101,9 @@ def add_alias(cmd: str, *aliases: str) -> None:
         SECRET_CMDS.add(alias)
 
 
-def periodic_handler(*, minutes: int) -> Callable[[Callback], Callback]:
+def periodic_handler(*, seconds: int) -> Callable[[Callback], Callback]:
     def periodic_handler_decorator(func: Callback) -> Callback:
-        PERIODIC_HANDLERS.append((minutes, func))
+        PERIODIC_HANDLERS.append((seconds, func))
         return func
     return periodic_handler_decorator
 

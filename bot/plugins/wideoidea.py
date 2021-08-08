@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio.subprocess
 import os
 import tempfile
 from typing import Match
@@ -9,15 +8,7 @@ from bot.config import Config
 from bot.data import command
 from bot.data import format_msg
 from bot.permissions import is_moderator
-
-
-async def _check_call(*cmd: str) -> None:
-    proc = await asyncio.subprocess.create_subprocess_exec(
-        *cmd, stdout=asyncio.subprocess.DEVNULL,
-    )
-    await proc.communicate()
-    if proc.returncode != 0:
-        raise ValueError(cmd, proc.returncode)
+from bot.util import check_call
 
 
 @command('!wideoidea', '!videoidea', secret=True)
@@ -27,7 +18,7 @@ async def cmd_videoidea(config: Config, match: Match[str]) -> str:
     _, _, rest = match['msg'].partition(' ')
 
     async def _git(*cmd: str) -> None:
-        await _check_call('git', '-C', tmpdir, *cmd)
+        await check_call('git', '-C', tmpdir, *cmd)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         await _git(
