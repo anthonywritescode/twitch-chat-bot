@@ -109,7 +109,6 @@ def periodic_handler(*, seconds: int) -> Callable[[Callback], Callback]:
 
 
 def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
-    prev_cmd: str | None = None
     msg_match = MSG_RE.match(msg)
     if msg_match:
         info = parse_badge_info(msg_match['info'])
@@ -124,10 +123,7 @@ def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
         if cmd_match:
             command = f'!{cmd_match["cmd"].lstrip("!").lower()}'
             if command in COMMANDS:
-                prev_cmd = msg_match['msg']
                 return COMMANDS[command], msg_match
-        elif msg_match['msg'] == '!!' and prev_cmd is not None:
-            return get_handler(msg_match.string.replace('!!', prev_cmd))
 
     for pattern, handler in HANDLERS:
         match = pattern.match(msg)
