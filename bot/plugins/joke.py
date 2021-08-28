@@ -10,6 +10,6 @@ from bot.data import esc
 from bot.data import format_msg
 
 
-@command('!joke')
+@command('!joke', '!yoke')
 async def cmd_joke(config: Config, match: Match[str]) -> str:
     return format_msg(match, esc(pyjokes.get_joke()))
