@@ -44,6 +44,7 @@ Callback = Callable[[Config, Match[str]], Awaitable[Optional[str]]]
 HANDLERS: list[tuple[Pattern[str], Callback]] = []
 COMMANDS: dict[str, Callback] = {}
 POINTS_HANDLERS: dict[str, Callback] = {}
+BITS_HANDLERS: dict[int, Callback] = {}
 SECRET_CMDS: set[str] = set()
 PERIODIC_HANDLERS: list[tuple[int, Callback]] = []
 
@@ -95,6 +96,13 @@ def channel_points_handler(reward_id: str) -> Callable[[Callback], Callback]:
     return channel_points_handler_decorator
 
 
+def bits_handler(bits_mod: int) -> Callable[[Callback], Callback]:
+    def bits_handler_decorator(func: Callback) -> Callback:
+        BITS_HANDLERS[bits_mod] = func
+        return func
+    return bits_handler_decorator
+
+
 def add_alias(cmd: str, *aliases: str) -> None:
     for alias in aliases:
         COMMANDS[alias] = COMMANDS[cmd]
@@ -118,6 +126,11 @@ def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
                 return POINTS_HANDLERS[info['custom-reward-id']], msg_match
             else:
                 return None
+
+        if 'bits' in info:
+            bits_n = int(info['bits'])
+            if bits_n % 100 in BITS_HANDLERS:
+                return BITS_HANDLERS[bits_n % 100], msg_match
 
         cmd_match = COMMAND_RE.match(msg_match['msg'])
         if cmd_match:

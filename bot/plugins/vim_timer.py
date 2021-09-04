@@ -7,11 +7,11 @@ from typing import Match
 import aiosqlite
 
 from bot.config import Config
+from bot.data import bits_handler
 from bot.data import command
 from bot.data import format_msg
-from bot.data import handler
-from bot.data import MSG_RE
 from bot.data import periodic_handler
+from bot.permissions import parse_badge_info
 from bot.util import check_call
 from bot.util import seconds_to_readable
 
@@ -91,11 +91,13 @@ async def add_bits(db: aiosqlite.Connection, user: str, bits: int) -> int:
     return time_left
 
 
-@handler(fr'(?=[^ ]+;bits=(?P<bits>\d*51);){MSG_RE.pattern}')
+@bits_handler(51)
 async def vim_bits_handler(config: Config, match: Match[str]) -> str:
+    info = parse_badge_info(match['info'])
+
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
-        time_left = await add_bits(db, match['user'], int(match['bits']))
+        time_left = await add_bits(db, match['user'], int(info['bits']))
 
     await _set_symlink(should_be_vim=True)
 
