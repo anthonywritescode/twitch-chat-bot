@@ -92,7 +92,11 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'https://github.com/asottile/asottile/blob/master/supporting.md',
     ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
-    ('!youtube', 'https://youtube.com/anthonywritescode'),
+    (
+        '!youtube',
+        'https://youtube.com/anthonywritescode -- '
+        'stream vods: https://youtube.com/channel/UChPxcypesw8L-iqltstSI4Q',
+    ),
 )
 
 _SECRET_COMMANDS = (
