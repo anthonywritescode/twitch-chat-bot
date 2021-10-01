@@ -109,7 +109,6 @@ _SECRET_COMMANDS = (
     ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
-    ('!onesie', 'yes I am a furry for this stream https://amzn.to/2YrMcGy'),
     (
         '!question',
         '"udp your questions, don\'t tcp your questions" - marsha_socks',
