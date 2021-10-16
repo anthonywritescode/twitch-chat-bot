@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import Match
 
@@ -11,17 +13,17 @@ from bot.util import seconds_to_readable
 async def cmd_12hour(config: Config, match: Match[str]) -> str:
     return format_msg(
         match,
-        'aleksacu cashed in the channel points, so here we are... '
+        'rkj_ cashed in the channel points, so here we are... '
         'see also !timeleft',
     )
 
 
-@command('!timeleft', '!downtime')
+@command('!timeleft', '!downtime', '!timeright')
 async def cmd_timeleft(config: Config, match: Match[str]) -> str:
-    end_time = datetime.datetime(2021, 1, 30, 22, 0)
+    end_time = datetime.datetime(2021, 10, 16, 23, 0)
     if datetime.datetime.now() > end_time:
         return format_msg(match, 'done!!!')
     else:
         remaining = (end_time - datetime.datetime.now()).seconds
-        msg = f'{seconds_to_readable(remaining)} left in stream!'
+        msg = f'{seconds_to_readable(remaining)} left in the stream!'
         return format_msg(match, msg)
