@@ -80,6 +80,11 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ('!ohai', 'ohai, {user}!'),
     ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
     (
+        '!readme',
+        'GitHub recently posted a blog post about me: '
+        'https://github.com/readme/stories/anthony-sottile',
+    ),
+    (
         '!theme',
         'awcBabi this is vs dark plus in !babi with one modification to '
         'highlight ini headers: '
@@ -150,6 +155,7 @@ _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!job', ('!jorb',)),
     ('!keyboard', ('!keyboard1',)),
     ('!question', ('!questions', '!tcp', '!udp')),
+    ('!readme', ('!reamde',)),
     ('!speechless', ('!ghost',)),
 )
 for _alias_name, _aliases in _ALIASES:
