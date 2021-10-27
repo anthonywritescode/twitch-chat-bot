@@ -17,7 +17,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!copilot',
         'Quick TLDR of my thoughts on Github copilot: '
-        'https://clips.twitch.tv/EphemeralDignifiedArugulaMingLee-f1BW6NhHmxUjrtxX',  # noqa: E501
+        'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
     ),
     (
         '!discord',
