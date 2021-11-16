@@ -112,12 +112,33 @@ _SECRET_COMMANDS = (
         'wideo: https://youtu.be/QAwQ8eKBpYw',
     ),
     ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
+    (
+        '!deadsnakes',
+        'I maintain deadsnakes!  I backport and forward port pythons: '
+        'https://github.com/deadsnakes',
+    ),
+    (
+        '!flake8',
+        'I am the current primary maintainer of flake8!  '
+        'https://github.com/pycqa/flake8',
+    ),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
         '!question',
         '"udp your questions, don\'t tcp your questions" - marsha_socks',
     ),
+    (
+        '!pre-commit',
+        'I created pre-commit!  https://pre-commit.com and '
+        'https://pre-commit.ci',
+    ),
+    (
+        '!pytest',
+        'yep, I am one of the pytest core devs '
+        'https://github.com/pytest-dev/pytest',
+    ),
+    ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
     ('!water', 'DRINK WATER, BITCH'),
     (
         '!wm',
