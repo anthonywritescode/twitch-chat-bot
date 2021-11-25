@@ -90,7 +90,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'highlight ini headers: '
         'https://github.com/asottile/babi#setting-up-syntax-highlighting',
     ),
-    ('!speechless', 'Good code changed like a ghost.Garbage.'),
     (
         '!support',
         'Here are the great ways to support my content: '
@@ -138,6 +137,7 @@ _SECRET_COMMANDS = (
         'yep, I am one of the pytest core devs '
         'https://github.com/pytest-dev/pytest',
     ),
+    ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
     ('!water', 'DRINK WATER, BITCH'),
     (
