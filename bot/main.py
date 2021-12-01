@@ -302,8 +302,14 @@ async def amain(config: Config, *, quiet: bool, images: bool) -> None:
             print(f'UNHANDLED: {msg}', end='')
 
 
-async def chat_message_test(config: Config, msg: str, bits: int) -> None:
-    line = get_fake_msg(config, msg, bits)
+async def chat_message_test(
+        config: Config,
+        msg: str,
+        *,
+        bits: int,
+        mod: bool,
+) -> None:
+    line = get_fake_msg(config, msg, bits=bits, mod=mod)
 
     input_ret = await get_printed_input(config, line, images=False)
     assert input_ret is not None
@@ -333,6 +339,7 @@ def main() -> int:
     parser.add_argument('--images', action='store_true')
     parser.add_argument('--test')
     parser.add_argument('--bits', type=int, default=0)
+    parser.add_argument('--mod', action='store_true')
     args = parser.parse_args()
 
     quiet = not args.verbose
@@ -341,7 +348,14 @@ def main() -> int:
         config = Config(**json.load(f))
 
     if args.test:
-        asyncio.run(chat_message_test(config, args.test, args.bits))
+        asyncio.run(
+            chat_message_test(
+                config,
+                args.test,
+                bits=args.bits,
+                mod=args.mod,
+            ),
+        )
     else:
         with contextlib.suppress(KeyboardInterrupt):
             asyncio.run(amain(config, quiet=quiet, images=args.images))

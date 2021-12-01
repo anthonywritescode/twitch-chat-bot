@@ -24,8 +24,15 @@ MSG_RE = re.compile(
 COMMAND_RE = re.compile(r'^(?P<cmd>!+\w+)')
 
 
-def get_fake_msg(config: Config, msg: str, bits: int = 0) -> str:
-    info = f'@badges=;bits={bits};color=;display-name=username'
+def get_fake_msg(
+        config: Config,
+        msg: str,
+        *,
+        bits: int = 0,
+        mod: bool = False,
+) -> str:
+    badges = 'moderator/1' if mod else ''
+    info = f'@badges={badges};bits={bits};color=;display-name=username'
     return f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
 
 
