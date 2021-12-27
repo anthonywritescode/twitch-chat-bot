@@ -154,9 +154,7 @@ def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
 
 
 def _import_plugins() -> None:
-    # https://github.com/python/mypy/issues/1422
-    plugins_path: str = plugins.__path__  # type: ignore
-    mod_infos = pkgutil.walk_packages(plugins_path, f'{plugins.__name__}.')
+    mod_infos = pkgutil.walk_packages(plugins.__path__, f'{plugins.__name__}.')
     for _, name, _ in mod_infos:
         __import__(name, fromlist=['_trash'])
 
