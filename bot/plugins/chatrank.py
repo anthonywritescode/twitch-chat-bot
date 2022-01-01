@@ -189,8 +189,9 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
                 comp_users[user]['y'].append(counts[user])
 
     # create the datasets (scatter and trend line) for all users to compare
+    PLOT_COLORS = ('#00a3ce', '#fab040')
     datasets: list[dict[str, Any]] = []
-    for user in user_list:
+    for user, color in zip(user_list, PLOT_COLORS):
         if len(comp_users[user]['x']) < 2:
             if len(user_list) > 1:
                 return format_msg(
@@ -205,6 +206,9 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
 
         point_data = {
             'label': f"{user}'s chats",
+            'borderColor': color,
+            # add alpha to the point fill color
+            'backgroundColor': f'{color}69',
             'data': [
                 {'x': x_i, 'y': y_i}
                 for x_i, y_i in
@@ -214,7 +218,7 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
         }
         m, c = lin_regr(comp_users[user]['x'], comp_users[user]['y'])
         trend_data = {
-            'label': f"{user}'s trend",
+            'borderColor': color,
             'type': 'line',
             'fill': False,
             'pointRadius': 0,
@@ -253,6 +257,9 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
                 'display': True,
                 'text': f'{title_user} chat in twitch.tv/{config.channel}',
             },
+            'legend': {
+                'labels': {'filter': 'FILTER'},
+            },
         },
     }
 
@@ -262,8 +269,15 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
         'y.setDate(x+y.getDate());return y.toISOString().slice(0,10)'
         '}'
     )
+    # https://github.com/chartjs/Chart.js/issues/3189#issuecomment-528362213
+    filter = (
+        '(legendItem, chartData)=>{'
+        '  return (chartData.datasets[legendItem.datasetIndex].label);'
+        '}'
+    )
     data = json.dumps(chart, separators=(',', ':'))
     data = data.replace('"CALLBACK"', callback)
+    data = data.replace('"FILTER"', filter)
 
     post_data = {'chart': data}
     request = urllib.request.Request(
