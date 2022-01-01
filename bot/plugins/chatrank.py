@@ -8,6 +8,7 @@ import json
 import os
 import re
 import urllib.request
+from typing import Any
 from typing import Counter
 from typing import Iterator
 from typing import Mapping
@@ -165,12 +166,15 @@ def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
 
 @command('!chatplot')
 async def cmd_chatplot(config: Config, match: Match[str]) -> str:
-    user = optional_user_arg(match).lower()
+    user_list = optional_user_arg(match).lower().split()
+    user_list = [user.lstrip('@') for user in user_list]
+
+    if len(user_list) > 2:
+        return format_msg(match, 'sorry, can only compare 2 users')
 
     min_date = datetime.date.fromisoformat(_log_start_date())
-    x: list[int] = []
-    y = []
-
+    comp_users: dict[str, dict[str, list[int]]]
+    comp_users = collections.defaultdict(lambda: {'x': [], 'y': []})
     for filename in sorted(os.listdir('logs')):
         if filename == f'{datetime.date.today()}.log':
             continue
@@ -179,40 +183,66 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
 
         full_filename = os.path.join('logs', filename)
         counts = _counts_per_file(full_filename, CHAT_LOG_RE)
-        if x or counts[user]:
-            x.append((filename_date - min_date).days)
-            y.append(counts[user])
+        for user in user_list:
+            if counts[user]:
+                comp_users[user]['x'].append((filename_date - min_date).days)
+                comp_users[user]['y'].append(counts[user])
 
-    if len(x) < 2:
-        return format_msg(
-            match, f'sorry {esc(user)}, need at least 2 days of data',
-        )
+    # create the datasets (scatter and trend line) for all users to compare
+    datasets: list[dict[str, Any]] = []
+    for user in user_list:
+        if len(comp_users[user]['x']) < 2:
+            if len(user_list) > 1:
+                return format_msg(
+                    match,
+                    'sorry, all users need at least 2 days of data',
+                )
+            else:
+                return format_msg(
+                    match,
+                    f'sorry {esc(user)}, need at least 2 days of data',
+                )
 
-    m, c = lin_regr(x, y)
+        point_data = {
+            'label': f"{user}'s chats",
+            'data': [
+                {'x': x_i, 'y': y_i}
+                for x_i, y_i in
+                zip(comp_users[user]['x'], comp_users[user]['y'])
+                if y_i
+            ],
+        }
+        m, c = lin_regr(comp_users[user]['x'], comp_users[user]['y'])
+        trend_data = {
+            'label': f"{user}'s trend",
+            'type': 'line',
+            'fill': False,
+            'pointRadius': 0,
+            'data': [
+                {
+                    'x': comp_users[user]['x'][0],
+                    'y': m * comp_users[user]['x'][0] + c,
+                },
+                {
+                    'x': comp_users[user]['x'][-1],
+                    'y': m * comp_users[user]['x'][-1] + c,
+                },
+            ],
+        }
+        datasets.append(point_data)
+        datasets.append(trend_data)
+
+    # generate title checking if we are comparing users
+    if len(user_list) > 1:
+        title_user = "'s, ".join(user_list)
+        title_user = f"{title_user}'s"
+    else:
+        title_user = f"{user_list[0]}'s"
 
     chart = {
         'type': 'scatter',
         'data': {
-            'datasets': [
-                {
-                    'label': 'chats',
-                    'data': [
-                        {'x': x_i, 'y': y_i}
-                        for x_i, y_i in zip(x, y)
-                        if y_i
-                    ],
-                },
-                {
-                    'label': 'trend',
-                    'type': 'line',
-                    'fill': False,
-                    'pointRadius': 0,
-                    'data': [
-                        {'x': x[0], 'y': m * x[0] + c},
-                        {'x': x[-1], 'y': m * x[-1] + c},
-                    ],
-                },
-            ],
+            'datasets': datasets,
         },
         'options': {
             'scales': {
@@ -221,7 +251,7 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
             },
             'title': {
                 'display': True,
-                'text': f"{user}'s chat in twitch.tv/{config.channel}",
+                'text': f'{title_user} chat in twitch.tv/{config.channel}',
             },
         },
     }
@@ -244,4 +274,11 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
     )
     resp = urllib.request.urlopen(request)
     contents = json.load(resp)
-    return format_msg(match, f'{esc(user)}: {contents["url"]}')
+    user_esc = [esc(user) for user in user_list]
+    if len(user_list) > 1:
+        return format_msg(
+            match,
+            f'comparing {", ".join(user_esc)}: {contents["url"]}',
+        )
+    else:
+        return format_msg(match, f'{esc(user_esc[0])}: {contents["url"]}')
