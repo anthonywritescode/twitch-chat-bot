@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import re
 from typing import Match
 
@@ -9,5 +10,7 @@ from bot.data import handle_message
 
 
 @handle_message(r'.*\bth[oi]nk(?:ing)?\b', flags=re.IGNORECASE)
-async def msg_think(config: Config, match: Match[str]) -> str:
+async def msg_think(config: Config, match: Match[str]) -> str | None:
+    if random.randrange(0, 100) < 90:
+        return None
     return format_msg(match, 'awcPythonk ' * 5)
