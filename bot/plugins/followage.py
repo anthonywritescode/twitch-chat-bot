@@ -86,8 +86,19 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
         follow_age['followed_at'].rstrip('Z'),
     )
     delta = now - date_of_follow
+
+    if delta <= datetime.timedelta(days=2):
+        # using 2 days because precisedelta returns "1 days"
+        humanize_string = humanize.naturaldelta(delta)
+    else:
+        humanize_string = humanize.precisedelta(
+            delta,
+            minimum_unit='days',
+            format='%d',
+        )
+        humanize_string = humanize_string.replace(' 1 days', ' 1 day')
     return format_msg(
         match,
         f'{esc(follow_age["from_name"])} has been following for '
-        f'{esc(humanize.naturaldelta(delta))}!',
+        f'{esc(humanize_string)}!',
     )
