@@ -92,11 +92,14 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
         humanize_string = humanize.naturaldelta(delta)
     else:
         humanize_string = humanize.precisedelta(
-            datetime.timedelta(days=delta.days),
+            delta,
             minimum_unit='days',
             format='%d',
         )
+
+        # odd month outputs are broken because mod 30.5
         humanize_string = humanize_string.replace(' 1 days', ' 1 day')
+        humanize_string = humanize_string.relpace(' and 0 days', '')
     return format_msg(
         match,
         f'{esc(follow_age["from_name"])} has been following for '
