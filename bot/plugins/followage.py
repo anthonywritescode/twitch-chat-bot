@@ -99,7 +99,7 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
 
         # odd month outputs are broken because mod 30.5
         humanize_string = humanize_string.replace(' 1 days', ' 1 day')
-        humanize_string = humanize_string.relpace(' and 0 days', '')
+        humanize_string = humanize_string.replace(' and 0 days', '')
     return format_msg(
         match,
         f'{esc(follow_age["from_name"])} has been following for '
