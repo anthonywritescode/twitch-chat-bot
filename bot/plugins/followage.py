@@ -92,7 +92,7 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
         humanize_string = humanize.naturaldelta(delta)
     else:
         humanize_string = humanize.precisedelta(
-            delta,
+            datetime.timedelta(days=delta.days),
             minimum_unit='days',
             format='%d',
         )
