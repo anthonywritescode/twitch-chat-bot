@@ -41,14 +41,14 @@ and this felt like a decent project to dive in on.
      searched via commands
    - `airnow_api_key`: api key for https://airnowapi.org
 
-1. Use python3.7 or newer and install the dependencies in `requirements.txt`
+1. Use python3.8 or newer and install the dependencies in `requirements.txt`
 
    ```bash
-   virtualenv venv -ppython3.7
+   virtualenv venv -ppython3.8
    venv/bin/pip install -r requirements.txt
    ```
 
-1. Run! `venv/bin/python bot.py`
+1. Run! `venv/bin/python -m bot`
 
 [docs-irc]: https://dev.twitch.tv/docs/irc/
 [app-setup]: https://dev.twitch.tv/docs/authentication/#registration
