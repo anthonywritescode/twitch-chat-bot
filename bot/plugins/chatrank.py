@@ -28,6 +28,10 @@ CHAT_LOG_RE = re.compile(
 BONKER_RE = re.compile(r'^\[[^]]+\][^<*]*<(?P<chat_user>[^>]+)> !bonk\b')
 BONKED_RE = re.compile(r'^\[[^]]+\][^<*]*<[^>]+> !bonk @?(?P<chat_user>\w+)')
 
+USER_ALIASES = {
+    'kevinsjoberg': 'kmjao',
+}
+
 
 @functools.lru_cache(maxsize=None)
 def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
@@ -40,7 +44,9 @@ def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
                 continue
             user = match['chat_user'] or match['action_user']
             assert user, line
-            counts[user.lower()] += 1
+
+            lowercase_user = user.lower()
+            counts[USER_ALIASES.get(lowercase_user, lowercase_user)] += 1
     return counts
 
 
