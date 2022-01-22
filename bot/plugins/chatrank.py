@@ -173,7 +173,11 @@ def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
 @command('!chatplot')
 async def cmd_chatplot(config: Config, match: Match[str]) -> str:
     user_list = optional_user_arg(match).lower().split()
-    user_list = [user.lstrip('@') for user in user_list]
+    user_list = [
+        USER_ALIASES.get(user.lstrip('@'), user.lstrip('@'))
+        for user
+        in user_list
+    ]
 
     if len(user_list) > 2:
         return format_msg(match, 'sorry, can only compare 2 users')
