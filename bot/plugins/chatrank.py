@@ -29,8 +29,9 @@ BONKER_RE = re.compile(r'^\[[^]]+\][^<*]*<(?P<chat_user>[^>]+)> !bonk\b')
 BONKED_RE = re.compile(r'^\[[^]]+\][^<*]*<[^>]+> !bonk @?(?P<chat_user>\w+)')
 
 USER_ALIASES = {
-    'kevinsjoberg': 'kmjao'
+    'kevinsjoberg': 'kmjao',
 }
+
 
 @functools.lru_cache(maxsize=None)
 def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
