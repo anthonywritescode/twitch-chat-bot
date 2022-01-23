@@ -22,15 +22,18 @@ from bot.data import esc
 from bot.data import format_msg
 from bot.permissions import optional_user_arg
 
+CHAT_ALIASES = {
+    'kevinsjoberg': 'kmjao',
+}
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
 )
 BONKER_RE = re.compile(r'^\[[^]]+\][^<*]*<(?P<chat_user>[^>]+)> !bonk\b')
 BONKED_RE = re.compile(r'^\[[^]]+\][^<*]*<[^>]+> !bonk @?(?P<chat_user>\w+)')
 
-USER_ALIASES = {
-    'kevinsjoberg': 'kmjao',
-}
+
+def _alias(user: str) -> str:
+    return CHAT_ALIASES.get(user, user)
 
 
 @functools.lru_cache(maxsize=None)
@@ -45,8 +48,7 @@ def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
             user = match['chat_user'] or match['action_user']
             assert user, line
 
-            lowercase_user = user.lower()
-            counts[USER_ALIASES.get(lowercase_user, lowercase_user)] += 1
+            counts[_alias(user.lower())] += 1
     return counts
 
 
@@ -173,11 +175,7 @@ def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
 @command('!chatplot')
 async def cmd_chatplot(config: Config, match: Match[str]) -> str:
     user_list = optional_user_arg(match).lower().split()
-    user_list = [
-        USER_ALIASES.get(user.lstrip('@'), user.lstrip('@'))
-        for user
-        in user_list
-    ]
+    user_list = [_alias(user.lstrip('@')) for user in user_list]
 
     if len(user_list) > 2:
         return format_msg(match, 'sorry, can only compare 2 users')
