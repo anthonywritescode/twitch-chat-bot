@@ -232,6 +232,27 @@ async def cmd_enablevim(config: Config, match: Match[str]) -> str:
         )
 
 
+@command('!editor')
+async def cmd_editor(config: Config, match: Match[str]) -> str:
+    async with aiosqlite.connect('db.db') as db:
+        await ensure_vim_tables_exist(db)
+        if await get_enabled(db):
+            return format_msg(
+                match,
+                'I am currently being forced to use vim by viewers. '
+                'awcBabi I normally use my text editor I made, called babi! '
+                'https://github.com/asottile/babi more info in this video: '
+                'https://www.youtube.com/watch?v=WyR1hAGmR3g',
+            )
+        else:
+            return format_msg(
+                match,
+                'awcBabi this is my text editor I made, called babi! '
+                'https://github.com/asottile/babi more info in this video: '
+                'https://www.youtube.com/watch?v=WyR1hAGmR3g',
+            )
+
+
 @periodic_handler(seconds=5)
 async def vim_normalize_state(config: Config, match: Match[str]) -> str | None:
     async with aiosqlite.connect('db.db') as db:
