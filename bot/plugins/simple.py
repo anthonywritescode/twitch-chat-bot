@@ -35,12 +35,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'donate, you can donate at https://streamlabs.com/anthonywritescode',
     ),
     (
-        '!editor',
-        'awcBabi this is my text editor I made, called babi! '
-        'https://github.com/asottile/babi '
-        'more info in this video: https://www.youtube.com/watch?v=WyR1hAGmR3g',
-    ),
-    (
         '!emotes',
         'awcBongo awcUp awcDown awcCarpet awcBonk awcPaint awcPythonk '
         'awcHelloHello awcPreCommit awcBabi awcNoodle0 awcNoodle1 awcNoodle2 '
