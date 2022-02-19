@@ -156,16 +156,6 @@ _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!bluething', ('!blueball',)),
     ('!discord', ('!dicsord',)),
     ('!distro', ('!os', '!windows')),
-    (
-        '!editor', (
-            '!babi',
-            '!nano',
-            '!vim',
-            '!emacs',
-            '!vscode',
-            '!wheredobabiscomefrom',
-        ),
-    ),
     ('!emotes', ('!emoji', '!emote')),
     ('!job', ('!jorb',)),
     ('!keyboard', ('!keyboard1',)),
