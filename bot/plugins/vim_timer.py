@@ -233,8 +233,8 @@ async def cmd_enablevim(config: Config, match: Match[str]) -> str:
 
 
 @command(
-    '!editor', '!babi', '!nano', '!vim', '!emacs', '!vscode',
-    '!wheredobabiscomefrom',
+    '!editor',
+    '!babi', '!nano', '!vim', '!emacs', '!vscode', '!wheredobabiscomefrom',
 )
 async def cmd_editor(config: Config, match: Match[str]) -> str:
     async with aiosqlite.connect('db.db') as db:
