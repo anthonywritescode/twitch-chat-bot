@@ -239,7 +239,7 @@ async def cmd_enablevim(config: Config, match: Match[str]) -> str:
 async def cmd_editor(config: Config, match: Match[str]) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
-        if await get_enabled(db):
+        if await get_time_left(db):
             return format_msg(
                 match,
                 'I am currently being forced to use vim by viewers. '
