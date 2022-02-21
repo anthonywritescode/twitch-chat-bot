@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import re
 from typing import Match
 
@@ -8,25 +9,20 @@ from bot.data import COMMANDS
 from bot.data import handle_message
 
 
-@handle_message(
-    '.*what keyboard',
-    flags=re.IGNORECASE,
+def _reg(s: str) -> str:
+    return fr".*what('s| is)?( this)? {s}"
+
+
+async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
+    return await COMMANDS[cmd](config, match)
+
+
+THINGS_TO_COMMANDS = (
+    ('keyboard', '!keyboard'),
+    ('keypad', '!keyboard3'),
+    ('trackball', '!bluething'),
 )
-async def msg_what_keyboard(config: Config, match: Match[str]) -> str | None:
-    return await COMMANDS['!keyboard'](config, match)
 
-
-@handle_message(
-    '.*what keypad',
-    flags=re.IGNORECASE,
-)
-async def msg_what_keypad(config: Config, match: Match[str]) -> str | None:
-    return await COMMANDS['!keyboard3'](config, match)
-
-
-@handle_message(
-    '.*what trackball',
-    flags=re.IGNORECASE,
-)
-async def msg_what_trackball(config: Config, match: Match[str]) -> str | None:
-    return await COMMANDS['!bluething'](config, match)
+for thing, command in THINGS_TO_COMMANDS:
+    func = functools.partial(_base, cmd=command)
+    handle_message(_reg(thing), flags=re.IGNORECASE)(func)
