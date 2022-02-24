@@ -10,7 +10,7 @@ from bot.data import handle_message
 
 
 def _reg(s: str) -> str:
-    return fr".*what('s| is)?( this)? {s}"
+    return fr".*what('s| is)?( this| that)? {s}"
 
 
 async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
@@ -21,6 +21,7 @@ THINGS_TO_COMMANDS = (
     ('keyboard', '!keyboard'),
     ('keypad', '!keyboard3'),
     ('trackball', '!bluething'),
+    ('blue thing', '!bluething'),
 )
 
 for thing, command in THINGS_TO_COMMANDS:
