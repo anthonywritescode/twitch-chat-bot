@@ -13,7 +13,7 @@ from bot.data import handle_message
 
 # XXX: this doesn't belong here, but ordering is important
 @handle_message(
-    '.*(is (this|that)|you us(e|ing)) (vim|nano)',
+    '.*(is (this|that)|you us(e|ing)|instead of) (vim|nano)',
     flags=re.IGNORECASE,
 )
 async def msg_is_this_vim(config: Config, match: Match[str]) -> str | None:
