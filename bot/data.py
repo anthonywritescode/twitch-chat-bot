@@ -30,10 +30,11 @@ def get_fake_msg(
         *,
         bits: int = 0,
         mod: bool = False,
+        user: str = 'username',
 ) -> str:
     badges = 'moderator/1' if mod else ''
-    info = f'@badges={badges};bits={bits};color=;display-name=username'
-    return f'{info} :username PRIVMSG #{config.channel} :{msg}\r\n'
+    info = f'@badges={badges};bits={bits};color=;display-name={user}'
+    return f'{info} :{user} PRIVMSG #{config.channel} :{msg}\r\n'
 
 
 # TODO: move this and/or delete this
