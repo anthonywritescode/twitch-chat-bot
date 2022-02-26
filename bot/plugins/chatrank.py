@@ -3,14 +3,12 @@ from __future__ import annotations
 import collections
 import datetime
 import functools
-import itertools
 import json
 import os
 import re
 import urllib.request
 from typing import Any
 from typing import Counter
-from typing import Iterator
 from typing import Mapping
 from typing import Match
 from typing import Pattern
@@ -21,6 +19,7 @@ from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
 from bot.permissions import optional_user_arg
+from bot.ranking import tied_rank
 
 CHAT_ALIASES = {
     'kevinsjoberg': 'kmjao',
@@ -64,20 +63,12 @@ def _chat_rank_counts(reg: Pattern[str]) -> Counter[str]:
     return total
 
 
-def _tied_rank(
-        counts: Sequence[tuple[str, int]],
-) -> Iterator[tuple[int, tuple[int, Iterator[tuple[str, int]]]]]:
-    # "counts" should be sorted, usually produced by Counter.most_common()
-    grouped = itertools.groupby(counts, key=lambda pair: pair[1])
-    yield from enumerate(grouped, start=1)
-
-
 def _user_rank_by_line_type(
         username: str, reg: Pattern[str],
 ) -> tuple[int, int] | None:
     total = _chat_rank_counts(reg)
     target_username = username.lower()
-    for rank, (count, users) in _tied_rank(total.most_common()):
+    for rank, (count, users) in tied_rank(total.most_common()):
         for username, _ in users:
             if target_username == username:
                 return rank, count
@@ -88,7 +79,7 @@ def _user_rank_by_line_type(
 def _top_n_rank_by_line_type(reg: Pattern[str], n: int = 10) -> list[str]:
     total = _chat_rank_counts(reg)
     user_list = []
-    for rank, (count, users) in _tied_rank(total.most_common(n)):
+    for rank, (count, users) in tied_rank(total.most_common(n)):
         usernames = ', '.join(username for username, _ in users)
         user_list.append(f'{rank}. {usernames} ({count})')
     return user_list

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import collections
 import datetime
 import os.path
+from typing import Counter
 from typing import Match
 
 import aiosqlite
@@ -9,10 +11,13 @@ import aiosqlite
 from bot.config import Config
 from bot.data import bits_handler
 from bot.data import command
+from bot.data import esc
 from bot.data import format_msg
 from bot.data import periodic_handler
 from bot.permissions import is_moderator
+from bot.permissions import optional_user_arg
 from bot.permissions import parse_badge_info
+from bot.ranking import tied_rank
 from bot.util import check_call
 from bot.util import seconds_to_readable
 
@@ -173,6 +178,63 @@ async def vim_bits_handler(config: Config, match: Match[str]) -> str:
             f'vim is currently disabled '
             f'{seconds_to_readable(time_left)} banked',
         )
+
+
+async def _get_user_vim_bits(
+    db: aiosqlite.Connection,
+) -> Counter[str]:
+    vim_bits_query = 'SELECT user, SUM(bits) FROM vim_bits GROUP BY user'
+    async with db.execute(vim_bits_query) as cursor:
+        rows = await cursor.fetchall()
+        bits_counts = collections.Counter(dict(rows))
+        return bits_counts
+
+
+async def _user_rank_by_bits(
+        username: str, db: aiosqlite.Connection,
+) -> tuple[int, int] | None:
+    total = await _get_user_vim_bits(db)
+    target_username = username.lower()
+    for rank, (count, users) in tied_rank(total.most_common()):
+        for username, _ in users:
+            if target_username == username.lower():
+                return rank, count
+    else:
+        return None
+
+
+async def _top_n_rank_by_bits(
+    db: aiosqlite.Connection, n: int = 5,
+) -> list[str]:
+    total = await _get_user_vim_bits(db)
+    user_list = []
+    for rank, (count, users) in tied_rank(total.most_common(n)):
+        usernames = ', '.join(username for username, _ in users)
+        user_list.append(f'{rank}. {usernames} ({count})')
+    return user_list
+
+
+@command('!top5vimbits', '!topvimbits')
+async def cmd_topvimbits(config: Config, match: Match[str]) -> str:
+    async with aiosqlite.connect('db.db') as db:
+        await ensure_vim_tables_exist(db)
+        top_10_s = ', '.join(await _top_n_rank_by_bits(db, n=5))
+        return format_msg(match, f'{top_10_s}')
+
+
+@command('!vimbitsrank')
+async def cmd_vimbitsrank(config: Config, match: Match[str]) -> str:
+    user = optional_user_arg(match)
+    async with aiosqlite.connect('db.db') as db:
+        ret = await _user_rank_by_bits(user, db)
+        if ret is None:
+            return format_msg(match, f'user not found {esc(user)}')
+        else:
+            rank, n = ret
+            return format_msg(
+                match,
+                f'{esc(user)} is ranked #{rank} with {n} vim bits',
+            )
 
 
 @command('!vimtimeleft', secret=True)
