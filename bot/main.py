@@ -308,8 +308,9 @@ async def chat_message_test(
         *,
         bits: int,
         mod: bool,
+        user: str,
 ) -> None:
-    line = get_fake_msg(config, msg, bits=bits, mod=mod)
+    line = get_fake_msg(config, msg, bits=bits, mod=mod, user=user)
 
     input_ret = await get_printed_input(config, line, images=False)
     assert input_ret is not None
@@ -338,6 +339,7 @@ def main() -> int:
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--images', action='store_true')
     parser.add_argument('--test')
+    parser.add_argument('--user', default='username')
     parser.add_argument('--bits', type=int, default=0)
     parser.add_argument('--mod', action='store_true')
     args = parser.parse_args()
@@ -354,6 +356,7 @@ def main() -> int:
                 args.test,
                 bits=args.bits,
                 mod=args.mod,
+                user=args.user,
             ),
         )
     else:
