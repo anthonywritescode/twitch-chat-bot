@@ -22,6 +22,7 @@ THINGS_TO_COMMANDS = (
     ('keypad', '!keyboard3'),
     ('trackball', '!bluething'),
     ('blue thing', '!bluething'),
+    ('editor', '!editor'),
 )
 
 for thing, command in THINGS_TO_COMMANDS:
