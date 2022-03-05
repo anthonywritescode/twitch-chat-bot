@@ -18,11 +18,12 @@ async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
 
 
 THINGS_TO_COMMANDS = (
+    ('blue thing', '!bluething'),
+    ('distro', '!distro'),
+    ('editor', '!editor'),
     ('keyboard', '!keyboard'),
     ('keypad', '!keyboard3'),
     ('trackball', '!bluething'),
-    ('blue thing', '!bluething'),
-    ('editor', '!editor'),
 )
 
 for thing, command in THINGS_TO_COMMANDS:
