@@ -136,7 +136,10 @@ async def change_theme(config: Config, match: Match[str]) -> str:
     else:
         return format_msg(match, 'error: could not parse theme!')
 
-    _validate_theme(loaded)
+    try:
+        _validate_theme(loaded)
+    except (TypeError, ValueError):
+        return format_msg(match, 'error: malformed theme!')
 
     os.makedirs('.babi-themes', exist_ok=True)
     theme_file = f'{match["user"]}-{uuid.uuid4()}.json'
