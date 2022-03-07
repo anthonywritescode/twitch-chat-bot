@@ -47,7 +47,8 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!job',
-        'I am a Staff Software Engineer at Stripe working on Python Infra',
+        "it's... complicated: "
+        'https://clips.twitch.tv/SquareSillyGnatDancingBanana-hoxF1MX5wGmHbT8f',  # noqa: E501
     ),
     (
         '!keyboard',
