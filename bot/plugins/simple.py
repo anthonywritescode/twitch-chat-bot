@@ -156,7 +156,7 @@ for _cmd, _msg in _SECRET_COMMANDS:
 _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!bluething', ('!blueball',)),
     ('!discord', ('!dicsord',)),
-    ('!distro', ('!os', '!windows')),
+    ('!distro', ('!linux', '!os', '!ubuntu', '!vm', '!windows')),
     ('!emotes', ('!emoji', '!emote')),
     ('!job', ('!jorb',)),
     ('!keyboard', ('!keyboard1',)),
