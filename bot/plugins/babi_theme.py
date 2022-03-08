@@ -102,7 +102,7 @@ def _validate_theme(theme: Any) -> None:
     for rule in theme.get('tokenColors', []) + theme.get('settings', []):
         if not isinstance(rule, dict):
             raise TypeError
-        for key in ('bg', 'fg'):
+        for key in ('background', 'foreground'):
             if key in rule:
                 _validate_color(rule[key])
 
