@@ -10,7 +10,6 @@ from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
 from bot.permissions import is_moderator
-from bot.permissions import is_subscriber
 
 
 async def ensure_giveaway_tables_exist(db: aiosqlite.Connection) -> None:
@@ -21,7 +20,10 @@ async def ensure_giveaway_tables_exist(db: aiosqlite.Connection) -> None:
         ')',
     )
     await db.execute(
-        'CREATE TABLE IF NOT EXISTS giveaway_users (user TEXT NOT NULL)',
+        'CREATE TABLE IF NOT EXISTS giveaway_users ('
+        '    user TEXT NOT NULL,'
+        '    PRIMARY KEY (user)'
+        ')',
     )
     await db.commit()
 
@@ -37,17 +39,11 @@ async def givewawaystart(config: Config, match: Match[str]) -> str | None:
         await db.execute('INSERT OR REPLACE INTO giveaway VALUES (1)')
         await db.commit()
 
-    return format_msg(
-        match,
-        'giveaway started!  use !giveaway to enter (subs only)',
-    )
+    return format_msg(match, 'giveaway started!  use !giveaway to enter')
 
 
 @command('!giveaway', secret=True)
 async def giveaway(config: Config, match: Match[str]) -> str:
-    if not is_subscriber(match):
-        return format_msg(match, 'not a subscriber! subscribe to enter')
-
     async with aiosqlite.connect('db.db') as db:
         await ensure_giveaway_tables_exist(db)
 
