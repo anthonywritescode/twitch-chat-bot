@@ -157,6 +157,7 @@ async def change_theme(config: Config, match: Match[str]) -> str:
 
     proc = await asyncio.create_subprocess_exec('pkill', '-USR1', 'babi')
     await proc.communicate()
-    assert proc.returncode == 0
+    # ignore the return code, if there are no editors running it'll be `1`
+    # assert proc.returncode == 0
 
     return format_msg(match, 'theme updated!')
