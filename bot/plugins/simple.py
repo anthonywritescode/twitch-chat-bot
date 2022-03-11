@@ -80,12 +80,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'https://github.com/readme/stories/anthony-sottile',
     ),
     (
-        '!theme',
-        'awcBabi this is vs dark plus in !babi with one modification to '
-        'highlight ini headers: '
-        'https://github.com/asottile/babi#setting-up-syntax-highlighting',
-    ),
-    (
         '!support',
         'Here are the great ways to support my content: '
         'https://github.com/asottile/asottile/blob/master/supporting.md',

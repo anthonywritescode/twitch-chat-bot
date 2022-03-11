@@ -25,6 +25,7 @@ THINGS_TO_COMMANDS = (
     ('keyboard', '!keyboard'),
     ('keypad', '!keyboard3'),
     ('playlist', '!playlist'),
+    ('theme', '!theme'),
     ('trackball', '!bluething'),
 )
 

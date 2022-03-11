@@ -16,6 +16,8 @@ import defusedxml.ElementTree
 
 from bot.config import Config
 from bot.data import channel_points_handler
+from bot.data import command
+from bot.data import esc
 from bot.data import format_msg
 
 ALLOWED_URL_PREFIXES = (
@@ -28,6 +30,8 @@ ALLOWED_URL_PREFIXES = (
 COMMENT_TOKEN = re.compile(br'(\\\\|\\"|"|//|\n)')
 COMMA_TOKEN = re.compile(br'(\\\\|\\"|"|\]|\})')
 TRAILING_COMMA = re.compile(br',(\s*)$')
+
+THEME_DIR = os.path.abspath('.babi-themes')
 
 
 def _remove_comments(s: bytes) -> io.BytesIO:
@@ -181,9 +185,12 @@ async def change_theme(config: Config, match: Match[str]) -> str:
     except (TypeError, ValueError):
         return format_msg(match, 'error: malformed theme!')
 
-    os.makedirs('.babi-themes', exist_ok=True)
+    loaded['user'] = match['user']
+    loaded['url'] = url
+
+    os.makedirs(THEME_DIR, exist_ok=True)
     theme_file = f'{match["user"]}-{uuid.uuid4()}.json'
-    theme_file = os.path.abspath(os.path.join('.babi-themes', theme_file))
+    theme_file = os.path.join(THEME_DIR, theme_file)
     with open(theme_file, 'w') as f:
         json.dump(loaded, f)
 
@@ -201,3 +208,31 @@ async def change_theme(config: Config, match: Match[str]) -> str:
     # assert proc.returncode == 0
 
     return format_msg(match, 'theme updated!')
+
+
+@command('!theme')
+async def command_theme(config: Config, match: Match[str]) -> str:
+    theme_file = os.path.expanduser('~/.config/babi/theme.json')
+    if not os.path.exists(theme_file):
+        return format_msg(
+            match,
+            'awcBabi this is vs dark plus in !babi with one modification to '
+            'highlight ini headers: '
+            'https://github.com/asottile/babi#setting-up-syntax-highlighting',
+        )
+
+    with open(theme_file) as f:
+        contents = json.load(f)
+
+    try:
+        name = contents.get('name', '(unknown)')
+        user = contents['user']
+        url = contents['url']
+    except KeyError:
+        return format_msg(match, "awcBabi I don't know what this theme is!?")
+    else:
+        return format_msg(
+            match,
+            f'awcBabi this theme was set by {esc(user)} using channel points! '
+            f'it is called {esc(name)!r} and can be download from {esc(url)}',
+        )
