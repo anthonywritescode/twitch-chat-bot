@@ -10,7 +10,7 @@ from bot.data import handle_message
 
 
 def _reg(s: str) -> str:
-    return fr".*what('s| is| does)?( this| that| the)? {s}"
+    return fr".*what('s| is| does)?( this| that| the)? {s}\b"
 
 
 async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
