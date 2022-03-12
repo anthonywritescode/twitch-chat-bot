@@ -21,7 +21,7 @@ MSG_RE = re.compile(
     'PRIVMSG #(?P<channel>[^ ]+) '
     ':(?P<msg>[^\r]+)',
 )
-COMMAND_RE = re.compile(r'^(?P<cmd>!+\w+)')
+COMMAND_RE = re.compile(r'^(?P<cmd>!+[a-zA-Z0-9-]+)')
 
 
 def get_fake_msg(
