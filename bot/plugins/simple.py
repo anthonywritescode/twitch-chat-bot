@@ -121,6 +121,7 @@ _SECRET_COMMANDS = (
         'I created pre-commit!  https://pre-commit.com and '
         'https://pre-commit.ci',
     ),
+    ('!precommit', "it's spelled !pre-commit awcBongo"),
     (
         '!pytest',
         'yep, I am one of the pytest core devs '
