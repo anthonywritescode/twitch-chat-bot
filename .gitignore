@@ -2,9 +2,7 @@
 /.badge_cache
 /.coverage
 /.emote_cache
-/.mypy_cache
 /.tox
 /config.json
 /db.db
 /logs
-/venv
