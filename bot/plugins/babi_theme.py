@@ -151,11 +151,13 @@ def _validate_theme(theme: Any) -> None:
                 _validate_color(rule[key])
 
 
-@channel_points_handler('5861c27a-ae1f-4b8e-af03-88f12dd7d23a')
-async def change_theme(config: Config, match: Match[str]) -> str:
-    url = match['msg'].strip()
+class ThemeError(ValueError):
+    pass
+
+
+async def _load_theme(url: str) -> dict[str, Any]:
     if not url.startswith(ALLOWED_URL_PREFIXES):
-        return format_msg(match, 'error: url must be from github!')
+        raise ThemeError('error: url must be from github!')
 
     if '/blob/' in url:
         url = url.replace('/blob/', '/raw/')
@@ -168,7 +170,7 @@ async def change_theme(config: Config, match: Match[str]) -> str:
             async with session.get(url) as resp:
                 data = await resp.read()
     except aiohttp.ClientError:
-        return format_msg(match, 'error: could not download url!')
+        raise ThemeError('error: could not download url!')
 
     for strategy in STRATEGIES:
         try:
@@ -178,12 +180,24 @@ async def change_theme(config: Config, match: Match[str]) -> str:
         else:
             break
     else:
-        return format_msg(match, 'error: could not parse theme!')
+        raise ThemeError('error: could not parse theme!')
 
     try:
         _validate_theme(loaded)
     except (TypeError, ValueError):
-        return format_msg(match, 'error: malformed theme!')
+        raise ThemeError('error: malformed theme!')
+
+    return loaded
+
+
+@channel_points_handler('5861c27a-ae1f-4b8e-af03-88f12dd7d23a')
+async def change_theme(config: Config, match: Match[str]) -> str:
+    url = match['msg'].strip()
+
+    try:
+        loaded = await _load_theme(url)
+    except ThemeError as e:
+        return format_msg(match, str(e))
 
     loaded['user'] = match['user']
     loaded['url'] = url
@@ -236,3 +250,14 @@ async def command_theme(config: Config, match: Match[str]) -> str:
             f'awcBabi this theme was set by {esc(user)} using channel points! '
             f'it is called {esc(name)!r} and can be download from {esc(url)}',
         )
+
+
+@command('!themevalidate', secret=True)
+async def command_themevalidate(config: Config, match: Match[str]) -> str:
+    _, _, url = match['msg'].partition(' ')
+    try:
+        await _load_theme(url.strip())
+    except ThemeError as e:
+        return format_msg(match, str(e))
+    else:
+        return format_msg(match, 'theme is ok!')
