@@ -214,7 +214,7 @@ async def _top_n_rank_by_bits(
     return user_list
 
 
-@command('!top5vimbits', '!topvimbits')
+@command('!top5vimbits', '!topvimbits', secret=True)
 async def cmd_topvimbits(config: Config, match: Match[str]) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
@@ -222,7 +222,7 @@ async def cmd_topvimbits(config: Config, match: Match[str]) -> str:
         return format_msg(match, f'{top_10_s}')
 
 
-@command('!vimbitsrank')
+@command('!vimbitsrank', secret=True)
 async def cmd_vimbitsrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     async with aiosqlite.connect('db.db') as db:

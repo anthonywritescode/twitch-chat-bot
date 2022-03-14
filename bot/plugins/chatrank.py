@@ -113,7 +113,7 @@ async def cmd_top_10_chat(config: Config, match: Match[str]) -> str:
     return format_msg(match, f'{top_10_s} (since {_log_start_date()})')
 
 
-@command('!bonkrank')
+@command('!bonkrank', secret=True)
 async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     ret = _user_rank_by_line_type(user, BONKER_RE)
@@ -127,13 +127,13 @@ async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
         )
 
 
-@command('!top5bonkers')
+@command('!top5bonkers', secret=True)
 async def cmd_top_5_bonkers(config: Config, match: Match[str]) -> str:
     top_5_s = ', '.join(_top_n_rank_by_line_type(BONKER_RE, n=5))
     return format_msg(match, top_5_s)
 
 
-@command('!bonkedrank')
+@command('!bonkedrank', secret=True)
 async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
     user = optional_user_arg(match)
     ret = _user_rank_by_line_type(user, BONKED_RE)
@@ -147,7 +147,7 @@ async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
         )
 
 
-@command('!top5bonked')
+@command('!top5bonked', secret=True)
 async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
     top_5_s = ', '.join(_top_n_rank_by_line_type(BONKED_RE, n=5))
     return format_msg(match, top_5_s)

@@ -15,11 +15,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         'I wrote the bot!  https://github.com/anthonywritescode/twitch-chat-bot',  # noqa: E501
     ),
     (
-        '!copilot',
-        'Quick TLDR of my thoughts on Github copilot: '
-        'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
-    ),
-    (
         '!discord',
         'We do have Discord, you are welcome to join: '
         'https://discord.gg/xDKGPaW',
@@ -59,18 +54,6 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         '(split) awcKeebL awcKeebR kinesis freestyle pro (cherry mx reds) '
         'https://amzn.to/3jyN4PC (faq: https://youtu.be/DZgCUWf9DZM )',
     ),
-    (
-        '!keyboard2',
-        'this is my second mechanical keyboard: '
-        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png '
-        'here is more info: https://youtu.be/rBngGyWCV-4',
-    ),
-    (
-        '!keyboard3',
-        'this is my stream deck keyboard (cherry mx black silent): '
-        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
-        'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
-    ),
     ('!lurk', 'thanks for lurking, {user}!'),
     ('!ohai', 'ohai, {user}!'),
     ('!playlist', 'HearWeGo: https://www.youtube.com/playlist?list=PL44UysF4ZQ23B_ITIqM8Fqt1UXgsA9yD6'),  # noqa: E501
@@ -101,6 +84,11 @@ _SECRET_COMMANDS = (
     ),
     ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
     (
+        '!copilot',
+        'Quick TLDR of my thoughts on Github copilot: '
+        'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
+    ),
+    (
         '!deadsnakes',
         'I maintain deadsnakes!  I backport and forward port pythons: '
         'https://github.com/deadsnakes',
@@ -111,6 +99,18 @@ _SECRET_COMMANDS = (
         'https://github.com/pycqa/flake8',
     ),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
+    (
+        '!keyboard2',
+        'this is my second mechanical keyboard: '
+        'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png '
+        'here is more info: https://youtu.be/rBngGyWCV-4',
+    ),
+    (
+        '!keyboard3',
+        'this is my stream deck keyboard (cherry mx black silent): '
+        'https://keeb.io/products/bdn9-3x3-9-key-macropad-rotary-encoder-support '  # noqa: E501
+        'here is more info: https://www.youtube.com/watch?v=p2TyRIAxR48',
+    ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
         '!question',
