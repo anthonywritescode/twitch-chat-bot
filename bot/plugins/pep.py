@@ -8,12 +8,12 @@ from bot.data import command
 from bot.data import format_msg
 from bot.data import handle_message
 
-DIGITS_RE = re.compile(r'\d{1,4}(?: |$)')
+DIGITS_RE = re.compile(r'\d{1,4}\b')
 
 
 def _pep_msg(match: Match[str], n_s: str) -> str:
     n = str(int(n_s)).zfill(4)
-    return format_msg(match, f'https://www.python.org/dev/peps/pep-{n}/')
+    return format_msg(match, f'https://peps.python.org/pep-{n}/')
 
 
 @command('!pep')
