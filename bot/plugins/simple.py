@@ -127,6 +127,10 @@ _SECRET_COMMANDS = (
         'yep, I am one of the pytest core devs '
         'https://github.com/pytest-dev/pytest',
     ),
+    (
+        '!rebase',
+        'https://clips.twitch.tv/HonestCrowdedGalagoStoneLightning-khp2n3Fqvo0Wdpno',  # noqa: E501
+    ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
     ('!water', 'DRINK WATER, BITCH'),
