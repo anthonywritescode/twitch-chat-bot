@@ -10,7 +10,7 @@ from bot.data import handle_message
 
 
 def _reg(s: str) -> str:
-    return fr".*what('s| is| does)?( this| that| the)? {s}\b"
+    return fr".*what('?s| is| does)?( this| that| the)? {s}\b"
 
 
 async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
@@ -18,6 +18,7 @@ async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
 
 
 THINGS_TO_COMMANDS = (
+    ('blue ball', '!bluething'),
     ('blue button', '!bluething'),
     ('blue thing', '!bluething'),
     ('distro', '!distro'),
