@@ -24,7 +24,7 @@ from bot.ranking import tied_rank
 CHAT_ALIASES = {
     'kevinsjoberg': 'kevinwritescode',
     'kmjao': 'kevinwritescode',
-    'makayla_fox': 'marsha_socks'
+    'makayla_fox': 'marsha_socks',
 }
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
