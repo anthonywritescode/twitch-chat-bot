@@ -7,7 +7,7 @@ from bot.data import command
 from bot.data import format_msg
 
 
-@command('!kmjao', '!kevinsjoberg', secret=True)
+@command('!kmjao', '!kevinsjoberg', '!kevinwritescode', secret=True)
 async def cmd_kevin(config: Config, match: Match[str]) -> str:
     return format_msg(match, "Kevin stop spending money you don't have")
 
@@ -16,5 +16,5 @@ async def cmd_kevin(config: Config, match: Match[str]) -> str:
 async def cmd_isatisfied(config: Config, match: Match[str]) -> str:
     return format_msg(
         match,
-        "Keep spending money that kevinsjoberg doesn't have",
+        "Keep spending money that Kevin doesn't have",
     )

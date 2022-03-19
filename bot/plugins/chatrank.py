@@ -22,7 +22,8 @@ from bot.permissions import optional_user_arg
 from bot.ranking import tied_rank
 
 CHAT_ALIASES = {
-    'kevinsjoberg': 'kmjao',
+    'kevinsjoberg': 'kevinwritescode',
+    'kmjao': 'kevinwritescode',
 }
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
