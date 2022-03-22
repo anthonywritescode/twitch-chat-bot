@@ -25,6 +25,7 @@ CHAT_ALIASES = {
     'kevinsjoberg': 'kevinwritescode',
     'kmjao': 'kevinwritescode',
     'makayla_fox': 'marsha_socks',
+    'jast_lucy': 'snipsyfox',
 }
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
