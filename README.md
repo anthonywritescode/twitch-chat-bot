@@ -1,4 +1,4 @@
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/anthonywritescode/twitch-chat-bot/master.svg)](https://results.pre-commit.ci/latest/github/anthonywritescode/twitch-chat-bot/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/anthonywritescode/twitch-chat-bot/main.svg)](https://results.pre-commit.ci/latest/github/anthonywritescode/twitch-chat-bot/main)
 
 twitch-chat-bot
 ===============
