@@ -65,7 +65,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!support',
         'Here are the great ways to support my content: '
-        'https://github.com/asottile/asottile/blob/master/supporting.md',
+        'https://github.com/asottile/asottile/blob/HEAD/supporting.md',
     ),
     ('!twitter', 'https://twitter.com/codewithanthony'),
     (
