@@ -163,12 +163,6 @@ def _import_plugins() -> None:
 _import_plugins()
 
 
-@handler('^PING (.*)')
-async def pong(config: Config, match: Match[str]) -> str:
-    """keeps the bot alive, need to reply with all PINGs with PONG"""
-    return f'PONG {match.group(1)}\r\n'
-
-
 # make this always last so that help is implemented properly
 @handle_message(r'!+\w')
 async def cmd_help(config: Config, match: Match[str]) -> str:

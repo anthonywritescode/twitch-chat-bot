@@ -298,6 +298,9 @@ async def amain(config: Config, *, quiet: bool, images: bool) -> None:
                 config, match, handler, writer, log_writer, quiet=quiet,
             )
             loop.create_task(coro)
+        elif msg.startswith('PING '):
+            _, _, rest = msg.partition(' ')
+            await send(writer, f'PONG {rest.rstrip()}\r\n', quiet=quiet)
         elif not quiet:
             print(f'UNHANDLED: {msg}', end='')
 
