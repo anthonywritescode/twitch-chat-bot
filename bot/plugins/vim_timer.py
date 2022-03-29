@@ -256,7 +256,7 @@ async def cmd_vimtimeleft(config: Config, match: Match[str]) -> str:
 
 @command('!disablevim', secret=True)
 async def cmd_disablevim(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != match['channel']:
+    if not is_moderator(match) and match['user'] != config.channel:
         return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
 
     async with aiosqlite.connect('db.db') as db:
@@ -270,7 +270,7 @@ async def cmd_disablevim(config: Config, match: Match[str]) -> str:
 
 @command('!enablevim', secret=True)
 async def cmd_enablevim(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != match['channel']:
+    if not is_moderator(match) and match['user'] != config.channel:
         return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
 
     async with aiosqlite.connect('db.db') as db:

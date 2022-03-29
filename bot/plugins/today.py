@@ -46,7 +46,7 @@ async def cmd_today(config: Config, match: Match[str]) -> str:
 
 @command('!settoday', secret=True)
 async def cmd_settoday(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != match['channel']:
+    if not is_moderator(match) and match['user'] != config.channel:
         return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
     _, _, rest = match['msg'].partition(' ')
 

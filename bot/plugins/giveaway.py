@@ -30,7 +30,7 @@ async def ensure_giveaway_tables_exist(db: aiosqlite.Connection) -> None:
 
 @command('!giveawaystart', secret=True)
 async def givewawaystart(config: Config, match: Match[str]) -> str | None:
-    if not is_moderator(match) and match['user'] != match['channel']:
+    if not is_moderator(match) and match['user'] != config.channel:
         return None
 
     async with aiosqlite.connect('db.db') as db:
@@ -62,7 +62,7 @@ async def giveaway(config: Config, match: Match[str]) -> str:
 
 @command('!giveawayend', secret=True)
 async def giveawayend(config: Config, match: Match[str]) -> str | None:
-    if not is_moderator(match) and match['user'] != match['channel']:
+    if not is_moderator(match) and match['user'] != config.channel:
         return None
 
     async with aiosqlite.connect('db.db') as db:
