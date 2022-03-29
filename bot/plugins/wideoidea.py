@@ -2,20 +2,19 @@ from __future__ import annotations
 
 import os
 import tempfile
-from typing import Match
 
 from bot.config import Config
 from bot.data import command
 from bot.data import format_msg
-from bot.permissions import is_moderator
+from bot.message import Message
 from bot.util import check_call
 
 
 @command('!wideoidea', '!videoidea', secret=True)
-async def cmd_videoidea(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != config.channel:
-        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
-    _, _, rest = match['msg'].partition(' ')
+async def cmd_videoidea(config: Config, msg: Message) -> str:
+    if not msg.is_moderator and msg.name_key != config.channel:
+        return format_msg(msg, 'https://youtu.be/RfiQYRn7fBg')
+    _, _, rest = msg.msg.partition(' ')
 
     async def _git(*cmd: str) -> None:
         await check_call('git', '-C', tmpdir, *cmd)
@@ -37,6 +36,6 @@ async def cmd_videoidea(config: Config, match: Match[str]) -> str:
         await _git('push', '-q', 'origin', 'HEAD')
 
     return format_msg(
-        match,
+        msg,
         'added! https://github.com/asottile/scratch/wiki/anthony-explains-ideas',  # noqa: E501
     )

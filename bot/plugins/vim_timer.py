@@ -4,7 +4,6 @@ import collections
 import datetime
 import os.path
 from typing import Counter
-from typing import Match
 
 import aiosqlite
 
@@ -14,9 +13,7 @@ from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
 from bot.data import periodic_handler
-from bot.permissions import is_moderator
-from bot.permissions import optional_user_arg
-from bot.permissions import parse_badge_info
+from bot.message import Message
 from bot.ranking import tied_rank
 from bot.util import check_call
 from bot.util import seconds_to_readable
@@ -152,29 +149,28 @@ async def add_bits_off(db: aiosqlite.Connection, user: str, bits: int) -> int:
 
 
 @bits_handler(51)
-async def vim_bits_handler(config: Config, match: Match[str]) -> str:
-    info = parse_badge_info(match['info'])
-
+async def vim_bits_handler(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
         enabled = await get_enabled(db)
 
-        bits = int(info['bits'])
+        bits = int(msg.info['bits'])
         if enabled:
-            time_left = await add_bits(db, match['user'], bits)
+            # TODO: fix casing of names
+            time_left = await add_bits(db, msg.name_key, bits)
         else:
-            time_left = await add_bits_off(db, match['user'], bits)
+            time_left = await add_bits_off(db, msg.name_key, bits)
 
     if enabled:
         await _set_symlink(should_be_vim=True)
 
         return format_msg(
-            match,
+            msg,
             f'MOAR VIM: {seconds_to_readable(time_left)} remaining',
         )
     else:
         return format_msg(
-            match,
+            msg,
             f'vim is currently disabled '
             f'{seconds_to_readable(time_left)} banked',
         )
@@ -215,49 +211,50 @@ async def _top_n_rank_by_bits(
 
 
 @command('!top5vimbits', '!topvimbits', secret=True)
-async def cmd_topvimbits(config: Config, match: Match[str]) -> str:
+async def cmd_topvimbits(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
         top_10_s = ', '.join(await _top_n_rank_by_bits(db, n=5))
-        return format_msg(match, f'{top_10_s}')
+        return format_msg(msg, f'{top_10_s}')
 
 
 @command('!vimbitsrank', secret=True)
-async def cmd_vimbitsrank(config: Config, match: Match[str]) -> str:
-    user = optional_user_arg(match)
+async def cmd_vimbitsrank(config: Config, msg: Message) -> str:
+    # TODO: handle display name properly
+    user = msg.optional_user_arg.lower()
     async with aiosqlite.connect('db.db') as db:
         ret = await _user_rank_by_bits(user, db)
         if ret is None:
-            return format_msg(match, f'user not found {esc(user)}')
+            return format_msg(msg, f'user not found {esc(user)}')
         else:
             rank, n = ret
             return format_msg(
-                match,
+                msg,
                 f'{esc(user)} is ranked #{rank} with {n} vim bits',
             )
 
 
 @command('!vimtimeleft', secret=True)
-async def cmd_vimtimeleft(config: Config, match: Match[str]) -> str:
+async def cmd_vimtimeleft(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
         if not await get_enabled(db):
-            return format_msg(match, 'vim is currently disabled')
+            return format_msg(msg, 'vim is currently disabled')
 
         time_left = await get_time_left(db)
         if time_left == 0:
-            return format_msg(match, 'not currently using vim')
+            return format_msg(msg, 'not currently using vim')
         else:
             return format_msg(
-                match,
+                msg,
                 f'vim time remaining: {seconds_to_readable(time_left)}',
             )
 
 
 @command('!disablevim', secret=True)
-async def cmd_disablevim(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != config.channel:
-        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
+async def cmd_disablevim(config: Config, msg: Message) -> str:
+    if not msg.is_moderator and msg.name_key != config.channel:
+        return format_msg(msg, 'https://youtu.be/RfiQYRn7fBg')
 
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
@@ -265,13 +262,13 @@ async def cmd_disablevim(config: Config, match: Match[str]) -> str:
         await db.execute('INSERT INTO vim_enabled VALUES (0)')
         await db.commit()
 
-    return format_msg(match, 'vim has been disabled')
+    return format_msg(msg, 'vim has been disabled')
 
 
 @command('!enablevim', secret=True)
-async def cmd_enablevim(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != config.channel:
-        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
+async def cmd_enablevim(config: Config, msg: Message) -> str:
+    if not msg.is_moderator and msg.name_key != config.channel:
+        return format_msg(msg, 'https://youtu.be/RfiQYRn7fBg')
 
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
@@ -284,11 +281,11 @@ async def cmd_enablevim(config: Config, match: Match[str]) -> str:
         await db.commit()
 
     if time_left == 0:
-        return format_msg(match, 'vim has been enabled')
+        return format_msg(msg, 'vim has been enabled')
     else:
         await _set_symlink(should_be_vim=True)
         return format_msg(
-            match,
+            msg,
             f'vim has been enabled: '
             f'time remaining {seconds_to_readable(time_left)}',
         )
@@ -298,12 +295,12 @@ async def cmd_enablevim(config: Config, match: Match[str]) -> str:
     '!editor',
     '!babi', '!nano', '!vim', '!emacs', '!vscode', '!wheredobabiscomefrom',
 )
-async def cmd_editor(config: Config, match: Match[str]) -> str:
+async def cmd_editor(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
         if await get_time_left(db):
             return format_msg(
-                match,
+                msg,
                 'I am currently being forced to use vim by viewers. '
                 'awcBabi I normally use my text editor I made, called babi! '
                 'https://github.com/asottile/babi more info in this video: '
@@ -311,7 +308,7 @@ async def cmd_editor(config: Config, match: Match[str]) -> str:
             )
         else:
             return format_msg(
-                match,
+                msg,
                 'awcBabi this is my text editor I made, called babi! '
                 'https://github.com/asottile/babi more info in this video: '
                 'https://www.youtube.com/watch?v=WyR1hAGmR3g',
@@ -319,13 +316,13 @@ async def cmd_editor(config: Config, match: Match[str]) -> str:
 
 
 @periodic_handler(seconds=5)
-async def vim_normalize_state(config: Config, match: Match[str]) -> str | None:
+async def vim_normalize_state(config: Config, msg: Message) -> str | None:
     async with aiosqlite.connect('db.db') as db:
         await ensure_vim_tables_exist(db)
         time_left = await get_time_left(db)
 
     cleared_vim = await _set_symlink(should_be_vim=time_left > 0)
     if cleared_vim:
-        return format_msg(match, 'vim no more! you are free!')
+        return format_msg(msg, 'vim no more! you are free!')
     else:
         return None

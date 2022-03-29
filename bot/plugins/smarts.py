@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import functools
 import re
-from typing import Match
 
 from bot.config import Config
 from bot.data import COMMANDS
 from bot.data import handle_message
+from bot.message import Message
 
 
 def _reg(s: str) -> str:
     return fr".*what('?s| is| does)?( this| that| the)? {s}\b"
 
 
-async def _base(config: Config, match: Match[str], *, cmd: str) -> str | None:
-    return await COMMANDS[cmd](config, match)
+async def _base(config: Config, msg: Message, *, cmd: str) -> str | None:
+    return await COMMANDS[cmd](config, msg)
 
 
 THINGS_TO_COMMANDS = (

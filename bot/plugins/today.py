@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import Match
-
 import aiosqlite
 
 from bot.config import Config
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
-from bot.permissions import is_moderator
+from bot.message import Message
 
 
 async def ensure_today_table_exists(db: aiosqlite.Connection) -> None:
@@ -39,18 +37,18 @@ async def get_today(db: aiosqlite.Connection) -> str:
 
 
 @command('!today', '!project')
-async def cmd_today(config: Config, match: Match[str]) -> str:
+async def cmd_today(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
-        return format_msg(match, await get_today(db))
+        return format_msg(msg, await get_today(db))
 
 
 @command('!settoday', secret=True)
-async def cmd_settoday(config: Config, match: Match[str]) -> str:
-    if not is_moderator(match) and match['user'] != config.channel:
-        return format_msg(match, 'https://youtu.be/RfiQYRn7fBg')
-    _, _, rest = match['msg'].partition(' ')
+async def cmd_settoday(config: Config, msg: Message) -> str:
+    if not msg.is_moderator and msg.name_key != config.channel:
+        return format_msg(msg, 'https://youtu.be/RfiQYRn7fBg')
+    _, _, rest = msg.msg.partition(' ')
 
     async with aiosqlite.connect('db.db') as db:
         await set_today(db, rest)
 
-    return format_msg(match, 'updated!')
+    return format_msg(msg, 'updated!')
