@@ -28,6 +28,7 @@ THINGS_TO_COMMANDS = (
     ('keypad', '!keyboard3'),
     ('os', '!os'),
     ('playlist', '!playlist'),
+    ('text editor', '!editor'),
     ('theme', '!theme'),
     ('trackball', '!bluething'),
 )
