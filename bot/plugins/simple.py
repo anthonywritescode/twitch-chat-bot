@@ -42,8 +42,8 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!job',
-        "it's... complicated: "
-        'https://clips.twitch.tv/SquareSillyGnatDancingBanana-hoxF1MX5wGmHbT8f',  # noqa: E501
+        "currently none!  but I'm starting at sentry.io next week!  "
+        'https://www.youtube.com/watch?v=QzZSvznoCEo',
     ),
     (
         '!keyboard',
