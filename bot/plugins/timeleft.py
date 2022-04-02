@@ -13,14 +13,14 @@ from bot.util import seconds_to_readable
 async def cmd_12hour(config: Config, match: Match[str]) -> str:
     return format_msg(
         match,
-        'rkj_ cashed in the channel points, so here we are... '
+        'MSR974 cashed in the channel points, so here we are... '
         'see also !timeleft',
     )
 
 
 @command('!timeleft', '!downtime', '!timeright')
 async def cmd_timeleft(config: Config, match: Match[str]) -> str:
-    end_time = datetime.datetime(2021, 10, 16, 23, 0)
+    end_time = datetime.datetime(2022, 4, 2, 22, 0)
     if datetime.datetime.now() > end_time:
         return format_msg(match, 'done!!!')
     else:
