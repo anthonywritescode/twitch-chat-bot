@@ -1,20 +1,16 @@
 from __future__ import annotations
 
-from typing import Match
-
 from bot.config import Config
 from bot.data import command
 from bot.data import format_msg
+from bot.message import Message
 
 
 @command('!kmjao', '!kevinsjoberg', '!kevinwritescode', secret=True)
-async def cmd_kevin(config: Config, match: Match[str]) -> str:
-    return format_msg(match, "Kevin stop spending money you don't have")
+async def cmd_kevin(config: Config, msg: Message) -> str:
+    return format_msg(msg, "Kevin stop spending money you don't have")
 
 
 @command('!isatisfied', secret=True)
-async def cmd_isatisfied(config: Config, match: Match[str]) -> str:
-    return format_msg(
-        match,
-        "Keep spending money that Kevin doesn't have",
-    )
+async def cmd_isatisfied(config: Config, msg: Message) -> str:
+    return format_msg(msg, "Keep spending money that Kevin doesn't have")

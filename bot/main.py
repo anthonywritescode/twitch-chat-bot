@@ -14,7 +14,6 @@ import struct
 import sys
 import traceback
 from typing import Any
-from typing import Match
 
 from bot.badges import badges_images
 from bot.badges import badges_plain_text
@@ -24,13 +23,12 @@ from bot.config import Config
 from bot.data import Callback
 from bot.data import get_fake_msg
 from bot.data import get_handler
-from bot.data import MSG_RE
 from bot.data import PERIODIC_HANDLERS
 from bot.data import PRIVMSG
 from bot.emote import download_all_emotes
 from bot.emote import parse_emote_info
 from bot.emote import replace_emotes
-from bot.permissions import parse_badge_info
+from bot.message import Message
 
 # TODO: allow host / port to be configurable
 HOST = 'irc.chat.twitch.tv'
@@ -138,7 +136,7 @@ def get_printed_output(config: Config, res: str) -> str | None:
 
 async def handle_response(
         config: Config,
-        match: Match[str],
+        msg: Message,
         handler: Callback,
         writer: asyncio.StreamWriter,
         log_writer: LogWriter,
@@ -146,7 +144,7 @@ async def handle_response(
         quiet: bool,
 ) -> None:
     try:
-        res = await handler(config, match)
+        res = await handler(config, msg)
     except Exception as e:
         traceback.print_exc()
         res = PRIVMSG.format(
@@ -169,13 +167,11 @@ def _start_periodic(
         quiet: bool,
 ) -> None:
     async def periodic(seconds: int, func: Callback) -> None:
-        line = get_fake_msg(config, 'placeholder message')
-        match = MSG_RE.match(line)
-        assert match is not None
+        msg = Message('placeholder message', 'channel', {})
         while True:
             await asyncio.sleep(seconds)
             await handle_response(
-                config, match, func, writer, log_writer, quiet=quiet,
+                config, msg, func, writer, log_writer, quiet=quiet,
             )
 
     loop = asyncio.get_event_loop()
@@ -189,26 +185,26 @@ async def get_printed_input(
         *,
         images: bool,
 ) -> tuple[str, str] | None:
-    msg_match = MSG_RE.match(msg)
-    if msg_match:
-        info = parse_badge_info(msg_match['info'])
-        if info['color']:
-            r, g, b = _parse_color(info['color'])
+    parsed = Message.parse(msg)
+    if parsed:
+        if parsed.info['color']:
+            r, g, b = _parse_color(parsed.info['color'])
         else:
-            r, g, b = _gen_color(info['display-name'])
+            r, g, b = _gen_color(parsed.info['display-name'])
 
         color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
 
-        msg_s = msg_match['msg']
+        msg_s = parsed.msg
         is_action = msg_s.startswith('\x01ACTION ')
         if is_action:
             msg_s = msg_s[8:-1]
 
-        badges_s = badges_plain_text(info['badges'])
+        badges_s = badges_plain_text(parsed.badges)
         if images:
-            badges = parse_badges(info['badges'])
+            # TODO: maybe combine into `Message`?
+            badges = parse_badges(parsed.info['badges'])
             await download_all_badges(
-                badges,
+                parse_badges(parsed.info['badges']),
                 channel=config.channel,
                 oauth_token=config.oauth_token_token,
                 client_id=config.client_id,
@@ -218,7 +214,7 @@ async def get_printed_input(
             badges_s_images = badges_s
 
         if images:
-            emote_info = parse_emote_info(info['emotes'])
+            emote_info = parse_emote_info(parsed.info['emotes'])
             await download_all_emotes(emote_info)
             msg_s_images = replace_emotes(msg_s, emote_info)
         else:
@@ -228,28 +224,28 @@ async def get_printed_input(
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
-                f'{color_start}\033[3m * {info["display-name"]}\033[22m '
+                f'{color_start}\033[3m * {parsed.display_name}\033[22m '
                 f'{{msg}}\033[m'
             )
-        elif info.get('msg-id') == 'highlighted-message':
+        elif parsed.info.get('msg-id') == 'highlighted-message':
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
-                f'<{color_start}{info["display-name"]}\033[m> '
+                f'<{color_start}{parsed.display_name}\033[m> '
                 f'\033[48;2;117;094;188m{{msg}}\033[m'
             )
-        elif 'custom-reward-id' in info:
+        elif 'custom-reward-id' in parsed.info:
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
-                f'<{color_start}{info["display-name"]}\033[m> '
+                f'<{color_start}{parsed.display_name}\033[m> '
                 f'\033[48;2;029;091;130m{{msg}}\033[m'
             )
         else:
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
-                f'<{color_start}{info["display-name"]}\033[m> '
+                f'<{color_start}{parsed.display_name}\033[m> '
                 f'{{msg}}'
             )
 

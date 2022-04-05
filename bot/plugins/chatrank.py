@@ -10,7 +10,6 @@ import urllib.request
 from typing import Any
 from typing import Counter
 from typing import Mapping
-from typing import Match
 from typing import Pattern
 from typing import Sequence
 
@@ -18,7 +17,7 @@ from bot.config import Config
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
-from bot.permissions import optional_user_arg
+from bot.message import Message
 from bot.ranking import tied_rank
 
 CHAT_ALIASES = {
@@ -96,64 +95,67 @@ def _log_start_date() -> str:
 
 
 @command('!chatrank')
-async def cmd_chatrank(config: Config, match: Match[str]) -> str:
-    user = optional_user_arg(match)
+async def cmd_chatrank(config: Config, msg: Message) -> str:
+    # TODO: handle display name
+    user = msg.optional_user_arg.lower()
     ret = _user_rank_by_line_type(user, CHAT_LOG_RE)
     if ret is None:
-        return format_msg(match, f'user not found {esc(user)}')
+        return format_msg(msg, f'user not found {esc(user)}')
     else:
         rank, n = ret
         return format_msg(
-            match,
+            msg,
             f'{esc(user)} is ranked #{rank} with {n} messages '
             f'(since {_log_start_date()})',
         )
 
 
 @command('!top10chat')
-async def cmd_top_10_chat(config: Config, match: Match[str]) -> str:
+async def cmd_top_10_chat(config: Config, msg: Message) -> str:
     top_10_s = ', '.join(_top_n_rank_by_line_type(CHAT_LOG_RE, n=10))
-    return format_msg(match, f'{top_10_s} (since {_log_start_date()})')
+    return format_msg(msg, f'{top_10_s} (since {_log_start_date()})')
 
 
 @command('!bonkrank', secret=True)
-async def cmd_bonkrank(config: Config, match: Match[str]) -> str:
-    user = optional_user_arg(match)
+async def cmd_bonkrank(config: Config, msg: Message) -> str:
+    # TODO: handle display name
+    user = msg.optional_user_arg.lower()
     ret = _user_rank_by_line_type(user, BONKER_RE)
     if ret is None:
-        return format_msg(match, f'user not found {esc(user)}')
+        return format_msg(msg, f'user not found {esc(user)}')
     else:
         rank, n = ret
         return format_msg(
-            match,
+            msg,
             f'{esc(user)} is ranked #{rank}, has bonked others {n} times',
         )
 
 
 @command('!top5bonkers', secret=True)
-async def cmd_top_5_bonkers(config: Config, match: Match[str]) -> str:
+async def cmd_top_5_bonkers(config: Config, msg: Message) -> str:
     top_5_s = ', '.join(_top_n_rank_by_line_type(BONKER_RE, n=5))
-    return format_msg(match, top_5_s)
+    return format_msg(msg, top_5_s)
 
 
 @command('!bonkedrank', secret=True)
-async def cmd_bonkedrank(config: Config, match: Match[str]) -> str:
-    user = optional_user_arg(match)
+async def cmd_bonkedrank(config: Config, msg: Message) -> str:
+    # TODO: handle display name
+    user = msg.optional_user_arg.lower()
     ret = _user_rank_by_line_type(user, BONKED_RE)
     if ret is None:
-        return format_msg(match, f'user not found {esc(user)}')
+        return format_msg(msg, f'user not found {esc(user)}')
     else:
         rank, n = ret
         return format_msg(
-            match,
+            msg,
             f'{esc(user)} is ranked #{rank}, has been bonked {n} times',
         )
 
 
 @command('!top5bonked', secret=True)
-async def cmd_top_5_bonked(config: Config, match: Match[str]) -> str:
+async def cmd_top_5_bonked(config: Config, msg: Message) -> str:
     top_5_s = ', '.join(_top_n_rank_by_line_type(BONKED_RE, n=5))
-    return format_msg(match, top_5_s)
+    return format_msg(msg, top_5_s)
 
 
 def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
@@ -167,13 +169,14 @@ def lin_regr(x: Sequence[float], y: Sequence[float]) -> tuple[float, float]:
 
 
 @command('!chatplot')
-async def cmd_chatplot(config: Config, match: Match[str]) -> str:
-    user_list = optional_user_arg(match).lower().split()
+async def cmd_chatplot(config: Config, msg: Message) -> str:
+    # TODO: handle display name
+    user_list = msg.optional_user_arg.lower().split()
     user_list = [_alias(user.lstrip('@')) for user in user_list]
     user_list = list(dict.fromkeys(user_list))
 
     if len(user_list) > 2:
-        return format_msg(match, 'sorry, can only compare 2 users')
+        return format_msg(msg, 'sorry, can only compare 2 users')
 
     min_date = datetime.date.fromisoformat(_log_start_date())
     comp_users: dict[str, dict[str, list[int]]]
@@ -198,12 +201,12 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
         if len(comp_users[user]['x']) < 2:
             if len(user_list) > 1:
                 return format_msg(
-                    match,
+                    msg,
                     'sorry, all users need at least 2 days of data',
                 )
             else:
                 return format_msg(
-                    match,
+                    msg,
                     f'sorry {esc(user)}, need at least 2 days of data',
                 )
 
@@ -294,8 +297,8 @@ async def cmd_chatplot(config: Config, match: Match[str]) -> str:
     user_esc = [esc(user) for user in user_list]
     if len(user_list) > 1:
         return format_msg(
-            match,
+            msg,
             f'comparing {", ".join(user_esc)}: {contents["url"]}',
         )
     else:
-        return format_msg(match, f'{esc(user_esc[0])}: {contents["url"]}')
+        return format_msg(msg, f'{esc(user_esc[0])}: {contents["url"]}')

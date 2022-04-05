@@ -5,22 +5,15 @@ import pkgutil
 import re
 from typing import Awaitable
 from typing import Callable
-from typing import Match
 from typing import Optional
 from typing import Pattern
 
 from bot import plugins
 from bot.config import Config
-from bot.permissions import parse_badge_info
+from bot.message import Message
 
 # TODO: maybe move this?
 PRIVMSG = 'PRIVMSG #{channel} : {msg}\r\n'
-COMMAND_PATTERN_RE = re.compile(r'!+\w+')
-MSG_RE = re.compile(
-    '^@(?P<info>[^ ]+) :(?P<user>[^!]+).* '
-    'PRIVMSG #(?P<channel>[^ ]+) '
-    ':(?P<msg>[^\r]+)',
-)
 COMMAND_RE = re.compile(r'^(?P<cmd>!+[a-zA-Z0-9-]+)')
 
 
@@ -42,14 +35,14 @@ def esc(s: str) -> str:
     return s.replace('{', '{{').replace('}', '}}')
 
 
-def format_msg(match: Match[str], fmt: str) -> str:
-    params = match.groupdict()
+def format_msg(msg: Message, fmt: str) -> str:
+    params = {'user': msg.display_name, 'channel': msg.channel}
     params['msg'] = fmt.format(**params)
     return PRIVMSG.format(**params)
 
 
-Callback = Callable[[Config, Match[str]], Awaitable[Optional[str]]]
-HANDLERS: list[tuple[Pattern[str], Callback]] = []
+Callback = Callable[[Config, Message], Awaitable[Optional[str]]]
+MSG_HANDLERS: list[tuple[Pattern[str], Callback]] = []
 COMMANDS: dict[str, Callback] = {}
 POINTS_HANDLERS: dict[str, Callback] = {}
 BITS_HANDLERS: dict[int, Callback] = {}
@@ -57,29 +50,17 @@ SECRET_CMDS: set[str] = set()
 PERIODIC_HANDLERS: list[tuple[int, Callback]] = []
 
 
-def handler(
-        *prefixes: str,
-        flags: re.RegexFlag = re.U,
-) -> Callable[[Callback], Callback]:
-    def handler_decorator(func: Callback) -> Callback:
-        for prefix in prefixes:
-            HANDLERS.append((re.compile(prefix + '\r\n$', flags=flags), func))
-        return func
-    return handler_decorator
-
-
 def handle_message(
         *message_prefixes: str,
         flags: re.RegexFlag = re.U,
 ) -> Callable[[Callback], Callback]:
-    return handler(
-        *(
-            f'^@(?P<info>[^ ]+) :(?P<user>[^!]+).* '
-            f'PRIVMSG #(?P<channel>[^ ]+) '
-            f':(?P<msg>{message_prefix}.*)'
-            for message_prefix in message_prefixes
-        ), flags=flags,
-    )
+    def handle_message_decorator(func: Callback) -> Callback:
+        for prefix in message_prefixes:
+            pattern = re.compile(f'{prefix}.*\r\n$', flags=flags)
+            MSG_HANDLERS.append((pattern, func))
+
+        return func
+    return handle_message_decorator
 
 
 def command(
@@ -124,32 +105,30 @@ def periodic_handler(*, seconds: int) -> Callable[[Callback], Callback]:
     return periodic_handler_decorator
 
 
-def get_handler(msg: str) -> tuple[Callback, Match[str]] | None:
-    msg_match = MSG_RE.match(msg)
-    if msg_match:
-        info = parse_badge_info(msg_match['info'])
-
-        if 'custom-reward-id' in info:
-            if info['custom-reward-id'] in POINTS_HANDLERS:
-                return POINTS_HANDLERS[info['custom-reward-id']], msg_match
+def get_handler(msg: str) -> tuple[Callback, Message] | None:
+    parsed = Message.parse(msg)
+    if parsed:
+        if 'custom-reward-id' in parsed.info:
+            if parsed.info['custom-reward-id'] in POINTS_HANDLERS:
+                return POINTS_HANDLERS[parsed.info['custom-reward-id']], parsed
             else:
                 return None
 
-        if 'bits' in info:
-            bits_n = int(info['bits'])
+        if 'bits' in parsed.info:
+            bits_n = int(parsed.info['bits'])
             if bits_n % 100 in BITS_HANDLERS:
-                return BITS_HANDLERS[bits_n % 100], msg_match
+                return BITS_HANDLERS[bits_n % 100], parsed
 
-        cmd_match = COMMAND_RE.match(msg_match['msg'])
+        cmd_match = COMMAND_RE.match(parsed.msg)
         if cmd_match:
             command = f'!{cmd_match["cmd"].lstrip("!").lower()}'
             if command in COMMANDS:
-                return COMMANDS[command], msg_match
+                return COMMANDS[command], parsed
 
-    for pattern, handler in HANDLERS:
-        match = pattern.match(msg)
-        if match:
-            return handler, match
+        for pattern, handler in MSG_HANDLERS:
+            match = pattern.match(parsed.msg)
+            if match:
+                return handler, parsed
 
     return None
 
@@ -165,21 +144,19 @@ _import_plugins()
 
 # make this always last so that help is implemented properly
 @handle_message(r'!+\w')
-async def cmd_help(config: Config, match: Match[str]) -> str:
-    possible = [COMMAND_PATTERN_RE.search(reg.pattern) for reg, _ in HANDLERS]
-    possible_cmds = {match[0] for match in possible if match}
-    possible_cmds.update(COMMANDS)
+async def cmd_help(config: Config, msg: Message) -> str:
+    possible_cmds = COMMANDS.keys() - SECRET_CMDS
     possible_cmds.difference_update(SECRET_CMDS)
     commands = ['!help'] + sorted(possible_cmds)
 
-    cmd = match['msg'].split()[0]
+    cmd = msg.msg.split()[0]
     if cmd.startswith(('!help', '!halp')):
-        msg = f' possible commands: {", ".join(commands)}'
+        msg_s = f' possible commands: {", ".join(commands)}'
     else:
-        msg = f'unknown command ({esc(cmd)}).'
+        msg_s = f'unknown command ({esc(cmd)}).'
         suggestions = difflib.get_close_matches(cmd, commands, cutoff=0.7)
         if suggestions:
-            msg += f' did you mean: {", ".join(suggestions)}?'
+            msg_s += f' did you mean: {", ".join(suggestions)}?'
         else:
-            msg += f' possible commands: {", ".join(commands)}'
-    return format_msg(match, msg)
+            msg_s += f' possible commands: {", ".join(commands)}'
+    return format_msg(msg, msg_s)

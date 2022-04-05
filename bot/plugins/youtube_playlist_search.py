@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Match
 from typing import NamedTuple
 
 import aiohttp
@@ -11,6 +10,7 @@ from bot.config import Config
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
+from bot.message import Message
 
 
 class YouTubeVideo(NamedTuple):
@@ -137,18 +137,18 @@ async def _msg(config: Config, playlist_name: str, search_terms: str) -> str:
 
 
 @command('!explain', '!explains')
-async def cmd_explain(config: Config, match: Match[str]) -> str:
-    _, _, rest = match['msg'].partition(' ')
-    return format_msg(match, await _msg(config, 'explains', rest))
+async def cmd_explain(config: Config, msg: Message) -> str:
+    _, _, rest = msg.msg.partition(' ')
+    return format_msg(msg, await _msg(config, 'explains', rest))
 
 
 @command('!faq')
-async def cmd_faq(config: Config, match: Match[str]) -> str:
-    _, _, rest = match['msg'].partition(' ')
-    return format_msg(match, await _msg(config, 'faq', rest))
+async def cmd_faq(config: Config, msg: Message) -> str:
+    _, _, rest = msg.msg.partition(' ')
+    return format_msg(msg, await _msg(config, 'faq', rest))
 
 
 @command('!puzzle', '!puzzles')
-async def cmd_puzzle(config: Config, match: Match[str]) -> str:
-    _, _, rest = match['msg'].partition(' ')
-    return format_msg(match, await _msg(config, 'puzzles', rest))
+async def cmd_puzzle(config: Config, msg: Message) -> str:
+    _, _, rest = msg.msg.partition(' ')
+    return format_msg(msg, await _msg(config, 'puzzles', rest))

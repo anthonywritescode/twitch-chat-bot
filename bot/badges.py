@@ -64,7 +64,7 @@ async def channel_badges(
     }
 
 
-def badges_plain_text(badges: str) -> str:
+def badges_plain_text(badges: tuple[str, ...]) -> str:
     ret = ''
     for s, reg in (
         ('\033[48;2;000;000;000m⚙\033[m', re.compile('^staff/')),
@@ -82,7 +82,7 @@ def badges_plain_text(badges: str) -> str:
         ('\033[48;2;230;186;072m♦\033[m', re.compile('^bits-leader/')),
         ('\033[48;2;145;070;255m☑\033[m', re.compile('^partner/')),
     ):
-        for badge in badges.split(','):
+        for badge in badges:
             if reg.match(badge):
                 ret += s
     return ret

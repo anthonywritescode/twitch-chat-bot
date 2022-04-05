@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 from typing import Any
-from typing import Match
 
 import aiohttp
 import humanize
@@ -11,7 +10,7 @@ from bot.config import Config
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
-from bot.permissions import optional_user_arg
+from bot.message import Message
 from bot.twitch_api import fetch_twitch_user
 
 
@@ -40,8 +39,8 @@ async def fetch_twitch_user_follows(
 # !followage foo bar -> still valid, however the whole
 # "foo bar" will be processed as a username
 @command('!followage')
-async def cmd_followage(config: Config, match: Match[str]) -> str:
-    username = optional_user_arg(match)
+async def cmd_followage(config: Config, msg: Message) -> str:
+    username = msg.optional_user_arg
 
     me = await fetch_twitch_user(
         config.channel,
@@ -56,12 +55,12 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
         client_id=config.client_id,
     )
     if target_user is None:
-        return format_msg(match, f'user {esc(username)} not found!')
+        return format_msg(msg, f'user {esc(username)} not found!')
 
     # if streamer wants to check the followage to their own channel
     if me['id'] == target_user['id']:
         return format_msg(
-            match,
+            msg,
             f"@{esc(target_user['login'])}, you can't check !followage "
             f'to your own channel.  But I appreciate your curiosity!',
         )
@@ -74,7 +73,7 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
     )
     if not follow_age_results:
         return format_msg(
-            match,
+            msg,
             f'{esc(target_user["login"])} is not a follower!',
         )
     follow_age, = follow_age_results
@@ -101,7 +100,7 @@ async def cmd_followage(config: Config, match: Match[str]) -> str:
         humanize_string = humanize_string.replace(' 1 days', ' 1 day')
         humanize_string = humanize_string.replace(' and 0 days', '')
     return format_msg(
-        match,
+        msg,
         f'{esc(follow_age["from_name"])} has been following for '
         f'{esc(humanize_string)}!',
     )

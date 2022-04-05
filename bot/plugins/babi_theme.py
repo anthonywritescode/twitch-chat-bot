@@ -8,7 +8,6 @@ import plistlib
 import re
 import uuid
 from typing import Any
-from typing import Match
 
 import aiohttp
 import cson
@@ -19,6 +18,7 @@ from bot.data import channel_points_handler
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
+from bot.message import Message
 
 ALLOWED_URL_PREFIXES = (
     'https://gist.github.com/',
@@ -191,19 +191,19 @@ async def _load_theme(url: str) -> dict[str, Any]:
 
 
 @channel_points_handler('5861c27a-ae1f-4b8e-af03-88f12dd7d23a')
-async def change_theme(config: Config, match: Match[str]) -> str:
-    url = match['msg'].strip()
+async def change_theme(config: Config, msg: Message) -> str:
+    url = msg.msg.strip()
 
     try:
         loaded = await _load_theme(url)
     except ThemeError as e:
-        return format_msg(match, str(e))
+        return format_msg(msg, str(e))
 
-    loaded['user'] = match['user']
+    loaded['user'] = msg.display_name
     loaded['url'] = url
 
     os.makedirs(THEME_DIR, exist_ok=True)
-    theme_file = f'{match["user"]}-{uuid.uuid4()}.json'
+    theme_file = f'{msg.display_name}-{uuid.uuid4()}.json'
     theme_file = os.path.join(THEME_DIR, theme_file)
     with open(theme_file, 'w') as f:
         json.dump(loaded, f)
@@ -221,15 +221,15 @@ async def change_theme(config: Config, match: Match[str]) -> str:
     # ignore the return code, if there are no editors running it'll be `1`
     # assert proc.returncode == 0
 
-    return format_msg(match, 'theme updated!')
+    return format_msg(msg, 'theme updated!')
 
 
 @command('!theme')
-async def command_theme(config: Config, match: Match[str]) -> str:
+async def command_theme(config: Config, msg: Message) -> str:
     theme_file = os.path.expanduser('~/.config/babi/theme.json')
     if not os.path.exists(theme_file):
         return format_msg(
-            match,
+            msg,
             'awcBabi this is vs dark plus in !babi with one modification to '
             'highlight ini headers: '
             'https://github.com/asottile/babi#setting-up-syntax-highlighting',
@@ -243,21 +243,21 @@ async def command_theme(config: Config, match: Match[str]) -> str:
         user = contents['user']
         url = contents['url']
     except KeyError:
-        return format_msg(match, "awcBabi I don't know what this theme is!?")
+        return format_msg(msg, "awcBabi I don't know what this theme is!?")
     else:
         return format_msg(
-            match,
+            msg,
             f'awcBabi this theme was set by {esc(user)} using channel points! '
             f'it is called {esc(name)!r} and can be download from {esc(url)}',
         )
 
 
 @command('!themevalidate', secret=True)
-async def command_themevalidate(config: Config, match: Match[str]) -> str:
-    _, _, url = match['msg'].partition(' ')
+async def command_themevalidate(config: Config, msg: Message) -> str:
+    _, _, url = msg.msg.partition(' ')
     try:
         await _load_theme(url.strip())
     except ThemeError as e:
-        return format_msg(match, str(e))
+        return format_msg(msg, str(e))
     else:
-        return format_msg(match, 'theme is ok!')
+        return format_msg(msg, 'theme is ok!')

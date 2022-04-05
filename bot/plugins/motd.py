@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Match
-
 import aiosqlite
 
 from bot.config import Config
@@ -9,6 +7,7 @@ from bot.data import channel_points_handler
 from bot.data import command
 from bot.data import esc
 from bot.data import format_msg
+from bot.message import Message
 
 
 async def ensure_motd_table_exists(db: aiosqlite.Connection) -> None:
@@ -50,17 +49,17 @@ async def msg_count(db: aiosqlite.Connection, msg: str) -> int:
 
 
 @channel_points_handler('a2fa47a2-851e-40db-b909-df001801cade')
-async def cmd_set_motd(config: Config, match: Match[str]) -> str:
+async def cmd_set_motd(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
-        await set_motd(db, match['user'], match['msg'])
-        msg = 'motd updated!  thanks for spending points!'
-        if match['msg'] == '!motd':
-            motd_count = await msg_count(db, match['msg'])
-            msg = f'{msg}  it has been set to !motd {motd_count} times!'
-    return format_msg(match, msg)
+        await set_motd(db, msg.name_key, msg.msg)
+        s = 'motd updated!  thanks for spending points!'
+        if msg.msg == '!motd':
+            motd_count = await msg_count(db, msg.msg)
+            s = f'{s}  it has been set to !motd {motd_count} times!'
+    return format_msg(msg, s)
 
 
 @command('!motd')
-async def cmd_motd(config: Config, match: Match[str]) -> str:
+async def cmd_motd(config: Config, msg: Message) -> str:
     async with aiosqlite.connect('db.db') as db:
-        return format_msg(match, await get_motd(db))
+        return format_msg(msg, await get_motd(db))

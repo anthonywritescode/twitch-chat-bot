@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import functools
-from typing import Match
 
 from bot.config import Config
 from bot.data import add_alias
 from bot.data import command
 from bot.data import format_msg
+from bot.message import Message
 
 
 _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
@@ -142,14 +142,14 @@ _SECRET_COMMANDS = (
 )
 
 
-async def _generic_msg(config: Config, match: Match[str], *, msg: str) -> str:
-    return format_msg(match, msg)
+async def _generic_msg(config: Config, msg: Message, *, s: str) -> str:
+    return format_msg(msg, s)
 
 
 for _cmd, _msg in _TEXT_COMMANDS:
-    command(_cmd)(functools.partial(_generic_msg, msg=_msg))
+    command(_cmd)(functools.partial(_generic_msg, s=_msg))
 for _cmd, _msg in _SECRET_COMMANDS:
-    command(_cmd, secret=True)(functools.partial(_generic_msg, msg=_msg))
+    command(_cmd, secret=True)(functools.partial(_generic_msg, s=_msg))
 
 
 _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
