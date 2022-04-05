@@ -56,8 +56,7 @@ def handle_message(
 ) -> Callable[[Callback], Callback]:
     def handle_message_decorator(func: Callback) -> Callback:
         for prefix in message_prefixes:
-            pattern = re.compile(f'{prefix}.*\r\n$', flags=flags)
-            MSG_HANDLERS.append((pattern, func))
+            MSG_HANDLERS.append((re.compile(prefix, flags=flags), func))
 
         return func
     return handle_message_decorator
