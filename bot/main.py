@@ -167,7 +167,11 @@ def _start_periodic(
         quiet: bool,
 ) -> None:
     async def periodic(seconds: int, func: Callback) -> None:
-        msg = Message('placeholder message', 'channel', {})
+        msg = Message(
+            'placeholder',
+            config.channel,
+            {'display-name': config.username},
+        )
         while True:
             await asyncio.sleep(seconds)
             await handle_response(
