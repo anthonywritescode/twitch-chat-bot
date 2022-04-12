@@ -42,8 +42,8 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!job',
-        "currently none!  but I'm starting at sentry.io next week!  "
-        'https://www.youtube.com/watch?v=QzZSvznoCEo',
+        'I am a staff software engineer at sentry.io working on developer '
+        'infrastructure!',
     ),
     (
         '!keyboard',
