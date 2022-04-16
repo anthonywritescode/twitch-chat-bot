@@ -16,7 +16,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!discord',
-        'We do have Discord, you are welcome to join: '
+        'We do have Dicsord, you are welcome to join: '
         'https://discord.gg/xDKGPaW',
     ),
     (
