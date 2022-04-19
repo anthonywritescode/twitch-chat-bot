@@ -162,6 +162,7 @@ _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!question', ('!ask', '!questions', '!tcp', '!udp')),
     ('!readme', ('!reamde',)),
     ('!speechless', ('!ghost',)),
+    ('!youtube', ('!yt',)),
 )
 for _alias_name, _aliases in _ALIASES:
     add_alias(_alias_name, *_aliases)
