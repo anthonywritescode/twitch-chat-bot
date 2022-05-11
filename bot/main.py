@@ -11,7 +11,7 @@ import re
 import signal
 import sys
 import traceback
-from typing import Any
+from typing import AsyncGenerator
 
 from bot.badges import badges_images
 from bot.badges import badges_plain_text
@@ -60,33 +60,64 @@ async def recv(
     return data
 
 
+def _shutdown(
+        writer: asyncio.StreamWriter,
+        loop: asyncio.AbstractEventLoop,
+) -> None:
+    print('bye!')
+
+    if writer:
+        writer.close()
+        loop.create_task(writer.wait_closed())
+
+
+async def connect(
+        config: Config,
+        *,
+        quiet: bool,
+) -> tuple[AsyncGenerator[bytes, None], asyncio.StreamWriter]:
+    reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
+
+    loop = asyncio.get_event_loop()
+    shutdown_cb = functools.partial(_shutdown, writer, loop)
+    try:
+        loop.add_signal_handler(signal.SIGINT, shutdown_cb)
+    except NotImplementedError:
+        # Doh... Windows...
+        signal.signal(signal.SIGINT, lambda *_: shutdown_cb())
+
+    await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
+    await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
+    await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
+    await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
+
+    async def next_line() -> AsyncGenerator[bytes, None]:
+        nonlocal reader, writer
+
+        while not writer.is_closing():
+            data = await recv(reader, quiet=quiet)
+            if not data:
+                if writer.is_closing():
+                    return
+                else:
+                    print('!!!reconnect!!!')
+                    reader, writer = await asyncio.open_connection(
+                        HOST,
+                        PORT,
+                        ssl=True,
+                    )
+                    continue
+
+            yield data
+
+    return next_line(), writer
+
+
 # TODO: !tags, only allowed by stream admin / mods????
 
 def dt_str() -> str:
     dt_now = datetime.datetime.now()
     return f'[{dt_now.hour:02}:{dt_now.minute:02}]'
-
-
-def _shutdown(
-        writer: asyncio.StreamWriter,
-        loop: asyncio.AbstractEventLoop,
-        shutdown_task: asyncio.Task[Any] | None = None,
-) -> None:
-    print('bye!')
-    ignored_tasks = set()
-    if shutdown_task is not None:
-        ignored_tasks.add(shutdown_task)
-
-    if writer:
-        writer.close()
-        closing_task = loop.create_task(writer.wait_closed())
-
-        def cancel_tasks(fut: asyncio.Future[Any]) -> None:
-            tasks = [t for t in asyncio.all_tasks() if t not in ignored_tasks]
-            for task in tasks:
-                task.cancel()
-
-        closing_task.add_done_callback(cancel_tasks)
 
 
 UNCOLOR_RE = re.compile(r'\033\[[^m]*m')
@@ -241,27 +272,11 @@ async def get_printed_input(
 
 async def amain(config: Config, *, quiet: bool, images: bool) -> None:
     log_writer = LogWriter()
-    reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
-
-    loop = asyncio.get_event_loop()
-    shutdown_cb = functools.partial(_shutdown, writer, loop)
-    try:
-        loop.add_signal_handler(signal.SIGINT, shutdown_cb)
-    except NotImplementedError:
-        # Doh... Windows...
-        signal.signal(signal.SIGINT, lambda *_: shutdown_cb())
-
-    await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
-    await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
-    await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
-    await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
+    line_iter, writer = await connect(config, quiet=quiet)
 
     _start_periodic(config, writer, log_writer, quiet=quiet)
 
-    while not writer.is_closing():
-        data = await recv(reader, quiet=quiet)
-        if not data:
-            return
+    async for data in line_iter:
         msg = data.decode('UTF-8', errors='backslashreplace')
 
         input_ret = await get_printed_input(config, msg, images=images)
@@ -276,7 +291,7 @@ async def amain(config: Config, *, quiet: bool, images: bool) -> None:
             coro = handle_response(
                 config, match, handler, writer, log_writer, quiet=quiet,
             )
-            loop.create_task(coro)
+            asyncio.get_event_loop().create_task(coro)
         elif msg.startswith('PING '):
             _, _, rest = msg.partition(' ')
             await send(writer, f'PONG {rest.rstrip()}\r\n', quiet=quiet)
