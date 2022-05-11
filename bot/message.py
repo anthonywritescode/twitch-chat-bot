@@ -5,6 +5,7 @@ import re
 import struct
 from typing import NamedTuple
 
+ME_PREFIX = '\x01ACTION '
 MSG_RE = re.compile(
     '^@(?P<info>[^ ]+) :(?P<user>[^!]+).* '
     'PRIVMSG #(?P<channel>[^ ]+) '
@@ -29,6 +30,7 @@ def _gen_color(name: str) -> tuple[int, int, int]:
 
 class Message(NamedTuple):
     msg: str
+    is_me: bool
     channel: str
     info: dict[str, str]
 
@@ -73,10 +75,21 @@ class Message(NamedTuple):
     def parse(cls, msg: str) -> Message | None:
         match = MSG_RE.match(msg)
         if match is not None:
+            is_me = match['msg'].startswith(ME_PREFIX)
+            if is_me:
+                msg = match['msg'][len(ME_PREFIX):]
+            else:
+                msg = match['msg']
+
             info = {}
             for part in match['info'].split(';'):
                 k, v = part.split('=', 1)
                 info[k] = v
-            return cls(match['msg'], match['channel'], info)
+            return cls(
+                msg=msg,
+                is_me=is_me,
+                channel=match['channel'],
+                info=info,
+            )
         else:
             return None

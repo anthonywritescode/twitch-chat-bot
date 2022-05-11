@@ -183,9 +183,10 @@ def _start_periodic(
 ) -> None:
     async def periodic(seconds: int, func: Callback) -> None:
         msg = Message(
-            'placeholder',
-            config.channel,
-            {'display-name': config.username},
+            msg='placeholder',
+            is_me=False,
+            channel=config.channel,
+            info={'display-name': config.username},
         )
         while True:
             await asyncio.sleep(seconds)
@@ -209,11 +210,6 @@ async def get_printed_input(
         r, g, b = parsed.color
         color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
 
-        msg_s = parsed.msg
-        is_action = msg_s.startswith('\x01ACTION ')
-        if is_action:
-            msg_s = msg_s[8:-1]
-
         badges_s = badges_plain_text(parsed.badges)
         if images:
             # TODO: maybe combine into `Message`?
@@ -231,11 +227,11 @@ async def get_printed_input(
         if images:
             emote_info = parse_emote_info(parsed.info['emotes'])
             await download_all_emotes(emote_info)
-            msg_s_images = replace_emotes(msg_s, emote_info)
+            msg_s_images = replace_emotes(parsed.msg, emote_info)
         else:
-            msg_s_images = msg_s
+            msg_s_images = parsed.msg
 
-        if is_action:
+        if parsed.is_me:
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
@@ -265,7 +261,7 @@ async def get_printed_input(
             )
 
         to_print = fmt.format(badges=badges_s_images, msg=msg_s_images)
-        to_log = fmt.format(badges=badges_s, msg=msg_s)
+        to_log = fmt.format(badges=badges_s, msg=parsed.msg)
         return to_print, to_log
 
     return None
