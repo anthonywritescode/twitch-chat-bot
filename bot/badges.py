@@ -64,6 +64,23 @@ async def channel_badges(
     }
 
 
+@async_lru.alru_cache(maxsize=1)
+async def all_badges(
+        username: str,
+        *,
+        oauth_token: str,
+        client_id: str,
+) -> Mapping[str, Mapping[str, str]]:
+    return collections.ChainMap(
+        await channel_badges(
+            username,
+            oauth_token=oauth_token,
+            client_id=client_id,
+        ),
+        await global_badges(),
+    )
+
+
 def badges_plain_text(badges: tuple[str, ...]) -> str:
     ret = ''
     for s, reg in (
@@ -121,13 +138,10 @@ async def _download_badge(
 
     os.makedirs(BADGE_CACHE, exist_ok=True)
 
-    badges_mapping = collections.ChainMap(
-        await channel_badges(
-            channel,
-            oauth_token=oauth_token,
-            client_id=client_id,
-        ),
-        await global_badges(),
+    badges_mapping = await all_badges(
+        channel,
+        oauth_token=oauth_token,
+        client_id=client_id,
     )
     url = badges_mapping[badge.badge][badge.version]
 
