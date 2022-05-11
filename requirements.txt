@@ -6,3 +6,4 @@ cson
 defusedxml
 humanize
 pyjokes
+websockets

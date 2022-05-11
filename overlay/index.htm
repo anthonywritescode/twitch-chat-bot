@@ -1,0 +1,126 @@
+<!doctype html>
+<html style="height:100%">
+<head>
+    <meta charset="utf-8">
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+
+            font: 30px helvetica;
+        }
+        #wrapper {
+            height: 100%;
+            width: 100%;
+        }
+        #messages {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+        }
+        .message {
+            padding: 7.5px;
+        }
+        .message span {
+            padding: 2.5px 2.5px 0 2.5px;
+        }
+        .badge {
+            height: 30px;
+            margin: 4px;
+            vertical-align: middle;
+        }
+        .user {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .emote {
+            height: 35px;
+            vertical-align: bottom;
+        }
+        .cheer {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body style="height: 100%;">
+    <div id="wrapper">
+        <div id="messages"></div>
+    </div>
+    <script>
+        (function () {
+            function connect() {
+                let sock = new WebSocket('ws://localhost:9002');
+                sock.addEventListener('message', (e) => {
+                    let msg = document.createElement('div')
+                    msg.classList.add('message');
+
+                    let data = JSON.parse(e.data);
+
+                    for (let badge of data.badges) {
+                        let img = document.createElement('img');
+                        img.classList.add('badge');
+                        img.src = badge;
+                        msg.appendChild(img);
+                    }
+
+                    if (data.is_me) {
+                        msg.style.color = data.color;
+                        msg.style.fontStyle = 'italic';
+                        msg.appendChild(document.createTextNode(' * '));
+                    }
+
+                    let user = document.createElement('span');
+                    user.classList.add('user');
+                    user.style.color = data.color;
+                    user.innerText = data.user;
+                    msg.appendChild(user);
+
+                    msg.append(document.createTextNode(' '));
+
+                    let msgText = document.createElement('span');
+                    if (data.bg_color) {
+                        msgText.style.background = data.bg_color;
+                    }
+
+                    for (let part of data.parts) {
+                        if (part.emote) {
+                            let emote = document.createElement('img');
+                            emote.classList.add('emote')
+                            emote.src = part.emote;
+                            msgText.appendChild(emote);
+                        } else if (part.cheer) {
+                            let emote = document.createElement('img');
+                            emote.classList.add('emote')
+                            emote.src = part.cheer;
+                            msgText.appendChild(emote);
+
+                            let cheer = document.createElement('span');
+                            cheer.classList.add('cheer')
+                            cheer.style.color = part.color;
+                            cheer.innerText = part.n;
+                            msgText.appendChild(cheer);
+                        } else {
+                            msgText.appendChild(document.createTextNode(part.text));
+                        }
+                    }
+                    msg.appendChild(msgText);
+
+                    document.getElementById('messages').appendChild(msg);
+                });
+                sock.addEventListener('close', (e) => {
+                    /*
+                    let el = document.createElement('div');
+                    el.innerText = 'CLOSED!';
+                    document.getElementById('messages').appendChild(el);
+                    setTimeout(connect, 1000);
+                    */
+                });
+            }
+
+            connect();
+        }());
+    </script>
+</body>
+</html>

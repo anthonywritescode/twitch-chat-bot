@@ -107,3 +107,25 @@ async def parsed_to_terminology(parts: list[str | Emote | Cheer]) -> str:
 
     await asyncio.gather(*futures)
     return ''.join(s_parts)
+
+
+def parsed_to_overlay(
+        parts: list[str | Emote | Cheer],
+) -> list[dict[str, str]]:
+    ret = []
+
+    for part in parts:
+        if isinstance(part, str):
+            ret.append({'text': part})
+        elif isinstance(part, Emote):
+            ret.append({'emote': part.url})
+        elif isinstance(part, Cheer):
+            ret.append({
+                'cheer': part.url,
+                'n': str(part.n),
+                'color': part.color,
+            })
+        else:
+            raise AssertionError(f'unexpected part: {part}')
+
+    return ret
