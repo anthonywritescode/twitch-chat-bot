@@ -5,12 +5,10 @@ import asyncio.subprocess
 import contextlib
 import datetime
 import functools
-import hashlib
 import json
 import os.path
 import re
 import signal
-import struct
 import sys
 import traceback
 from typing import Any
@@ -35,21 +33,6 @@ HOST = 'irc.chat.twitch.tv'
 PORT = 6697
 
 SEND_MSG_RE = re.compile('^PRIVMSG #[^ ]+ :(?P<msg>[^\r]+)')
-
-
-def _parse_color(s: str) -> tuple[int, int, int]:
-    return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
-
-
-def _gen_color(name: str) -> tuple[int, int, int]:
-    h = hashlib.sha256(name.encode())
-    n, = struct.unpack('Q', h.digest()[:8])
-    bits = [int(s) for s in bin(n)[2:]]
-
-    r = bits[0] * 0b1111111 + (bits[1] << 7)
-    g = bits[2] * 0b1111111 + (bits[3] << 7)
-    b = bits[4] * 0b1111111 + (bits[5] << 7)
-    return r, g, b
 
 
 async def send(
@@ -191,11 +174,7 @@ async def get_printed_input(
 ) -> tuple[str, str] | None:
     parsed = Message.parse(msg)
     if parsed:
-        if parsed.info['color']:
-            r, g, b = _parse_color(parsed.info['color'])
-        else:
-            r, g, b = _gen_color(parsed.info['display-name'])
-
+        r, g, b = parsed.color
         color_start = f'\033[1m\033[38;2;{r};{g};{b}m'
 
         msg_s = parsed.msg
