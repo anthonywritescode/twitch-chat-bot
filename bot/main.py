@@ -76,20 +76,25 @@ async def connect(
         *,
         quiet: bool,
 ) -> tuple[AsyncGenerator[bytes, None], asyncio.StreamWriter]:
-    reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
+    async def _new_conn() -> tuple[asyncio.StreamReader, asyncio.StreamWriter]:
+        reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
-    loop = asyncio.get_event_loop()
-    shutdown_cb = functools.partial(_shutdown, writer, loop)
-    try:
-        loop.add_signal_handler(signal.SIGINT, shutdown_cb)
-    except NotImplementedError:
-        # Doh... Windows...
-        signal.signal(signal.SIGINT, lambda *_: shutdown_cb())
+        loop = asyncio.get_event_loop()
+        shutdown_cb = functools.partial(_shutdown, writer, loop)
+        try:
+            loop.add_signal_handler(signal.SIGINT, shutdown_cb)
+        except NotImplementedError:
+            # Doh... Windows...
+            signal.signal(signal.SIGINT, lambda *_: shutdown_cb())
 
-    await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
-    await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
-    await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
-    await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
+        await send(writer, 'CAP REQ :twitch.tv/tags\r\n', quiet=quiet)
+        await send(writer, f'PASS {config.oauth_token}\r\n', quiet=True)
+        await send(writer, f'NICK {config.username}\r\n', quiet=quiet)
+        await send(writer, f'JOIN #{config.channel}\r\n', quiet=quiet)
+
+        return reader, writer
+
+    reader, writer = await _new_conn()
 
     async def next_line() -> AsyncGenerator[bytes, None]:
         nonlocal reader, writer
@@ -101,11 +106,7 @@ async def connect(
                     return
                 else:
                     print('!!!reconnect!!!')
-                    reader, writer = await asyncio.open_connection(
-                        HOST,
-                        PORT,
-                        ssl=True,
-                    )
+                    reader, writer = await _new_conn()
                     continue
 
             yield data
