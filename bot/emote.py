@@ -1,24 +1,16 @@
 from __future__ import annotations
 
-import asyncio
-import os.path
 from typing import NamedTuple
-
-import aiohttp
-
-from bot.util import atomic_open
-
-EMOTE_CACHE = '.emote_cache'
-
-
-def _emote_path(emote: str) -> str:
-    return os.path.abspath(os.path.join(EMOTE_CACHE, f'{emote}.png'))
 
 
 class EmotePosition(NamedTuple):
     start: int
     end: int
     emote: str
+
+    @property
+    def download_url(self) -> str:
+        return f'https://static-cdn.jtvnw.net/emoticons/v2/{self.emote}/default/dark/2.0'  # noqa: E501
 
 
 def parse_emote_info(s: str) -> list[EmotePosition]:
@@ -33,39 +25,3 @@ def parse_emote_info(s: str) -> list[EmotePosition]:
             ret.append(EmotePosition(int(start_s), int(end_s), emote))
     ret.sort()
     return ret
-
-
-async def _ensure_downloaded(emote: str) -> None:
-    emote_path = _emote_path(emote)
-    if os.path.exists(emote_path):
-        return
-
-    os.makedirs(EMOTE_CACHE, exist_ok=True)
-
-    dl_url = f'https://static-cdn.jtvnw.net/emoticons/v2/{emote}/default/dark/2.0'  # noqa: E501
-    async with aiohttp.ClientSession() as session:
-        async with session.get(dl_url) as resp:
-            data = await resp.read()
-
-    with atomic_open(emote_path) as f:
-        f.write(data)
-
-
-async def download_all_emotes(emotes: list[EmotePosition]) -> None:
-    unique_emotes = {emote.emote for emote in emotes}
-    futures = [_ensure_downloaded(emote) for emote in unique_emotes]
-    await asyncio.gather(*futures)
-
-
-def replace_emotes(msg: str, emotes: list[EmotePosition]) -> str:
-    parts = []
-    pos = 0
-    for emote in emotes:
-        parts.append(msg[pos:emote.start])
-        parts.append(
-            f'\033}}ic#2;1;{_emote_path(emote.emote)}\000'
-            f'\033}}ib\000##\033}}ie\000',
-        )
-        pos = emote.end + 1
-    parts.append(msg[pos:])
-    return ''.join(parts)

@@ -13,7 +13,7 @@ MSG_RE = re.compile(
 )
 
 
-def _parse_color(s: str) -> tuple[int, int, int]:
+def parse_color(s: str) -> tuple[int, int, int]:
     return int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16)
 
 
@@ -50,7 +50,7 @@ class Message(NamedTuple):
     @property
     def color(self) -> tuple[int, int, int]:
         if self.info['color']:
-            return _parse_color(self.info['color'])
+            return parse_color(self.info['color'])
         else:
             return _gen_color(self.display_name)
 

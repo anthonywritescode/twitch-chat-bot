@@ -23,10 +23,9 @@ from bot.data import get_fake_msg
 from bot.data import get_handler
 from bot.data import PERIODIC_HANDLERS
 from bot.data import PRIVMSG
-from bot.emote import download_all_emotes
-from bot.emote import parse_emote_info
-from bot.emote import replace_emotes
 from bot.message import Message
+from bot.parse_message import parse_message_parts
+from bot.parse_message import parsed_to_terminology
 
 # TODO: allow host / port to be configurable
 HOST = 'irc.chat.twitch.tv'
@@ -225,9 +224,13 @@ async def get_printed_input(
             badges_s_images = badges_s
 
         if images:
-            emote_info = parse_emote_info(parsed.info['emotes'])
-            await download_all_emotes(emote_info)
-            msg_s_images = replace_emotes(parsed.msg, emote_info)
+            msg_parsed = await parse_message_parts(
+                msg=parsed,
+                channel=config.channel,
+                oauth_token=config.oauth_token_token,
+                client_id=config.client_id,
+            )
+            msg_s_images = await parsed_to_terminology(msg_parsed)
         else:
             msg_s_images = parsed.msg
 
