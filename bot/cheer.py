@@ -34,7 +34,7 @@ class CheerInfo(NamedTuple):
         tiers = tuple(
             CheerTier.from_dct(tier_dct)
             for tier_dct in dct['tiers']
-            if tier_dct['can_cheer']
+            if tier_dct['can_cheer'] or dct['prefix'].lower() == 'anon'
         )
         return cls(prefix=dct['prefix'].lower(), tiers=tiers)
 
