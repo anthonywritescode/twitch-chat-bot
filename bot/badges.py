@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import collections
-import os.path
 import re
 from typing import Mapping
 from typing import NamedTuple
@@ -10,10 +9,9 @@ from typing import NamedTuple
 import aiohttp
 import async_lru
 
+from bot.image_cache import download
+from bot.image_cache import local_image_path
 from bot.twitch_api import fetch_twitch_user
-from bot.util import atomic_open
-
-BADGE_CACHE = '.badge_cache'
 
 
 @async_lru.alru_cache(maxsize=1)
@@ -110,9 +108,12 @@ class Badge(NamedTuple):
     version: str
 
     @property
+    def local_filename(self) -> str:
+        return f'{self.badge}_{self.version}.png'
+
+    @property
     def fs_path(self) -> str:
-        fname = f'{self.badge}_{self.version}.png'
-        return os.path.abspath(os.path.join(BADGE_CACHE, fname))
+        return local_image_path('badge', self.local_filename)
 
 
 def parse_badges(badges: str) -> list[Badge]:
@@ -126,33 +127,6 @@ def parse_badges(badges: str) -> list[Badge]:
     return ret
 
 
-async def _download_badge(
-        badge: Badge,
-        *,
-        channel: str,
-        oauth_token: str,
-        client_id: str,
-) -> None:
-    if os.path.exists(badge.fs_path):
-        return
-
-    os.makedirs(BADGE_CACHE, exist_ok=True)
-
-    badges_mapping = await all_badges(
-        channel,
-        oauth_token=oauth_token,
-        client_id=client_id,
-    )
-    url = badges_mapping[badge.badge][badge.version]
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            data = await resp.read()
-
-    with atomic_open(badge.fs_path) as f:
-        f.write(data)
-
-
 async def download_all_badges(
         badges: list[Badge],
         *,
@@ -160,12 +134,16 @@ async def download_all_badges(
         oauth_token: str,
         client_id: str,
 ) -> None:
+    badges_mapping = await all_badges(
+        channel,
+        oauth_token=oauth_token,
+        client_id=client_id,
+    )
     futures = [
-        _download_badge(
-            badge,
-            channel=channel,
-            oauth_token=oauth_token,
-            client_id=client_id,
+        download(
+            subtype='badge',
+            name=badge.local_filename,
+            url=badges_mapping[badge.badge][badge.version],
         )
         for badge in badges
     ]

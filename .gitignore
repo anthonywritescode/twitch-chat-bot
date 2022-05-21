@@ -1,7 +1,5 @@
 *.pyc
-/.badge_cache
 /.coverage
-/.emote_cache
 /.tox
 /config.json
 /db.db
