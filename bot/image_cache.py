@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import os.path
 
 import aiohttp
@@ -7,6 +8,15 @@ import aiohttp
 from bot.util import atomic_open
 
 CACHE = '.cache'
+
+
+@functools.lru_cache(maxsize=1)
+def _ensure_cache_gitignore() -> None:
+    gitignore_path = os.path.join(CACHE, '.gitignore')
+    if os.path.exists(gitignore_path):
+        return
+    with atomic_open(gitignore_path) as f:
+        f.write(b'*\n')
 
 
 def local_image_path(subtype: str, name: str) -> str:
@@ -20,6 +30,8 @@ async def download(subtype: str, name: str, url: str) -> None:
 
     img_dir = os.path.join(CACHE, subtype)
     os.makedirs(img_dir, exist_ok=True)
+
+    _ensure_cache_gitignore()
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
