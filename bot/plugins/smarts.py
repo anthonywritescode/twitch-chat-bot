@@ -23,6 +23,7 @@ THINGS_TO_COMMANDS = (
     ('blue ball', '!bluething'),
     ('blue button', '!bluething'),
     ('blue thing', '!bluething'),
+    ('color scheme', '!theme'),
     ('distro', '!distro'),
     ('editor', '!editor'),
     ('keyboard', '!keyboard'),
