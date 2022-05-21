@@ -241,19 +241,13 @@ async def get_printed_input(
                 f'{color_start}\033[3m * {parsed.display_name}\033[22m '
                 f'{{msg}}\033[m'
             )
-        elif parsed.info.get('msg-id') == 'highlighted-message':
+        elif parsed.bg_color is not None:
+            bg_color_s = '{};{};{}'.format(*parsed.bg_color)
             fmt = (
                 f'{dt_str()}'
                 f'{{badges}}'
                 f'<{color_start}{parsed.display_name}\033[m> '
-                f'\033[48;2;117;094;188m{{msg}}\033[m'
-            )
-        elif 'custom-reward-id' in parsed.info:
-            fmt = (
-                f'{dt_str()}'
-                f'{{badges}}'
-                f'<{color_start}{parsed.display_name}\033[m> '
-                f'\033[48;2;029;091;130m{{msg}}\033[m'
+                f'\033[48;2;{bg_color_s}m{{msg}}\033[m'
             )
         else:
             fmt = (
