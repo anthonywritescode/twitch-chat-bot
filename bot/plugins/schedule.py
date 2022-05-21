@@ -10,6 +10,5 @@ from bot.message import Message
 async def cmd_schedule(config: Config, msg: Message) -> str:
     return format_msg(
         msg,
-        "Monday evenings or Saturday at noon (EST) - See !twitter and !dicsord"
+        'Monday evenings or Saturday at noon (EST) - See !twitter and !dicsord',
     )
-
