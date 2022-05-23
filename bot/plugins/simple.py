@@ -92,7 +92,8 @@ _SECRET_COMMANDS = (
     (
         '!deadsnakes',
         'I maintain deadsnakes!  I backport and forward port pythons: '
-        'https://github.com/deadsnakes',
+        'https://github.com/deadsnakes -- '
+        'see also https://youtu.be/Xe40amojaXE',
     ),
     (
         '!flake8',
