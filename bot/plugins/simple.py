@@ -114,10 +114,6 @@ _SECRET_COMMANDS = (
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
-        '!question',
-        '"udp your questions, don\'t tcp your questions" - marsha_socks',
-    ),
-    (
         '!pre-commit',
         'I created pre-commit!  https://pre-commit.com and '
         'https://pre-commit.ci',
@@ -129,8 +125,18 @@ _SECRET_COMMANDS = (
         'https://github.com/pytest-dev/pytest',
     ),
     (
+        '!question',
+        '"udp your questions, don\'t tcp your questions" - marsha_socks',
+    ),
+    (
         '!rebase',
         'https://clips.twitch.tv/HonestCrowdedGalagoStoneLightning-khp2n3Fqvo0Wdpno',  # noqa: E501
+    ),
+    (
+        '!schedule',
+        'Monday evenings and Saturday at noon (EST) - '
+        'Check !twitter and !dicsord for more, or see the google calendar '
+        'link below the stream video.',
     ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
