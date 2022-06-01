@@ -24,6 +24,7 @@ THINGS_TO_COMMANDS = (
     ('blue button', '!bluething'),
     ('blue thing', '!bluething'),
     ('color scheme', '!theme'),
+    ('deadsnakes', '!deadsnakes'),
     ('distro', '!distro'),
     ('editor', '!editor'),
     ('keyboard', '!keyboard'),
