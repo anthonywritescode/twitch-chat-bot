@@ -11,7 +11,7 @@ from bot.data import handle_message
 from bot.message import Message
 
 GNU_RE = re.compile(
-    r'.*\b(?P<word>nano|linux|windows|emacs|NT)\b', flags=re.IGNORECASE,
+    r'.*?\b(?P<word>nano|linux|windows|emacs|NT)\b', flags=re.IGNORECASE,
 )
 
 # XXX: this doesn't belong here, but ordering is important
