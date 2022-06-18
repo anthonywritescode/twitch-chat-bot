@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import collections
 import re
 from typing import Mapping
 from typing import NamedTuple
@@ -69,14 +68,14 @@ async def all_badges(
         oauth_token: str,
         client_id: str,
 ) -> Mapping[str, Mapping[str, str]]:
-    return collections.ChainMap(
-        await channel_badges(
+    return {
+        **await channel_badges(
             username,
             oauth_token=oauth_token,
             client_id=client_id,
         ),
-        await global_badges(),
-    )
+        **await global_badges(),
+    }
 
 
 def badges_plain_text(badges: tuple[str, ...]) -> str:
