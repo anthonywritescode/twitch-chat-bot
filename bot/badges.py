@@ -69,12 +69,12 @@ async def all_badges(
         client_id: str,
 ) -> Mapping[str, Mapping[str, str]]:
     return {
+        **await global_badges(),
         **await channel_badges(
             username,
             oauth_token=oauth_token,
             client_id=client_id,
         ),
-        **await global_badges(),
     }
 
 
