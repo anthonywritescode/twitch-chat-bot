@@ -115,6 +115,10 @@ _SECRET_COMMANDS = (
     ),
     ('!levelup', 'https://i.imgur.com/Uoq5vGx.gif'),
     (
+        '!overlay',
+        'https://github.com/anthonywritescode/data-url-twitch-overlays',
+    ),
+    (
         '!pre-commit',
         'I created pre-commit!  https://pre-commit.com and '
         'https://pre-commit.ci',
