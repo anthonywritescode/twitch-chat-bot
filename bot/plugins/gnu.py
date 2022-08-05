@@ -18,7 +18,7 @@ GNU_RE = re.compile(
 
 
 @handle_message(
-    '.*(why|is (this|that)|you us(e|ing)|instead of) (vim|nano)',
+    '.*(why|is (this|that)|you us(e|ing)|instead of) (n?vim|nano)',
     flags=re.IGNORECASE,
 )
 async def msg_is_this_vim(config: Config, msg: Message) -> str | None:
