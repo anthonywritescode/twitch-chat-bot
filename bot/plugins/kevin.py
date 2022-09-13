@@ -6,7 +6,7 @@ from bot.data import format_msg
 from bot.message import Message
 
 
-@command('!kmjao', '!kevinsjoberg', '!kevinwritescode', secret=True)
+@command('!kevin', '!hovsater', secret=True)
 async def cmd_kevin(config: Config, msg: Message) -> str:
     return format_msg(msg, "Kevin stop spending money you don't have")
 
