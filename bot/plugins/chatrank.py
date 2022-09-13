@@ -21,10 +21,11 @@ from bot.message import Message
 from bot.ranking import tied_rank
 
 CHAT_ALIASES = {
-    'kevinsjoberg': 'kevinwritescode',
-    'kmjao': 'kevinwritescode',
-    'makayla_fox': 'marsha_socks',
     'jast_lucy': 'snipsyfox',
+    'kevinsjoberg': 'hovsater',
+    'kevinwritescode': 'hovsater',
+    'kmjao': 'hovsater',
+    'makayla_fox': 'marsha_socks',
     'metabytez': 'mrmetabytes',
     'naughtmeta': 'mrmetabytes',
 }
