@@ -89,6 +89,7 @@ _SECRET_COMMANDS = (
         'Quick TLDR of my thoughts on Github copilot: '
         'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
     ),
+    ('!chair', 'https://amzn.to/3zMzdPu'),
     (
         '!deadsnakes',
         'I maintain deadsnakes!  I backport and forward port pythons: '
