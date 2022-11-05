@@ -72,7 +72,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     (
         '!youtube',
         'https://youtube.com/anthonywritescode -- '
-        'stream vods: https://youtube.com/channel/UChPxcypesw8L-iqltstSI4Q',
+        'stream vods: https://youtube.com/@anthonywritescode-vods',
     ),
 )
 
