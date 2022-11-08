@@ -145,7 +145,7 @@ _SECRET_COMMANDS = (
         'link below the stream video.',
     ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
-    ('!tox', 'yep, I am a tox code dev https://github.com/tox-dev/tox'),
+    ('!tox', 'yep, I am a tox core dev https://github.com/tox-dev/tox'),
     ('!water', 'DRINK WATER, BITCH'),
     (
         '!wm',
