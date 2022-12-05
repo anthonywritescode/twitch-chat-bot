@@ -81,7 +81,7 @@ _SECRET_COMMANDS = (
         '!aoc',
         'advent of code is a series of puzzles which come out daily as an '
         'advent calendar in december -- for more information watch this '
-        'wideo: https://youtu.be/QAwQ8eKBpYw',
+        'wideo: https://youtu.be/CZZLCeRya74',
     ),
     ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
     (
