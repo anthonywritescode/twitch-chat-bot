@@ -25,6 +25,7 @@ THINGS_TO_COMMANDS = (
     ('blue thing', '!bluething'),
     ('color scheme', '!theme'),
     ('deadsnakes', '!deadsnakes'),
+    ('(dicsord|discord)', '!dicsord'),
     ('distro', '!distro'),
     ('editor', '!editor'),
     ('keyboard', '!keyboard'),
