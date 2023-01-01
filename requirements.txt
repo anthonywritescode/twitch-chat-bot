@@ -5,4 +5,5 @@ cson
 # can remove once we're on expat 2.4.1 (ubuntu jammy)
 defusedxml
 humanize
+lz4
 pyjokes
