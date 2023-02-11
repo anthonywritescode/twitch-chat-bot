@@ -147,6 +147,12 @@ _SECRET_COMMANDS = (
     ),
     ('!speechless', 'Good code changed like a ghost.Garbage.'),
     ('!tox', 'yep, I am a tox core dev https://github.com/tox-dev/tox'),
+    (
+        '!vods',
+        'yep, vods are no longer on twitch due to DMCA shenanigans -- '
+        'but you can find them on youtube!  '
+        'https://youtube.com/@anthonywritescode-vods (plz subscribe kthxbai)',
+    ),
     ('!water', 'DRINK WATER, BITCH'),
     (
         '!wm',
@@ -176,6 +182,7 @@ _ALIASES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ('!question', ('!ask', '!questions', '!tcp', '!udp')),
     ('!readme', ('!reamde',)),
     ('!speechless', ('!ghost',)),
+    ('!vods', ('!bods',)),
     ('!youtube', ('!yt',)),
 )
 for _alias_name, _aliases in _ALIASES:
