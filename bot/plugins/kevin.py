@@ -14,3 +14,8 @@ async def cmd_kevin(config: Config, msg: Message) -> str:
 @command('!isatisfied', secret=True)
 async def cmd_isatisfied(config: Config, msg: Message) -> str:
     return format_msg(msg, "Keep spending money that Kevin doesn't have")
+
+
+@command('!wolfred', secret=True)
+async def cmd_wolfred(config: Config, msg: Message) -> str:
+    return format_msg(msg, 'wolfred is just here for the taco meat')
