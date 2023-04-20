@@ -103,6 +103,10 @@ _SECRET_COMMANDS = (
     ),
     ('!homeland', 'WE WILL PROTECT OUR HOMELAND!'),
     (
+        '!ikea',
+        'They\'re the "gladelig" set in blue: https://www.ikea.com/us/en/search/?q=gladelig&filters=f-colors%3A10007',  # noqa: E501
+    ),
+    (
         '!keyboard2',
         'this is my second mechanical keyboard: '
         'https://i.fluffy.cc/CDtRzWX1JZTbqzKswHrZsF7HPX2zfLL1.png '
