@@ -14,18 +14,26 @@ from bot.twitch_api import fetch_twitch_user
 
 
 @async_lru.alru_cache(maxsize=1)
-async def global_badges() -> Mapping[str, Mapping[str, str]]:
-    url = 'https://badges.twitch.tv/v1/badges/global/display'
+async def global_badges(
+        *,
+        oauth_token: str,
+        client_id: str,
+) -> Mapping[str, Mapping[str, str]]:
+    url = 'https://api.twitch.tv/helix/chat/badges/global'
+    headers = {
+        'Authorization': f'Bearer {oauth_token}',
+        'Client-ID': client_id,
+    }
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
+        async with session.get(url, headers=headers) as resp:
             data = await resp.json()
 
     return {
-        badge: {
-            version: dct['image_url_2x']
-            for version, dct in v['versions'].items()
+        v['set_id']: {
+            version['id']: version['image_url_2x']
+            for version in v['versions']
         }
-        for badge, v in data['badge_sets'].items()
+        for v in data['data']
     }
 
 
@@ -43,7 +51,7 @@ async def channel_badges(
     )
     assert user is not None
 
-    url = f'https://badges.twitch.tv/v1/badges/channels/{user["id"]}/display'
+    url = f'https://api.twitch.tv/helix/chat/badges?broadcaster_id={user["id"]}'  # noqa: E501
     headers = {
         'Authorization': f'Bearer {oauth_token}',
         'Client-ID': client_id,
@@ -53,11 +61,11 @@ async def channel_badges(
             data = await resp.json()
 
     return {
-        badge: {
-            version: dct['image_url_2x']
-            for version, dct in v['versions'].items()
+        v['set_id']: {
+            version['id']: version['image_url_2x']
+            for version in v['versions']
         }
-        for badge, v in data['badge_sets'].items()
+        for v in data['data']
     }
 
 
@@ -69,7 +77,7 @@ async def all_badges(
         client_id: str,
 ) -> Mapping[str, Mapping[str, str]]:
     return {
-        **await global_badges(),
+        **await global_badges(oauth_token=oauth_token, client_id=client_id),
         **await channel_badges(
             username,
             oauth_token=oauth_token,
