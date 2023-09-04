@@ -7,11 +7,11 @@ import json
 import os
 import re
 import urllib.request
+from collections import Counter
+from collections.abc import Mapping
+from collections.abc import Sequence
+from re import Pattern
 from typing import Any
-from typing import Counter
-from typing import Mapping
-from typing import Pattern
-from typing import Sequence
 
 from bot.config import Config
 from bot.data import command
@@ -40,7 +40,7 @@ def _alias(user: str) -> str:
     return CHAT_ALIASES.get(user, user)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _counts_per_file(filename: str, reg: Pattern[str]) -> Mapping[str, int]:
     counts: Counter[str] = collections.Counter()
     with open(filename, encoding='utf8') as f:

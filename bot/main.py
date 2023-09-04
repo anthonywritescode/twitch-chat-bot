@@ -11,7 +11,7 @@ import re
 import signal
 import sys
 import traceback
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from bot.badges import badges_images
 from bot.badges import badges_plain_text

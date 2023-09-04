@@ -3,10 +3,9 @@ from __future__ import annotations
 import difflib
 import pkgutil
 import re
-from typing import Awaitable
-from typing import Callable
-from typing import Optional
-from typing import Pattern
+from collections.abc import Awaitable
+from collections.abc import Callable
+from re import Pattern
 
 from bot import plugins
 from bot.config import Config
@@ -41,7 +40,7 @@ def format_msg(msg: Message, fmt: str) -> str:
     return PRIVMSG.format(**params)
 
 
-Callback = Callable[[Config, Message], Awaitable[Optional[str]]]
+Callback = Callable[[Config, Message], Awaitable[str | None]]
 MSG_HANDLERS: list[tuple[Pattern[str], Callback]] = []
 COMMANDS: dict[str, Callback] = {}
 POINTS_HANDLERS: dict[str, Callback] = {}

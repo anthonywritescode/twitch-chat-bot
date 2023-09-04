@@ -4,7 +4,7 @@ import asyncio.subprocess
 import contextlib
 import os.path
 import tempfile
-from typing import Generator
+from collections.abc import Generator
 from typing import IO
 
 

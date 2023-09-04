@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import itertools
-from typing import Iterator
-from typing import Sequence
+from collections.abc import Iterator
+from collections.abc import Sequence
 
 
 def tied_rank(

@@ -3,7 +3,7 @@ from __future__ import annotations
 import collections
 import datetime
 import os.path
-from typing import Counter
+from collections import Counter
 
 import aiosqlite
 
