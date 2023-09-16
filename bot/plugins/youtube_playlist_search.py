@@ -13,69 +13,55 @@ from bot.data import format_msg
 from bot.message import Message
 
 
+class Playlist(NamedTuple):
+    name: str
+    id: str
+
+    @property
+    def url(self) -> str:
+        return f'https://www.youtube.com/playlist?list={self.id}'
+
+
 class YouTubeVideo(NamedTuple):
-    video_id: str
+    playlist: str
+    url: str
     title: str
-    playlist_id: str
 
     def chat_message(self) -> str:
-        return (
-            f'{esc(self.title)} - '
-            f'https://youtu.be/{self.video_id}?list={self.playlist_id}'
-        )
-
-
-async def _fetch_playlist(
-        playlist_id: str,
-        *,
-        api_key: str,
-) -> list[YouTubeVideo]:
-    url = 'https://www.googleapis.com/youtube/v3/playlistItems'
-    params = {
-        'part': 'snippet',
-        'playlistId': playlist_id,
-        'key': api_key,
-        'maxResults': 50,
-    }
-    playlist_videos = []
-    more_pages = True
-    async with aiohttp.ClientSession() as session:
-        while more_pages:
-            async with session.get(url, params=params) as resp:
-                json_resp = await resp.json()
-                playlist_videos.extend(json_resp['items'])
-                next_page_token = json_resp.get('nextPageToken')
-                if next_page_token:
-                    params['pageToken'] = next_page_token
-                else:
-                    more_pages = False
-
-        return [
-            YouTubeVideo(
-                video_id=v['snippet']['resourceId']['videoId'],
-                title=v['snippet']['title'],
-                playlist_id=v['snippet']['playlistId'],
-            )
-            for v in playlist_videos
-        ]
+        return f'{esc(self.title)} - {esc(self.url)}'
 
 
 @async_lru.alru_cache(maxsize=None)
-async def _populate_playlist(playlist_id: str, *, api_key: str) -> None:
+async def _info() -> tuple[tuple[Playlist, ...], tuple[YouTubeVideo, ...]]:
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://anthonywritescode.github.io/explains/playlists.json') as resp:  # noqa: E501
+            resp = await resp.json()
+
+    playlists = tuple(
+        Playlist(playlist['playlist_name'], playlist['playlist_id'])
+        for playlist in resp['playlists']
+    )
+
+    videos = tuple(
+        YouTubeVideo(playlist['playlist_name'], **video)
+        for playlist in resp['playlists']
+        for video in playlist['videos']
+    )
+
+    return playlists, videos
+
+
+@async_lru.alru_cache(maxsize=None)
+async def _populate_playlists() -> None:
     async with aiosqlite.connect('db.db') as db:
+        await db.execute('DROP TABLE IF EXISTS youtube_videos')
         await db.execute(
-            'CREATE VIRTUAL TABLE IF NOT EXISTS youtube_videos using FTS5 ('
-            '   video_id,'
-            '   title,'
-            '   playlist_id'
-            ')',
+            'CREATE VIRTUAL TABLE youtube_videos using FTS5 '
+            '(playlist, url, title)',
         )
         await db.commit()
 
-        videos = await _fetch_playlist(playlist_id, api_key=api_key)
-
-        query = 'DELETE FROM youtube_videos WHERE playlist_id = ?'
-        await db.execute(query, (playlist_id,))
+        _, videos = await _info()
 
         query = 'INSERT INTO youtube_videos VALUES (?, ?, ?)'
         await db.executemany(query, videos)
@@ -83,49 +69,47 @@ async def _populate_playlist(playlist_id: str, *, api_key: str) -> None:
         await db.commit()
 
 
+async def _playlist(playlist_name: str) -> Playlist:
+    playlists, _ = await _info()
+    playlist, = (p for p in playlists if p.name == playlist_name)
+    return playlist
+
+
 async def _search_playlist(
         db: aiosqlite.Connection,
-        playlist_id: str,
+        playlist: str,
         search_terms: str,
 ) -> list[YouTubeVideo]:
     query = (
-        'SELECT video_id, title, playlist_id '
+        'SELECT playlist, url, title '
         'FROM youtube_videos '
-        'WHERE playlist_id = ? AND title MATCH ? ORDER BY rank'
+        'WHERE playlist = ? AND title MATCH ? ORDER BY rank'
     )
     # Append a wildcard character to the search to include plurals etc.
     if not search_terms.endswith('*'):
         search_terms += '*'
-    async with db.execute(query, (playlist_id, search_terms)) as cursor:
+    async with db.execute(query, (playlist, search_terms)) as cursor:
         results = await cursor.fetchall()
         return [YouTubeVideo(*row) for row in results]
 
 
-async def _msg(config: Config, playlist_name: str, search_terms: str) -> str:
-    info = config.youtube_playlists[playlist_name]
-    playlist_id = info['playlist_id']
-    playlist_url = f'https://www.youtube.com/playlist?list={playlist_id}'
-    if not search_terms:
-        msg = f'playlist: {playlist_url}'
-        if info.get('github'):
-            return f'{msg} video list: {info["github"]}'
-        else:
-            return msg
+async def _msg(playlist_name: str, search_terms: str) -> str:
+    await _populate_playlists()
 
-    await _populate_playlist(playlist_id, api_key=config.youtube_api_key)
+    playlist = await _playlist(playlist_name)
 
     async with aiosqlite.connect('db.db') as db:
         try:
-            videos = await _search_playlist(db, playlist_id, search_terms)
+            videos = await _search_playlist(db, playlist_name, search_terms)
         except aiosqlite.OperationalError:
             return 'invalid search syntax used'
 
         if not videos:
-            return f'no video found - see playlist: {playlist_url}'
+            return f'no video found - see playlist: {playlist.url}'
         elif len(videos) > 2:
             return (
                 f'{videos[0].chat_message()} and {len(videos)} other '
-                f'videos found - see playlist: {playlist_url}'
+                f'videos found - see playlist: {playlist.url}'
             )
         elif len(videos) == 2:
             return (
@@ -139,16 +123,10 @@ async def _msg(config: Config, playlist_name: str, search_terms: str) -> str:
 @command('!explain', '!explains')
 async def cmd_explain(config: Config, msg: Message) -> str:
     _, _, rest = msg.msg.partition(' ')
-    return format_msg(msg, await _msg(config, 'explains', rest))
+    return format_msg(msg, await _msg('explains', rest))
 
 
 @command('!faq')
 async def cmd_faq(config: Config, msg: Message) -> str:
     _, _, rest = msg.msg.partition(' ')
-    return format_msg(msg, await _msg(config, 'faq', rest))
-
-
-@command('!puzzle', '!puzzles')
-async def cmd_puzzle(config: Config, msg: Message) -> str:
-    _, _, rest = msg.msg.partition(' ')
-    return format_msg(msg, await _msg(config, 'puzzles', rest))
+    return format_msg(msg, await _msg('faq', rest))

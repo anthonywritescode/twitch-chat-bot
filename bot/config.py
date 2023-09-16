@@ -8,8 +8,6 @@ class Config(NamedTuple):
     channel: str
     oauth_token: str
     client_id: str
-    youtube_api_key: str
-    youtube_playlists: dict[str, dict[str, str]]
     airnow_api_key: str
 
     @property
@@ -24,8 +22,6 @@ class Config(NamedTuple):
             f'channel={self.channel!r}, '
             f'oauth_token={"***"!r}, '
             f'client_id={"***"!r}, '
-            f'youtube_api_key={"***"!r}, '
-            f'youtube_playlists={self.youtube_playlists!r}, '
             f'airnow_api_key={"***"!r}, '
             f')'
         )
