@@ -98,6 +98,9 @@ async def _msg(playlist_name: str, search_terms: str) -> str:
 
     playlist = await _playlist(playlist_name)
 
+    if not search_terms.strip():
+        return f'see playlist: {playlist.url}'
+
     async with aiosqlite.connect('db.db') as db:
         try:
             videos = await _search_playlist(db, playlist_name, search_terms)
