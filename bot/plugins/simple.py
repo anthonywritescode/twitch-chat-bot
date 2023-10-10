@@ -85,15 +85,15 @@ _SECRET_COMMANDS = (
     ),
     ('!bluething', 'it is a fidget toy: https://amzn.to/35PmPQr'),
     (
-        '!copilot',
-        'Quick TLDR of my thoughts on Github copilot: '
-        'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
-    ),
-    (
         '!book',
         "i don't read good",
     ),
     ('!chair', 'https://amzn.to/3zMzdPu'),
+    (
+        '!copilot',
+        'Quick TLDR of my thoughts on Github copilot: '
+        'https://clips.twitch.tv/AntediluvianCloudyDotterelSquadGoals-EnFRoJsDEnEF_IjI',  # noqa: E501
+    ),
     (
         '!deadsnakes',
         'I maintain deadsnakes!  I backport and forward port pythons: '
