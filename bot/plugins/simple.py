@@ -129,6 +129,13 @@ _SECRET_COMMANDS = (
         'https://github.com/anthonywritescode/data-url-twitch-overlays',
     ),
     (
+        '!pokemon',
+        'I am soft resetting for shiny pokemon on a real switch using a '
+        'microcontroller and computer vision -- '
+        'see https://github.com/asottile/nintendo-microcontrollers '
+        'or https://www.youtube.com/playlist?list=PLWBKAf81pmOYZoIyNPAnR7i56KV1JaRr0',  # noqa: E501
+    ),
+    (
         '!pre-commit',
         'I created pre-commit!  https://pre-commit.com and '
         'https://pre-commit.ci',
