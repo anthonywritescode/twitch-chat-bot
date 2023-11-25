@@ -32,6 +32,7 @@ THINGS_TO_COMMANDS = (
     ('keyboard', '!keyboard'),
     ('keypad', '!keyboard3'),
     ('os', '!os'),
+    ('operating system', '!os'),
     ('playlist', '!playlist'),
     ('project', '!project'),
     ('text editor', '!editor'),
