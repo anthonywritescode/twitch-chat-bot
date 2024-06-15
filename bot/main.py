@@ -224,13 +224,14 @@ async def get_printed_input(
             badges_s_images = badges_s
 
         if images:
+            big = parsed.info.get('msg-id') == 'gigantified-emote-message'
             msg_parsed = await parse_message_parts(
                 msg=parsed,
                 channel=config.channel,
                 oauth_token=config.oauth_token_token,
                 client_id=config.client_id,
             )
-            msg_s_images = await parsed_to_terminology(msg_parsed)
+            msg_s_images = await parsed_to_terminology(msg_parsed, big=big)
         else:
             msg_s_images = parsed.msg
 

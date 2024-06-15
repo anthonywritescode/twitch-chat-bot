@@ -10,7 +10,7 @@ class EmotePosition(NamedTuple):
 
     @property
     def download_url(self) -> str:
-        return f'https://static-cdn.jtvnw.net/emoticons/v2/{self.emote}/default/dark/2.0'  # noqa: E501
+        return f'https://static-cdn.jtvnw.net/emoticons/v2/{self.emote}/default/dark/3.0'  # noqa: E501
 
 
 def parse_emote_info(s: str) -> list[EmotePosition]:

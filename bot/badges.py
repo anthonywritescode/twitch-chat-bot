@@ -10,6 +10,7 @@ import async_lru
 
 from bot.image_cache import download
 from bot.image_cache import local_image_path
+from bot.parse_message import terminology_image
 from bot.twitch_api import fetch_twitch_user
 
 
@@ -30,7 +31,7 @@ async def global_badges(
 
     return {
         v['set_id']: {
-            version['id']: version['image_url_2x']
+            version['id']: version['image_url_4x']
             for version in v['versions']
         }
         for v in data['data']
@@ -62,7 +63,7 @@ async def channel_badges(
 
     return {
         v['set_id']: {
-            version['id']: version['image_url_2x']
+            version['id']: version['image_url_4x']
             for version in v['versions']
         }
         for v in data['data']
@@ -159,7 +160,6 @@ async def download_all_badges(
 
 def badges_images(badges: list[Badge]) -> str:
     return ''.join(
-        f'\033}}ic#2;1;{badge.fs_path}\000'
-        f'\033}}ib\000##\033}}ie\000'
+        terminology_image(badge.fs_path, width=2, height=1)
         for badge in badges
     )

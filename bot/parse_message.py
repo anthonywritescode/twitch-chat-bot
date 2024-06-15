@@ -14,7 +14,12 @@ from bot.image_cache import local_image_path
 from bot.message import Message
 from bot.message import parse_color
 
-TERMINOLOGY_IMAGE = '\033}}ic#2;1;{url}\000\033}}ib\000##\033}}ie\000'
+
+def terminology_image(url: str, *, width: int, height: int) -> str:
+    parts = [f'\033}}ic#{width};{height};{url}\000']
+    for _ in range(height):
+        parts.append(f'\033}}ib\000{"#" * width}\033}}ie\000\n')
+    return ''.join(parts).rstrip('\n')
 
 
 class Emote(NamedTuple):
@@ -85,20 +90,33 @@ async def parse_message_parts(
     return parts
 
 
-async def parsed_to_terminology(parts: list[str | Emote | Cheer]) -> str:
+async def parsed_to_terminology(
+        parts: list[str | Emote | Cheer],
+        *,
+        big: bool,
+) -> str:
     futures = []
     s_parts = []
 
-    for part in parts:
+    last_emote = -1
+    for i, part in enumerate(parts):
+        if isinstance(part, Emote):
+            last_emote = i
+
+    for i, part in enumerate(parts):
         if isinstance(part, str):
             s_parts.append(part)
         elif isinstance(part, Emote):
             url = local_image_path('emote', part.original)
-            s_parts.append(TERMINOLOGY_IMAGE.format(url=url))
+            if big and i == last_emote:
+                s_parts.append('\n')
+                s_parts.append(terminology_image(url, width=11, height=6))
+            else:
+                s_parts.append(terminology_image(url, width=2, height=1))
             futures.append(download('emote', part.original, part.url))
         elif isinstance(part, Cheer):
             url = local_image_path('cheer', part.original)
-            s_parts.append(TERMINOLOGY_IMAGE.format(url=url))
+            s_parts.append(terminology_image(url, width=2, height=1))
             r, g, b = parse_color(part.color)
             s_parts.append(f'\033[1m\033[38;2;{r};{g};{b}m{part.n}\033[m')
             futures.append(download('cheer', part.original, part.url))
