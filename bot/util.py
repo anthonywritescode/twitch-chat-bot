@@ -30,7 +30,7 @@ def seconds_to_readable(seconds: int) -> str:
 
 
 @contextlib.contextmanager
-def atomic_open(filename: str) -> Generator[IO[bytes], None, None]:
+def atomic_open(filename: str) -> Generator[IO[bytes]]:
     fd, fname = tempfile.mkstemp(dir=os.path.dirname(filename))
     try:
         with open(fd, 'wb') as f:
