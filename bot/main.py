@@ -74,7 +74,7 @@ async def connect(
         config: Config,
         *,
         quiet: bool,
-) -> tuple[AsyncGenerator[bytes, None], asyncio.StreamWriter]:
+) -> tuple[AsyncGenerator[bytes], asyncio.StreamWriter]:
     async def _new_conn() -> tuple[asyncio.StreamReader, asyncio.StreamWriter]:
         reader, writer = await asyncio.open_connection(HOST, PORT, ssl=True)
 
@@ -95,7 +95,7 @@ async def connect(
 
     reader, writer = await _new_conn()
 
-    async def next_line() -> AsyncGenerator[bytes, None]:
+    async def next_line() -> AsyncGenerator[bytes]:
         nonlocal reader, writer
 
         while not writer.is_closing():

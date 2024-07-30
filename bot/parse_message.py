@@ -38,7 +38,7 @@ def _replace_cheer(
         s: str,
         cheer_info: Mapping[str, CheerInfo],
         cheer_regex: re.Pattern[str],
-) -> Generator[str | Emote | Cheer, None, None]:
+) -> Generator[str | Emote | Cheer]:
     pos = 0
     for match in cheer_regex.finditer(s):
         yield s[pos:match.start()]
