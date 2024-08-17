@@ -78,6 +78,10 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
 
 _SECRET_COMMANDS = (
     (
+        '!ai',
+        'yeah I use AI, anthony intelligence!',
+    ),
+    (
         '!aoc',
         'advent of code is a series of puzzles which come out daily as an '
         'advent calendar in december -- for more information watch this '
