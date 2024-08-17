@@ -19,7 +19,7 @@ async def _base(config: Config, msg: Message, *, cmd: str) -> str | None:
 
 THINGS_TO_COMMANDS = (
     ('are (you|we) (building|doing|working on|making)', '!today'),
-    ('babi', '!babi'),
+    ('babb?ie?', '!babi'),
     ('blue ball', '!bluething'),
     ('blue button', '!bluething'),
     ('blue thing', '!bluething'),
