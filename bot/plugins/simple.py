@@ -21,7 +21,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
     ),
     (
         '!distro',
-        'awcActuallyWindows Windows 10 with Ubuntu 22.04 LTS virtual machine, '
+        'awcActuallyWindows Windows 11 with Ubuntu 24.04 LTS virtual machine, '
         'more info here: https://www.youtube.com/watch?v=8KdAqlESQJo',
     ),
     (
