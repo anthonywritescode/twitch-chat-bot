@@ -28,6 +28,7 @@ CHAT_ALIASES = {
     'makayla_fox': 'marsha_socks',
     'metabytez': 'mrmetabytes',
     'naughtmeta': 'mrmetabytes',
+    'theqexat': 'lesbianmonad',
 }
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
