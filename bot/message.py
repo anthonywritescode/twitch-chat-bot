@@ -58,7 +58,7 @@ class Message(NamedTuple):
     def bg_color(self) -> tuple[int, int, int] | None:
         if self.info.get('msg-id') == 'highlighted-message':
             return (117, 94, 188)
-        elif 'custom-reward-id' in self.info:
+        elif self.info.get('custom-reward-id'):
             return 29, 91, 130
         else:
             return None
