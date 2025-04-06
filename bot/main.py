@@ -24,6 +24,7 @@ from bot.data import get_handler
 from bot.data import PERIODIC_HANDLERS
 from bot.data import PRIVMSG
 from bot.message import Message
+from bot.parse_message import colorize
 from bot.parse_message import parse_message_parts
 from bot.parse_message import parsed_to_terminology
 
@@ -233,7 +234,10 @@ async def get_printed_input(
             )
             msg_s_images = await parsed_to_terminology(msg_parsed, big=big)
         else:
-            msg_s_images = parsed.msg
+            msg_s_images = colorize(parsed.msg)
+
+        if int(parsed.info.get('bits', '0')) % 100 == 69:
+            msg_s_images = colorize(msg_s_images)
 
         if parsed.is_me:
             fmt = (

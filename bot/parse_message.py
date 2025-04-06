@@ -89,6 +89,21 @@ async def parse_message_parts(
 
     return parts
 
+_033 = '(?:033|x1b)'
+_0_107 = '(?:10[0-7]|[0-9]?[0-9]?)'
+_0_255 = '(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[0-9]?[0-9])'
+_COLORIZE_ALLOWED = re.compile(
+    fr'\\{_033}\[{_0_107}m|'
+    fr'\\{_033}\[[34]8;5;{_0_255}m|'
+    fr'\\{_033}\[[34]8;2;{_0_255};{_0_255};{_0_255}m',
+)
+
+
+def colorize(s: str) -> str:
+    def replace_cb(m: re.Match[str]) -> str:
+        return m[0].replace(r'\033', '\033').replace(r'\x1b', '\x1b')
+    return f'{_COLORIZE_ALLOWED.sub(replace_cb, s)}\033[m'
+
 
 async def parsed_to_terminology(
         parts: list[str | Emote | Cheer],
