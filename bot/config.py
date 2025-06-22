@@ -9,6 +9,7 @@ class Config(NamedTuple):
     oauth_token: str
     client_id: str
     airnow_api_key: str
+    openweathermap_api_key: str
 
     @property
     def oauth_token_token(self) -> str:
@@ -23,5 +24,6 @@ class Config(NamedTuple):
             f'oauth_token={"***"!r}, '
             f'client_id={"***"!r}, '
             f'airnow_api_key={"***"!r}, '
+            f'openweathermap_api_key={"***"!r}, '
             f')'
         )
