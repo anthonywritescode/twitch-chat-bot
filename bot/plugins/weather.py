@@ -30,7 +30,7 @@ async def cmd_weather(config: Config, msg: Message) -> str:
             )
         zip_code = m.string
     else:
-        zip_code = '48105,US'
+        zip_code = '48103,US'
 
     geocoding_url = 'http://api.openweathermap.org/geo/1.0/zip'
     weather_url = 'https://api.openweathermap.org/data/2.5/weather'
