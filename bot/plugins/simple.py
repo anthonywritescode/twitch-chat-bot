@@ -41,11 +41,7 @@ _TEXT_COMMANDS: tuple[tuple[str, str], ...] = (
         "anthony's github is https://github.com/asottile -- stream github is "
         'https://github.com/anthonywritescode',
     ),
-    (
-        '!job',
-        'I am a staff software engineer at sentry.io working on developer '
-        'infrastructure!',
-    ),
+    ('!job', 'lmao. streamer? youtuber? ceo?'),
     (
         '!keyboard',
         'either '
