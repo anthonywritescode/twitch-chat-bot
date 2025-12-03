@@ -26,7 +26,7 @@ class PronounData(TypedDict):
 
 
 async def _get_user_data(username: str) -> UserData | None:
-    url = f"https://api.pronouns.alejo.io/v1/users/{username}"
+    url = f'https://api.pronouns.alejo.io/v1/users/{username}'
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
@@ -38,9 +38,9 @@ async def _get_user_data(username: str) -> UserData | None:
 
 @async_lru.alru_cache(maxsize=1)
 async def pronouns() -> dict[str, PronounData]:
-    """
+    '''
     Database of all pronouns, with their various forms.
-    """
+    '''
 
     url = 'https://api.pronouns.alejo.io/v1/pronouns/'
 
@@ -50,7 +50,7 @@ async def pronouns() -> dict[str, PronounData]:
 
 
 async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
-    """
+    '''
     Get the pronouns of the user given their `username`.
 
     The returned value is a pair `(main subject/alt subject)`
@@ -59,7 +59,7 @@ async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
     their username is not known to the pronouns service.
 
     Note: pronouns are in English, and put in lowercase.
-    """
+    '''
 
     user_data = await _get_user_data(username)
 
@@ -90,7 +90,7 @@ async def cmd_pronouns(config: Config, msg: Message) -> str:
     pronouns = await _get_user_pronouns(username)
 
     if pronouns is None:
-        return format_msg(msg, f"user not found: {username}")
+        return format_msg(msg, f'user not found: {username}')
 
     (subj, obj) = pronouns
     return format_msg(msg, f"{username}'s pronouns are: {subj}/{obj}")
