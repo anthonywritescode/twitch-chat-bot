@@ -33,7 +33,8 @@ async def _get_user_data(username: str) -> UserData | None:
             if resp.status != 200:
                 return None
 
-            return await resp.json()
+            json_resp = await resp.json()
+            return json_resp
 
 
 @async_lru.alru_cache(maxsize=1)
@@ -46,7 +47,8 @@ async def pronouns() -> dict[str, PronounData]:
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
-            return await resp.json()
+            json_resp = await resp.json()
+            return json_resp
 
 
 async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
