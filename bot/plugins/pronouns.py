@@ -52,16 +52,6 @@ async def pronouns() -> dict[str, PronounData]:
 
 
 async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
-    '''
-    Get the pronouns of the user given their `username`.
-
-    The returned value is a pair `(main subject/alt subject)`
-    if the user has alternative pronouns,
-    `(main subject/main object)` if they don't, and `None` if
-    their username is not known to the pronouns service.
-
-    Note: pronouns are in English, and put in lowercase.
-    '''
 
     user_data = await _get_user_data(username)
 
