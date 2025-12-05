@@ -39,10 +39,6 @@ async def _get_user_data(username: str) -> UserData | None:
 
 @async_lru.alru_cache(maxsize=1)
 async def pronouns() -> dict[str, PronounData]:
-    '''
-    Database of all pronouns, with their various forms.
-    '''
-
     url = 'https://api.pronouns.alejo.io/v1/pronouns/'
 
     async with aiohttp.ClientSession() as session:
