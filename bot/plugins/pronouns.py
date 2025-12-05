@@ -7,7 +7,6 @@ import async_lru
 
 from bot.config import Config
 from bot.data import command
-from bot.data import esc
 from bot.data import format_msg
 from bot.message import Message
 
@@ -34,7 +33,8 @@ async def _get_user_data(username: str) -> UserData | None:
             if resp.status != 200:
                 return None
 
-            return (await resp.json())
+            json_resp = await resp.json()
+            return json_resp
 
 
 @async_lru.alru_cache(maxsize=1)
@@ -43,17 +43,32 @@ async def pronouns() -> dict[str, PronounData]:
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
-            return (await resp.json())
+            json_resp = await resp.json()
+            return json_resp
 
 
 async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
+
     user_data = await _get_user_data(username)
 
     if user_data is None:
         return None
 
-    pronoun_data = (await pronouns())[user_data['pronoun_id']]
-    return (pronoun_data['subject'], pronoun_data['object'])
+    all_pronouns = await pronouns()
+    main_pronoun_data = all_pronouns[user_data['pronoun_id']]
+    maybe_alt_pronoun_id = user_data['alt_pronoun_id']
+
+    # first is always main subject
+    first = main_pronoun_data['subject'].lower()
+
+    if maybe_alt_pronoun_id is not None:
+        # second is alt subject if they have alt pronouns
+        second = all_pronouns[maybe_alt_pronoun_id]['subject'].lower()
+    else:
+        # second is main object if they don't
+        second = main_pronoun_data['object'].lower()
+
+    return (first, second)
 
 
 @command('!pronouns')
@@ -63,7 +78,7 @@ async def cmd_pronouns(config: Config, msg: Message) -> str:
     pronouns = await _get_user_pronouns(username)
 
     if pronouns is None:
-        return format_msg(msg, f'user not found {esc(username)}')
+        return format_msg(msg, f'user not found: {username}')
 
     (subj, obj) = pronouns
-    return format_msg(msg, f'{username}\'s pronouns are: {subj}/{obj}')
+    return format_msg(msg, f"{username}'s pronouns are: {subj}/{obj}")
