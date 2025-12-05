@@ -77,7 +77,7 @@ async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
 
     if maybe_alt_pronoun_id is not None:
         # second is alt subject if they have alt pronouns
-        second = all_pronouns[maybe_alt_pronoun_id]['subject'].casefold()
+        second = all_pronouns[maybe_alt_pronoun_id]['subject'].lower()
     else:
         # second is main object if they don't
         second = main_pronoun_data['object'].casefold()
