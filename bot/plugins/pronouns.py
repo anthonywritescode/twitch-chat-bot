@@ -80,7 +80,7 @@ async def _get_user_pronouns(username: str) -> tuple[str, str] | None:
         second = all_pronouns[maybe_alt_pronoun_id]['subject'].lower()
     else:
         # second is main object if they don't
-        second = main_pronoun_data['object'].casefold()
+        second = main_pronoun_data['object'].lower()
 
     return (first, second)
 
