@@ -31,6 +31,7 @@ CHAT_ALIASES = {
     'theqexat': 'qexat_',
     '케그자트': 'qexat_',
     'lesbianmonad': 'qexat_',
+    'drunktimelord': 'stronglytyped_',
 }
 CHAT_LOG_RE = re.compile(
     r'^\[[^]]+\][^<*]*(<(?P<chat_user>[^>]+)>|\* (?P<action_user>[^ ]+))',
