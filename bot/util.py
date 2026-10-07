@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio.subprocess
 import contextlib
 import os.path

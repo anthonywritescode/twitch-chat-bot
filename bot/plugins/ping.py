@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from bot.config import Config
 from bot.data import esc
 from bot.data import format_msg

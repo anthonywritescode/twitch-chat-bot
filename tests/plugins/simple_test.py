@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from bot.plugins.simple import _SECRET_COMMANDS
 from bot.plugins.simple import _TEXT_COMMANDS
 
