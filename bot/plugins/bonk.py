@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from bot.config import Config
 from bot.data import command
 from bot.data import esc

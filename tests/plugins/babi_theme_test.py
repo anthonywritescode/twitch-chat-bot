@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pytest
 
 from bot.plugins.babi_theme import json_with_comments

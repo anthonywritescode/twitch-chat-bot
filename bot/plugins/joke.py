@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pyjokes
 
 from bot.config import Config

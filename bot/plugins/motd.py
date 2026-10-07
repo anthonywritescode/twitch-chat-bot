@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import aiosqlite
 
 from bot.config import Config
