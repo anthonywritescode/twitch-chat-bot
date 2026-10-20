@@ -27,10 +27,10 @@ and this felt like a decent project to dive in on.
    - `client_id`: set up an application for your chat bot [here][app-setup]
    - `airnow_api_key`: api key for https://airnowapi.org
 
-1. Use python3.8 or newer and install the dependencies in `requirements.txt`
+1. Use modern python and install the dependencies in `requirements.txt`
 
    ```bash
-   virtualenv venv -ppython3.8
+   virtualenv venv
    venv/bin/pip install -r requirements.txt
    ```
 

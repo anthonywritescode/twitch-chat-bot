@@ -24,14 +24,14 @@ async def cmd_aqi(config: Config, msg: Message) -> str:
 
     params = {
         'format': 'application/json',
-        'zipCode': zip_code,
+        'zipcode': zip_code,
         'API_KEY': config.airnow_api_key,
     }
-    url = 'https://www.airnowapi.org/aq/observation/zipCode/current/'
+    url = 'https://www.airnowapi.org/aq/observation/current/ziplatlong/'
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as resp:
             json_resp = await resp.json()
-            pm_25 = [d for d in json_resp if d['ParameterName'] == 'PM2.5']
+            pm_25 = [d for d in json_resp if d['parameterName'] == 'PM2.5']
             if not pm_25:
                 return format_msg(
                     msg,
@@ -41,9 +41,8 @@ async def cmd_aqi(config: Config, msg: Message) -> str:
                 data, = pm_25
                 return format_msg(
                     msg,
-                    f'Current AQI ({esc(data["ParameterName"])}) in '
-                    f'{esc(data["ReportingArea"])}, '
-                    f'{esc(data["StateCode"])}: '
-                    f'{esc(str(data["AQI"]))} '
-                    f'({esc(data["Category"]["Name"])})',
+                    f'Current AQI ({esc(data["parameterName"])}) in '
+                    f'{esc(data["siteName"])}: '
+                    f'{esc(str(data["nowcastAQI"]))} '
+                    f'({esc(data["aqiCategoryName"])})',
                 )
